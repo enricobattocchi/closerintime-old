@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta property="og:title" content="#closerintime">
+	<meta property="og:site_name" content="#closerintime">
+	<meta property="og:url" content="https://closerinti.me">
+	<meta property="og:description" content="Timespan comparisons between historical events.">
+	<meta property="og:type" content="website">
+	<meta property="og:image" content="https://closerinti.me/img/closerintime-FB.png">
+
+	<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
+
+	<script src="js/jquery-3.1.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/typeahead.bundle.min.js"></script>
+	<script src="js/script.js" async></script>
+	
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="css/typeahead.css"/>
+	<link rel="stylesheet" href="css/style.css"/>
+
+	<title>#closerintime</title>
+
+	<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-13108600-3', 'auto');
+  ga('send', 'pageview');
+
+	</script>
+</head>
+<body>
+		<header id="main">
+			<h1><a href="https://closerinti.me" rel="bookmark">#closerintime</a></h1>
+		</header>
+		<section id="chooser">
+			<h2 id="chooser-header">
+					Pick two events <i class="fa fa-question-circle-o"	
+ 							 	data-toggle="popover" 
+							 	data-trigger="hover focus"
+  							 	data-content="Start typing to get suggestions. You can also search by category, e.g. 'music', 'history', 'computer', 'art', 'film', 'building', 'science', 'book'"
+  							 	data-placement="bottom"></i>
+			</h2>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-6">
+						<label class="sr-only" for="chooser-event-one">Lookup an event</label>
+						<div class="input-group">
+							<span class="input-group-addon"><i id="chooser-event-pre-one" class="chooser-event-pre"></i></span>
+  							<input type="text" class="form-control typeahead" placeholder="Lookup an event" id="chooser-event-one" name="chooser-event-one" value=""/>
+  							<span class="input-group-addon" id="chooser-event-one-cancel"><i class="fa fa-close"></i></span>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<label class="sr-only" for="chooser-event-one">Lookup another event</label>
+						<div class="input-group">
+							<span class="input-group-addon"><i id="chooser-event-pre-two" class="chooser-event-pre"></i></span>
+  							<input type="text" class="form-control typeahead" placeholder="Lookup another event" id="chooser-event-two" id="chooser-event-two" value=""/>
+  							<span class="input-group-addon" id="chooser-event-two-cancel"><i class="fa fa-close"></i></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section id="timeline-section">
+			<div id="timeline">
+				
+				<div id="timeline-marker-start" class="timeline-marker">
+					<div id="timeline-marker-icon-start"  class="timeline-marker-icon"></div>
+					<div class="timeline-marker-label">
+						<h5 class="date"></h5>
+						<div class="timeline-marker-description"></div>
+					</div>
+				</div>
+				<div id="timeline-part-one" class="timeline-part" style="width: 50%;">
+					<h6 class="timeline-part-label"></h6>
+				</div>
+				<div id="timeline-marker-middle" class="timeline-marker" style="left: 50%;">
+					<div class="timeline-marker-label">
+						<h5 class="date"></h5>
+						<div class="timeline-marker-description"></div>
+					</div>
+					<div id="timeline-marker-icon-middle" class="timeline-marker-icon"></div>
+				</div>
+				<div id="timeline-part-two" class="timeline-part"  style="width: 50%;">
+					<h6 class="timeline-part-label"></h6>
+				</div>
+				<div id="timeline-marker-end" class="timeline-marker">
+					<div id="timeline-marker-icon-end" class="timeline-marker-icon"></div>
+					<div class="timeline-marker-label">
+						<h5 class="date"></h5>
+						<div class="timeline-marker-description">Now</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section id="timeline-header">
+			<a href="" id="permalink" rel="bookmark">
+				<h3>
+				</h3>
+			</a>
+			<div id="sharing"></div>
+		</section>
+		<section id="suggest" class="hide">
+			<a href="javascript:closesuggest();"><i class="fa fa-close" id="close-suggest"></i></a>
+		   <form id="form-suggest" data-async data-target="#form-target" action="suggest.php" method="POST">
+		   		<h3>Suggest an event</h3>
+	   			<label class="sr-only" for="name">Event name</label>
+      			<input type="text" class="form-control" name="name" placeholder="Event name"/>
+      			<label class="sr-only" for="year">Year</label>
+      			<input type="number" class="form-control" name="year" min="1000" max="2016" placeholder="Year"/>
+      			<label class="sr-only" for="month">Month</label>
+      			<input type="number" class="form-control" name="month" min="01" max="12" placeholder="Month"/>
+      			<label class="sr-only" for="day">Day</label>
+      			<input type="number" class="form-control" name="day" min="01" max="31" placeholder="Day"/>
+      			<input class="form-control" type="submit"></input>
+      			<h3 id="form-target"></h3>
+			</form>
+		</section>
+		<footer>
+			<section class="right">
+				<a href="https://lopo.it" rel="author noopener" target="_blank">Lopo.it</a> - <a href="https://paypal.me/lopo" rel="external noopener" target="_blank">Donate</a>
+			</section>
+		</footer>
+		<script>
+		if('serviceWorker' in navigator) {
+  			navigator.serviceWorker
+        	   	.register('/sw.js')
+           		.then(function() { console.log("Service Worker Registered"); });
+		}
+		</script>
+</body>
+</html>
