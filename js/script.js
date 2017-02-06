@@ -291,18 +291,25 @@ function populateIDB(data){
 		// let's use only the years
 		bol_years_only = true;
 
+		var datetime = new Array(2);
+		
+		datetime[0] = moment().year(data[0].year);
+		
+		datetime[1] = moment().year(data[1].year);
+		
 		// reverse order if first event is more recent
-		if(data[0].year > data[1].year){
+		if(datetime[1].isBefore(datetime[0])){
 			data.reverse();
+			datetime.reverse();
 		}
 
-		total_span = Math.abs(datenow.year() - parseInt(data[0].year));
-		first_span = Math.abs(parseInt(data[0].year) - parseInt(data[1].year));
-		second_span = Math.abs(datenow.year() - parseInt(data[1].year));
+		total_span = datenow.diff(datetime[0], 'years');
+		first_span = datetime[0].diff(datetime[1], 'years');
+		second_span = datenow.diff(datetime[1], 'years');
 
 		percentage = 100*first_span/total_span;
-		result.start.date = (parseInt(data[0].year) < 0)? Math.abs(parseInt(data[0].year))+' B.C.' : parseInt(data[0].year);
-		result.middle.date = (parseInt(data[1].year) < 0)? Math.abs(parseInt(data[1].year))+' B.C.' : parseInt(data[1].year);
+		result.start.date = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
+		result.middle.date = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
 		result.now_date = datenow.year();
 
 		result.timeline_1 = first_span + " years";
