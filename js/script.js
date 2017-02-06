@@ -272,7 +272,7 @@ function populateIDB(data){
 
 		total_span = date_diff_in_days(datenow,datetime[0]);
 		first_span = date_diff_in_days(datetime[1],datetime[0]);
-		second_span = date_diff_in_days(datetime[1],datetimenow);
+		second_span = date_diff_in_days(datetime[1],datenow);
 
 		percentage = 100*first_span/total_span;
 
