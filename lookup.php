@@ -25,7 +25,7 @@ if($exclude){
 if($query){
 	$whr .= "AND ((name LIKE '%".$query."%') OR (year = '".$query."') OR (CONCAT_WS(' – ', name, year) = '".$query."') OR (type LIKE '%".$query."%')) ORDER BY rand() LIMIT 20";
 } else {
-	$whr .= 'ORDER BY rand()';
+	$whr .= 'ORDER BY id ASC';
 }
 
 $sql = "SELECT * "
@@ -36,9 +36,9 @@ $sql = "SELECT * "
 $res = $db->query( $sql );
 if ( erli( $sql, $res, $db ) && ( mysqli_num_rows( $res ) > 0 ) ) {
 	while( $row = mysqli_fetch_assoc( $res )){
-		if ($row['year'] < 0){
+		/*if ($row['year'] < 0){
 			$row['year'] = -$row['year'].' B.C.';
-		}
+		}*/
 		$result[] = $row;
 	}
 	

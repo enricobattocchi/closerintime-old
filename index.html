@@ -31,7 +31,9 @@
 
 	<script src="js/jquery-3.1.1.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
-	<script src="js/typeahead.bundle.min.js"></script>
+	<script src="js/typeahead.bundle.js"></script>
+	<script src="js/dexie.min.js"></script>
+	<script src="js/moment.min.js"></script>
 	<script src="js/script.js" async></script>
 	
 	<!-- Latest compiled and minified CSS -->
@@ -144,7 +146,21 @@
 		</section>
 		<footer>
 			<section class="right">
-				<a href="https://lopo.it" rel="author noopener" target="_blank">Lopo.it</a> - <a href="https://paypal.me/lopo" rel="external noopener" target="_blank">Donate</a>
+				<a href="https://lopo.it" rel="author noopener" target="_blank">Lopo.it</a>
+		 		- <a href="#" data-toggle="popover" 
+					data-trigger="focus"
+					data-html="true"
+					title="Credits"
+					data-content="<ul>
+						<li><a href='https://jquery.com/' rel='external noopener' target='_blank'>jQuery</a></li>
+						<li><a href='http://getbootstrap.com/' rel='external noopener' target='_blank'>Bootstrap</a></li>
+						<li><a href='http://fontawesome.io/' rel='external noopener' target='_blank'>Font Awesome</a></li>
+						<li><a href='https://github.com/corejavascript/typeahead.js' rel='external noopener' target='_blank'>corejs-typeahead</a></li>
+						<li><a href='http://dexie.org/' rel='external noopener' target='_blank'>Dexie.js</a></li>
+						<li><a href='https://momentjs.com/' rel='external noopener' target='_blank'>moment.js</a></li>
+						</ul>"
+					data-placement="top">Credits</a>
+				 - <a href="https://paypal.me/lopo" rel="external noopener" target="_blank">Donate</a>
 			</section>
 		</footer>
 		<script>

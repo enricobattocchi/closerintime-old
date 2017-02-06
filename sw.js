@@ -7,6 +7,8 @@ self.addEventListener('install', function(e) {
 				'/js/jquery-3.1.1.min.js',
 				'/js/bootstrap.min.js',
 				'/js/typeahead.bundle.min.js',
+				'/js/dexie.min.js',
+				'/js/moment.min.js',
 				'/js/script.js',	
 				'/css/bootstrap.min.css',
 				'/css/bootstrap-theme.min.css',

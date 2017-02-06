@@ -11,12 +11,14 @@ $(function(){
 	initIndexedDB();
 
 	$('#chooser-event-one-cancel').on('click',function(){
+		$('#chooser-event-one').removeAttr('disabled');
 		$('#chooser-event-one').typeahead('val','');
 		$('#chooser-event-pre-one').attr('data-content', '').removeClass().addClass('chooser-event-pre');
 		event_ids[0] = null;
 	});
 
 	$('#chooser-event-two-cancel').on('click',function(){
+		$('#chooser-event-two').removeAttr('disabled');
 		$('#chooser-event-two').typeahead('val','');
 		$('#chooser-event-pre-two').attr('data-content', '').removeClass().addClass('chooser-event-pre');
 		event_ids[1] = null;
@@ -37,11 +39,11 @@ function preload(){
 }
 
 function initJSONdata(){
-	var request = db.transaction("events").objectStore("events").getAll();
-	request.onsuccess = function(event) {
-		  	jsondata = event.target.result;
-		  	initTypeahead();
-	}
+	db.events.toArray(function(array){
+		jsondata = array;
+		initTypeahead();
+	});
+	
 }
 
 function loadComparison(){
@@ -53,6 +55,8 @@ function loadComparison(){
 			event_ids[1] = pars[1];
 			computeFromIDB();
 			event_ids = new Array();
+			$('#chooser-event-one').removeAttr('disabled');
+			$('#chooser-event-two').removeAttr('disabled');
 		}
 	}
 }
@@ -65,7 +69,7 @@ function initTypeahead(){
   			return datumstrings;
   	    },
   		queryTokenizer:function(query) {
-  			var querystrings = Bloodhound.tokenizers.nonword(query);
+  			var querystrings = whitespacelesshyphen(query);
   			return querystrings;
   	    }, 
   		local: jsondata
@@ -76,27 +80,65 @@ function initTypeahead(){
 		}, {
 		name: 'events',
 		/*display: 'name',*/
-		display: function(data){return data.name+' – '+data.year;},
+		display: function(data){
+			var string = data.name;
+			var year = data.year;
+			if(data.year < 0){
+				year = Math.abs(data.year)+ ' B.C.';
+			}
+			return data.name+' – '+year;
+			},
 		limit: 40,
-		source: events,
+		source: function(query, syncResults){
+			events.search(query,function(suggestions){
+					syncResults(filterselected(suggestions));
+				});
+		},
 		templates: {
     		notFound: [
       		'<div class="empty-message">',
         		'<i class="fa fa-exclamation-triangle"></i> Unable to find any matches. <a href="javascript:opensuggest();">Want to send a suggestion?</a>',
       		'</div>'
     		].join('\n'),
-    		suggestion: function(data){return '<div><i class="fa '+data.type+'"></i> <strong>'+data.name+'</strong> – '+data.year+'</div>';}
+    		suggestion: function(data){
+    			var year = data.year;
+    			if(data.year < 0){
+    				year = Math.abs(data.year)+ ' B.C.';
+    			}
+    			return '<div><i class="fa '+data.type+'"></i> <strong>'+data.name+'</strong> – '+year+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
 		var index = $('#chooser input[id^="chooser-"').index(this);
 		event_ids[index] = obj.id;
 		$(this).closest('.input-group').find('.chooser-event-pre').addClass(obj.type).attr('data-content', obj.type);
 		$(this).blur();
+		$(this).attr('disabled','disabled');
 		computeFromIDB();		
 	}).on('typeahead:render', function(){
-		var index = $('#chooser input[id^="chooser-"').index(this);
-		event_ids[index] = '';			
+		if(!$(this).typeahead('val')){
+				var index = $('#chooser input[id^="chooser-"').index(this);
+				event_ids[index] = '';
+		}			
 	}).typeahead('val', '');	
+}
+
+function whitespacelesshyphen(str) {
+    str = (typeof str === "undefined" || str === null) ? "" : str + "";
+    str = str.split('–');
+    str = str[0];
+    return str ? str.split(/\s+/) : [];
+}
+
+function filterselected(suggestions){
+	var filtered = new Array();
+	if(suggestions.length > 0){
+		suggestions.forEach(function(item){
+			if(item.id !== event_ids[0] && item.id !== event_ids[1]){
+				filtered.push(item);
+			}
+		});	
+	}
+	return filtered;
 }
 
 function initPopover(){
@@ -140,52 +182,69 @@ function closesuggest(){
 }
 
 function initIndexedDB(){
-	if (!window.indexedDB) {
-	    window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
-	}
-	var request = window.indexedDB.open("closerintime", 10);
+	db = new Dexie("closerintime");
 	
-	request.onerror = function(event) {
-	  alert("Why didn't you allow my web app to use IndexedDB?!");
-	};
-	request.onsuccess = function(event) {
-		  db = event.target.result;	  
-		  initJSONdata();  
-		  loadComparison();
-	}
-	request.onupgradeneeded = function(event) {
-		window.indexedDB.deleteDatabase("closerintime");
-		
-		var objectStore = event.target.result.createObjectStore("events", { keyPath: "id" });
-		objectStore.createIndex("name", "name", { unique: true });
-		objectStore.createIndex("type", "type", { unique: false });
-		objectStore.createIndex("year", "year", { unique: false });
+	db.version(10).stores({
+	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link"
+	});
+	
+	db.on('ready', function () {
+        return db.events.count(function (count) {
+            if (count > 0) {
+                console.log("Already populated");
+            } else {
+                console.log("Database is empty. Populating from ajax call...");
+                return new Dexie.Promise(function (resolve, reject) {
+                    $.ajax('lookup.php', {
+                        type: 'get',
+                        dataType: 'json',
+                        error: function (xhr, textStatus) {
+                            // Rejecting promise to make db.open() fail.
+                            reject(textStatus);
+                        },
+                        success: function (data) {
+                            // Resolving Promise will launch then() below.
+                            resolve(data);
+                        }
+                    });
+                }).then(function (data) {
+                    console.log("Got ajax response. We'll now add the objects.");
+                    // By returning the db.transaction() promise, framework will keep
+                    // waiting for this transaction to commit before resuming other
+                    // db-operations.
+                    return db.transaction('rw', db.events, function () {
+                        data.forEach(function (item) {
+                            console.log("Adding object: " + JSON.stringify(item));
+                            db.events.add(item);
+                        });
+                    });
+                }).then(function () {
+                    console.log ("Transaction committed");
+                });
+            }
+        });
+    });
 
-		preload();
-		
-		objectStore.transaction.oncomplete = function(event) {
-			var eventsObjectStore = event.target.db.transaction("events", "readwrite").objectStore("events");
-		    for (var i in jsondata) {
-		    	eventsObjectStore.add(jsondata[i]);
-		    }
-		  };
-		};
+    db.open()
+    	.then(function(){
+    		initJSONdata();
+    		loadComparison();
+    	}).catch(function (error) {
+    		console.error(error.stack || error);
+    });
+	
 }
 
 function computeFromIDB(){
 	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
 	
-	data = new Array();
-
-	db.transaction("events").objectStore("events").get(event_ids[0]).onsuccess = function(event) {
-		data.push(event.target.result);
-		populateIDB(data);
-	};
-	
-	db.transaction("events").objectStore("events").get(event_ids[1]).onsuccess = function(event) {
-		data.push(event.target.result);
-		populateIDB(data);
-	};
+	db.events.where('id').
+		anyOf(event_ids[0],event_ids[1])
+		.toArray()
+		.then(function(data){
+			populateIDB(data);
+		});
+		
 }
 
 function populateIDB(data){
@@ -221,7 +280,7 @@ function populateIDB(data){
 	result.middle = {};
 	result.end = {};
 	var bol_years_only = true;
-	var datenow = new Date();
+	var datenow = moment();
 	
 	var total_span;
 	var first_span;
@@ -237,14 +296,14 @@ function populateIDB(data){
 			data.reverse();
 		}
 
-		total_span = Math.abs(datenow.getFullYear() - parseInt(data[0].year));
+		total_span = Math.abs(datenow.year() - parseInt(data[0].year));
 		first_span = Math.abs(parseInt(data[0].year) - parseInt(data[1].year));
-		second_span = Math.abs(datenow.getFullYear() - parseInt(data[1].year));
+		second_span = Math.abs(datenow.year() - parseInt(data[1].year));
 
 		percentage = 100*first_span/total_span;
 		result.start.date = (parseInt(data[0].year) < 0)? Math.abs(parseInt(data[0].year))+' B.C.' : parseInt(data[0].year);
 		result.middle.date = (parseInt(data[1].year) < 0)? Math.abs(parseInt(data[1].year))+' B.C.' : parseInt(data[1].year);
-		result.now_date = datenow.getFullYear();
+		result.now_date = datenow.year();
 
 		result.timeline_1 = first_span + " years";
 		result.timeline_2 = second_span + " years";
@@ -253,37 +312,31 @@ function populateIDB(data){
 
 		var datetime = new Array(2);
 		
-		datetime[0] = new Date();
-		datetime[0].setFullYear(parseInt(data[0].year));
-		datetime[0].setMonth(parseInt(data[0].month));
-		datetime[0].setDate(parseInt(data[0].day));
-
-		datetime[1] = new Date();
-		datetime[1].setFullYear(parseInt(data[1].year));
-		datetime[1].setMonth(parseInt(data[1].month));
-		datetime[1].setDate(parseInt(data[1].day));
+		datetime[0] = moment().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day);
 		
-
+		datetime[1] = moment().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day);
+		
 		// reverse order if first event is more recent
-		if(datetime[0] > datetime[1]){
+		if(datetime[1].isBefore(datetime[0])){
 			data.reverse();
 			datetime.reverse();
 		}
 
-		total_span = date_diff_in_days(datenow,datetime[0]);
-		first_span = date_diff_in_days(datetime[1],datetime[0]);
-		second_span = date_diff_in_days(datetime[1],datenow);
+		total_span = datenow.diff(datetime[0], 'days');
+		first_span = datetime[1].diff(datetime[0], 'days');
+		second_span = datenow.diff(datetime[1], 'days');
 
 		percentage = 100*first_span/total_span;
 
-		/*year_0 = (parseInt(data[0].year) < 0)? Math.abs(parseInt(data[0].year))+' B.C.' : parseInt(data[0].year);
-		year_1 = (parseInt(data[1].year) < 0)? Math.abs(parseInt(data[1].year))+' B.C.' : parseInt(data[1].year);*/
 		
-		var options = { year: 'numeric', month: 'long', day: 'numeric' };
+		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
+		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
+				
+		var format = 'MMMM D';
 		
-		result.start.date = datetime[0].toLocaleDateString('en-US', options);
-		result.middle.date = datetime[1].toLocaleDateString('en-US', options);
-		result.now_date = datenow.toLocaleDateString('en-US', options);
+		result.start.date = datetime[0].format(format)+', '+year_0;
+		result.middle.date = datetime[1].format(format)+', '+year_1;
+		result.now_date = datenow.format(format+', Y');
 
 		result.timeline_1 = first_span + ' days';
 		result.timeline_2 = second_span + ' days';
@@ -342,13 +395,6 @@ function populateIDB(data){
 
 	start_icon.removeClass().addClass('timeline-marker-icon '+result.start.category_icon);
 	middle_icon.removeClass().addClass('timeline-marker-icon '+result.middle.category_icon);
-}
-
-function date_diff_in_days(d1, d2) {
-    var t2 = d2.getTime();
-    var t1 = d1.getTime();
-	
-	return parseInt(Math.abs(t2-t1)/(24*3600*1000));
 }
 
 function lcfirst (str) {
