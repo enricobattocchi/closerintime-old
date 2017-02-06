@@ -1,6 +1,7 @@
 {
  "short_name": "closerintime",
- "name": "#closerintime",
+ "name": "closerintime",
+ "start_url": "/",
  "icons": [
   {
    "src": "\/android-icon-36x36.png",
