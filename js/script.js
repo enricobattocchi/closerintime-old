@@ -303,9 +303,9 @@ function populateIDB(data){
 			datetime.reverse();
 		}
 
-		total_span = datenow.diff(datetime[0], 'years');
-		first_span = datetime[0].diff(datetime[1], 'years');
-		second_span = datenow.diff(datetime[1], 'years');
+		total_span = Math.abs(datenow.diff(datetime[0], 'years'));
+		first_span = Math.abs(datetime[0].diff(datetime[1], 'years'));
+		second_span = Math.abs(datenow.diff(datetime[1], 'years'));
 
 		percentage = 100*first_span/total_span;
 		result.start.date = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
@@ -329,9 +329,9 @@ function populateIDB(data){
 			datetime.reverse();
 		}
 
-		total_span = datenow.diff(datetime[0], 'days');
-		first_span = datetime[1].diff(datetime[0], 'days');
-		second_span = datenow.diff(datetime[1], 'days');
+		total_span = Math.abs(datenow.diff(datetime[0], 'days'));
+		first_span = Math.abs(datetime[1].diff(datetime[0], 'days'));
+		second_span = Math.abs(datenow.diff(datetime[1], 'days'));
 
 		percentage = 100*first_span/total_span;
 
