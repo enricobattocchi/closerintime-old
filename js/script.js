@@ -164,7 +164,7 @@ function initIndexedDB(){
 		preload();
 		
 		objectStore.transaction.oncomplete = function(event) {
-			var eventsObjectStore = db.transaction("events", "readwrite").objectStore("events");
+			var eventsObjectStore = event.target.db.transaction("events", "readwrite").objectStore("events");
 		    for (var i in jsondata) {
 		    	eventsObjectStore.add(jsondata[i]);
 		    }
