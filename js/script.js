@@ -54,9 +54,6 @@ function loadComparison(){
 		if(pars[1]){
 			event_ids[1] = pars[1];
 			computeFromIDB();
-			event_ids = new Array();
-			$('#chooser-event-one').removeAttr('disabled');
-			$('#chooser-event-two').removeAttr('disabled');
 		}
 	}
 }
@@ -64,7 +61,7 @@ function loadComparison(){
 function initTypeahead(){
 	var events = new Bloodhound({
   		datumTokenizer: function(d) {
-  			var datumstrings = Bloodhound.tokenizers.whitespace(d.name+' '+d.year+' '+d.type);
+  			var datumstrings = Bloodhound.tokenizers.whitespace(d.name.replace('"','')+' '+d.year+' '+d.type);
   			datumstrings.push(d.name);
   			return datumstrings;
   	    },
@@ -243,8 +240,9 @@ function computeFromIDB(){
 		.toArray()
 		.then(function(data){
 			populateIDB(data);
+            $('#chooser-event-one').attr('disabled', 'disabled').typeahead('val',$('#timeline-marker-start .timeline-marker-description').html());
+            $('#chooser-event-two').attr('disabled', 'disabled').typeahead('val',$('#timeline-marker-middle .timeline-marker-description').html());
 		});
-		
 }
 
 function populateIDB(data){
