@@ -22,6 +22,7 @@ Libraries used
 * [Dexie.js]
 * [moment.js]
 * [sw-precache]
+* [Comfortaa]
 
 <!-- section links -->
 [jQuery]: https://jquery.com/
@@ -31,3 +32,4 @@ Libraries used
 [Dexie.js]: http://dexie.org/
 [moment.js]: https://momentjs.com/
 [sw-precache]: https://github.com/GoogleChrome/sw-precache
+[Comfortaa]: http://www.dafont.com/it/comfortaa.font
