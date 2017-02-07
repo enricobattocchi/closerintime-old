@@ -9,8 +9,8 @@ Timespan comparisons between historical events
 Getting Started
 ---------------
 * clone the repository
-* copy settings-sample.inc.php to settings.inc.php and edit with your DB data
 * import closerintime.sql (still to be added to the repo) to your DB
+* copy settings-sample.inc.php to settings.inc.php and edit with your DB data
 * visit website
 
 Libraries used
