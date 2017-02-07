@@ -412,11 +412,11 @@ function populateIDB(data){
 	
 	if(chooser_event_one.typeahead('val') !== result.start.description){
 		chooser_event_one.attr('disabled', 'disabled').typeahead('val',result.start.description);
-		chooser_event_one.closest('.input-group').find('.chooser-event-pre').addClass(result.start.category_icon).attr('data-content', result.start.category_icon);
+		chooser_event_one.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.start.category_icon).attr('data-content', result.start.category_icon);
 	}
 	if(chooser_event_two.typeahead('val') !== result.middle.description){
 		chooser_event_two.attr('disabled', 'disabled').typeahead('val',result.middle.description);
-		chooser_event_two.closest('.input-group').find('.chooser-event-pre').addClass(result.middle.category_icon).attr('data-content', result.middle.category_icon);
+		chooser_event_two.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.middle.category_icon).attr('data-content', result.middle.category_icon);
 	}
 }
 
