@@ -3,7 +3,8 @@ module.exports = {
     'css/**.css',
     '**.html',
     'img/**.*',
-    'js/**.js'
+    'js/**.js',
+    'fonts/**.*'
   ],
   verbose: true,
   runtimeCaching: [{
