@@ -23,6 +23,10 @@ $(function(){
 		$('#chooser-event-pre-two').attr('data-content', '').removeClass().addClass('chooser-event-pre');
 		event_ids[1] = null;
 	});
+	
+	$( window ).on('hashchange',function() {
+		loadComparison();
+	});
 
 });
 
@@ -107,10 +111,11 @@ function initTypeahead(){
 	}).on('typeahead:select', function(e, obj){
 		var index = $('#chooser input[id^="chooser-"').index(this);
 		event_ids[index] = obj.id;
+		updateHashFromIDS();
 		$(this).closest('.input-group').find('.chooser-event-pre').addClass(obj.type).attr('data-content', obj.type);
 		$(this).blur();
 		$(this).attr('disabled','disabled');
-		computeFromIDB();		
+		//computeFromIDB();	
 	}).on('typeahead:render', function(){
 		if(!$(this).typeahead('val')){
 				var index = $('#chooser input[id^="chooser-"').index(this);
@@ -118,6 +123,12 @@ function initTypeahead(){
 		}			
 	}).typeahead('val', '');	
 }
+
+function updateHashFromIDS(){
+	var url = window.location.href.split('#');
+	window.location.href = url[0] + '#'+(event_ids[0]?event_ids[0]:'')+'/'+(event_ids[1]?event_ids[1]:'');
+}
+
 
 function whitespacelesshyphen(str) {
     str = (typeof str === "undefined" || str === null) ? "" : str + "";
@@ -186,10 +197,8 @@ function initIndexedDB(){
 	});
 	
 	db.on('ready', function () {
-        return db.events.count(function (count) {
-            if (count > 0) {
-                console.log("Already populated");
-            } else {
+        return db.events.clear()
+        	.then(function(){
                 console.log("Database is empty. Populating from ajax call...");
                 return new Dexie.Promise(function (resolve, reject) {
                     $.ajax('lookup.php', {
@@ -210,17 +219,19 @@ function initIndexedDB(){
                     // waiting for this transaction to commit before resuming other
                     // db-operations.
                     return db.transaction('rw', db.events, function () {
+                    	var counter = 0;
                         data.forEach(function (item) {
-                            console.log("Adding object: " + JSON.stringify(item));
                             db.events.add(item);
+                            counter++;
                         });
+                        console.log("Added "+counter+" events");
                     });
                 }).then(function () {
                     console.log ("Transaction committed");
                 });
-            }
+            });
         });
-    });
+
 
     db.open()
     	.then(function(){
@@ -240,8 +251,6 @@ function computeFromIDB(){
 		.toArray()
 		.then(function(data){
 			populateIDB(data);
-            $('#chooser-event-one').attr('disabled', 'disabled').typeahead('val',$('#timeline-marker-start .timeline-marker-description').html());
-            $('#chooser-event-two').attr('disabled', 'disabled').typeahead('val',$('#timeline-marker-middle .timeline-marker-description').html());
 		});
 }
 
@@ -400,6 +409,15 @@ function populateIDB(data){
 
 	start_icon.removeClass().addClass('timeline-marker-icon '+result.start.category_icon);
 	middle_icon.removeClass().addClass('timeline-marker-icon '+result.middle.category_icon);
+	
+	if(chooser_event_one.typeahead('val') !== result.start.description){
+		chooser_event_one.attr('disabled', 'disabled').typeahead('val',result.start.description);
+		chooser_event_one.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.start.category_icon).attr('data-content', result.start.category_icon);
+	}
+	if(chooser_event_two.typeahead('val') !== result.middle.description){
+		chooser_event_two.attr('disabled', 'disabled').typeahead('val',result.middle.description);
+		chooser_event_two.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.middle.category_icon).attr('data-content', result.middle.category_icon);
+	}
 }
 
 function lcfirst (str) {

@@ -158,17 +158,12 @@
 						<li><a href='https://github.com/corejavascript/typeahead.js' rel='external noopener' target='_blank'>corejs-typeahead</a></li>
 						<li><a href='http://dexie.org/' rel='external noopener' target='_blank'>Dexie.js</a></li>
 						<li><a href='https://momentjs.com/' rel='external noopener' target='_blank'>moment.js</a></li>
+						<li><a href='https://github.com/GoogleChrome/sw-precache' rel='external noopener' target='_blank'>sw-precache</a></li>		
 						</ul>"
 					data-placement="top">Credits</a>
 				 - <a href="https://paypal.me/lopo" rel="external noopener" target="_blank">Donate</a>
 			</section>
 		</footer>
-		<script>
-		if('serviceWorker' in navigator) {
-  			navigator.serviceWorker
-        	   	.register('sw.js')
-           		.then(function() { console.log("Service Worker Registered"); });
-		}
-		</script>
+		<script src="js/service-worker-registration.js"></script>
 </body>
 </html>
