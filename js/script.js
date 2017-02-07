@@ -219,10 +219,12 @@ function initIndexedDB(){
                     // waiting for this transaction to commit before resuming other
                     // db-operations.
                     return db.transaction('rw', db.events, function () {
+                    	var counter = 0;
                         data.forEach(function (item) {
-                            console.log("Adding object: " + JSON.stringify(item));
                             db.events.add(item);
+                            counter++;
                         });
+                        console.log("Added "+counter+" events");
                     });
                 }).then(function () {
                     console.log ("Transaction committed");
