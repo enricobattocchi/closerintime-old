@@ -1,7 +1,13 @@
 {
- "short_name": "closerintime",
- "name": "#closerintime",
- "icons": [
+  "background_color": "#ffffff",
+  "theme_color": "#fa7921",
+  "name": "closerintime",
+  "short_name": "closerintime",
+  "description": "Timespan comparisons between historical events",
+  "display": "standalone",
+  "start_url": "/",
+  "lang": "en-US",
+  "icons": [
   {
    "src": "\/android-icon-36x36.png",
    "sizes": "36x36",
@@ -38,8 +44,5 @@
    "type": "image\/png",
    "density": "4.0"
   }
- ],
- "display": "standalone",
- "background_color": "#ffffff",
- "theme_color": "#fa7921"
+ ]
 }

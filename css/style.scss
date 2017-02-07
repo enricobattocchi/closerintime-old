@@ -9,7 +9,8 @@ $color-2: #5bc0eb; //blue jeans
 $color-3: #fa7921; //princeton orange
 $color-4: #e55934; //flame
 $color-5: #fde74c; //gargoyle gas
-$shadow: #444;
+$shadow: #444444;
+$text-color: #333;
 
 $num_icons: 9;
 
@@ -376,6 +377,13 @@ footer a:hover,
 footer a:visited{
 	font-weight: bold;
 	color: #ffffff;
+}
+
+footer .popover,
+footer .popover a,
+footer .popover a:hover,
+foter .popover a:visited{
+	color: $text-color;
 }
 
 #twitter-share-button{
