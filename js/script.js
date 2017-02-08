@@ -172,8 +172,8 @@ function initSuggestionForm(){
         var $target = $($form.attr('data-target'));
 
         if($('input[name="name"').val() && $('input[name="year"').val()){
-
-	        $.ajax({
+	        /*
+         	$.ajax({
 	            type: $form.attr('method'),
 	            url: $form.attr('action'),
 	            data: $form.serialize(),
@@ -182,13 +182,44 @@ function initSuggestionForm(){
 	                $target.html(data);
 	            }
 	        });
-
+			*/
+        	$form.serialize();
+        	var item = {};
+        	item.name = $('input[name="name"').val();
+        	item.year = $('input[name="year"').val();
+        	item.month = $('input[name="month"').val();
+        	item.day = $('input[name="day"').val();
+        	db.suggestions.add(item).then(function(){
+        		$target.html('Suggestion successfully stored.');
+            	$('input[name="name"').val('');
+            	$('input[name="year"').val('');
+            	$('input[name="month"').val('');
+            	$('input[name="day"').val('');
+        	});    	
 		} else {
 			$target.html("You must fill at least the event name and year");
 		}
 
         event.preventDefault();
 	});	
+}
+
+function pushSuggestions(){
+	db.suggestions
+		.toArray()
+		.then(function(data){
+         	$.ajax({
+         		method: 'post',
+	            url: 'suggest.php',
+	            data: {arr: JSON.stringify(data)},
+	            success: function(data, status) {
+	                console.log(data);
+	                if(data == 1){
+	                	db.suggestions.clear();
+	                }
+	            }
+	        });
+		});
 }
 
 function opensuggest(){
@@ -204,9 +235,14 @@ function closesuggest(){
 
 function initIndexedDB(){
 	db = new Dexie("closerintime");
-	
+
 	db.version(10).stores({
-	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link"
+	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
+	});
+		
+	db.version(11).stores({
+	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
+	    suggestions: "++id, name, year, month, day"
 	});
 	
 	db.on('ready', function () {

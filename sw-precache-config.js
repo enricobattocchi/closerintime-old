@@ -6,6 +6,9 @@ module.exports = {
     'js/**.js',
     'fonts/**.*'
   ],
+  importScripts: [
+     'js/suggestions-sync.js'
+  ],
   verbose: true,
   runtimeCaching: [{
     urlPattern: 'lookup.php',
