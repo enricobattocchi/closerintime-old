@@ -257,5 +257,5 @@ toolbox.router.get("lookup.php", toolbox.networkFirst, {});
 
 
 
-importScripts("js/suggestions-sync.js");
+importScripts("js/dexie.min.js","js/suggestions-sync.js");
 
