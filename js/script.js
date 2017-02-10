@@ -114,7 +114,7 @@ function initTypeahead(){
     			return '<div><i class="fa '+data.type+'"></i> <strong>'+data.name+'</strong> – '+year+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
-		var index = $('#chooser input[id^="chooser-"').index(this);
+		var index = $('#chooser input[id^="chooser-"]').index(this);
 		event_ids[index] = obj.id;
 		event_objs[index] = obj;
 		updateHashFromIDS();
@@ -131,7 +131,7 @@ function initTypeahead(){
 		//computeFromIDB();	
 	}).on('typeahead:render', function(){
 		if(!$(this).typeahead('val')){
-				var index = $('#chooser input[id^="chooser-"').index(this);
+				var index = $('#chooser input[id^="chooser-"]').index(this);
 				event_ids[index] = '';
 		}			
 	}).typeahead('val', '');	
