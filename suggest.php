@@ -8,14 +8,18 @@ if (empty($input)){
 }
 
 $array = json_decode($input);
+if(!is_array($array)){
+	$array = array($array);
+}
 
 $suggestions = array();
 
-foreach ($array as $suggestion){
-	$name = $db->real_escape_string($suggestion->name);
-	$year = $db->real_escape_string($suggestion->year);
-	$month = $suggestion->month ? $db->real_escape_string($suggestion->month) : 'NULL';
-	$day = $suggestion->day ? $db->real_escape_string($suggestion->month) : 'NULL';
+if(count($array) > 0){
+	foreach ($array as $suggestion){
+		$name = $db->real_escape_string($suggestion->name);
+		$year = $db->real_escape_string($suggestion->year);
+		$month = $suggestion->month ? $db->real_escape_string($suggestion->month) : 'NULL';
+		$day = $suggestion->day ? $db->real_escape_string($suggestion->day) : 'NULL';
 	
 	$suggestions[] = "( '$name', $year, $month, $day, 'person', '0', '' )";
 }
@@ -33,5 +37,4 @@ if ( erli( $sql, $res, $db ) ) {
 }
 
 echo json_encode($result);
-		
-		
+?>
