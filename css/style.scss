@@ -316,6 +316,15 @@ header#main h1 a:visited{
 	background-position: 0% calc(100% / #{$num_icons} * 9);
 }
 
+.sport:before{
+	content: "\f1e3"; /* futbol-o */
+}
+
+.sport{
+	background-position: 0% calc(100% / #{$num_icons} * 10);
+}
+
+
 .person:before{
 	content: "\f2be"; /* user-circle-o */
 }
