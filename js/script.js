@@ -207,18 +207,26 @@ function initSuggestionForm(){
 function pushSuggestions(){
 	db.suggestions
 		.toArray()
-		.then(function(data){
-         	$.ajax({
-         		method: 'post',
-	            url: 'suggest.php',
-	            data: {arr: JSON.stringify(data)},
-	            success: function(data, status) {
-	                console.log(data);
-	                if(data == 1){
-	                	db.suggestions.clear();
-	                }
-	            }
-	        });
+		.then(function(data){				
+			var myInit = {
+				method: 'post',
+	    		headers: {
+    				'Accept': 'application/json, text/plain, */*',
+					'Content-Type': 'application/json'
+	    		},
+	    		body: encodeURI(JSON.stringify(data))
+			}
+
+			var myRequest = new Request('suggest.php');
+
+			fetch(myRequest,myInit).then(function(response) {
+				console.log(response.ok);
+				return response.json();
+			}).then(function(result) {
+				if(result == 1){
+					suggestions.clear();
+				}
+			});		
 		});
 }
 

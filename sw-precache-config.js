@@ -7,8 +7,8 @@ module.exports = {
     'fonts/**.*'
   ],
   importScripts: [
-     'js/dexie.min.js',
-     'js/suggestions-sync.js'
+	'js/dexie.min.js',
+	'js/suggestions-sync.js'
   ],
   verbose: true,
   runtimeCaching: [{

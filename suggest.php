@@ -1,12 +1,14 @@
 <?php  
 require_once('connection.php');
+$input = urldecode(file_get_contents('php://input'));
 
-if (empty($_POST['arr'])){
+if (empty($input)){
 	return false;
 	exit;
 }
 
-$array = json_decode($_POST['arr']);
+$array = json_decode($input);
+
 $suggestions = array();
 
 foreach ($array as $suggestion){
@@ -30,6 +32,6 @@ if ( erli( $sql, $res, $db ) ) {
 	$result = 0;
 }
 
-echo $result;
+echo json_encode($result);
 		
 		
