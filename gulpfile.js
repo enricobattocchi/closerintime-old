@@ -1,4 +1,5 @@
 //gulpfile.js
+var $ = require('gulp-load-plugins')()
 var gulp = require('gulp');
 var sass = require('gulp-sass');
 var cleanCSS = require('gulp-clean-css');
