@@ -1,11 +1,17 @@
 self.addEventListener('sync', function(event) {
-  if (event.tag == 'suggestions' || event.tag == 'test-tag-from-devtools') {
-    event.waitUntil(pushSuggestionsSW());
-  }
+	if (event.tag == 'suggestions' || event.tag == 'test-tag-from-devtools') {
+		event.waitUntil(pushSuggestionsSW());
+	}
+});
+
+
+self.addEventListener('message', event => {
+	if (event.data == 'pushSuggestions') {
+		pushSuggestionsSW();
+	}
 });
 
 var suggestions;
-
 
 function pushSuggestionsSW(){
 	db = new Dexie("closerintime");
@@ -26,10 +32,11 @@ function pushSuggestionsSW(){
 				var myRequest = new Request('suggest.php');
 
 				fetch(myRequest,myInit).then(function(response) {
-					console.log(response.ok);
+					console.log("Suggestions sent: "+response.ok);
 					return response.json();
 				}).then(function(result) {
 					if(result == 1){
+						console.log("Clearing suggestions");
 						suggestions.clear();
 					}
 				});

@@ -21,7 +21,8 @@ if(count($array) > 0){
 		$month = $suggestion->month ? $db->real_escape_string($suggestion->month) : 'NULL';
 		$day = $suggestion->day ? $db->real_escape_string($suggestion->day) : 'NULL';
 	
-	$suggestions[] = "( '$name', $year, $month, $day, 'person', '0', '' )";
+		$suggestions[] = "( '$name', $year, $month, $day, 'person', '0', '' )";
+	}
 }
 
 $result ='';
@@ -37,4 +38,3 @@ if ( erli( $sql, $res, $db ) ) {
 }
 
 echo json_encode($result);
-?>

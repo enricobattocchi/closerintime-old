@@ -179,13 +179,28 @@ function initSuggestionForm(){
         	item.year = $('input[name="year"]').val();
         	item.month = $('input[name="month"]').val();
         	item.day = $('input[name="day"]').val();
-        	db.suggestions.add(item).then(function(){
-        		$target.html('Suggestion successfully stored.');
-            	$('input[name="name"]').val('');
-            	$('input[name="year"]').val('');
-            	$('input[name="month"]').val('');
-            	$('input[name="day"]').val('');
-        	});    	
+        	
+            if (navigator.serviceWorker) {
+            	navigator.serviceWorker.ready.then(function(reg){            		                
+	            	db.suggestions.add(item).then(function(){
+	            		$target.html('Suggestion successfully stored.');
+	                	$('input[name="name"]').val('');
+	                	$('input[name="year"]').val('');
+	                	$('input[name="month"]').val('');
+	                	$('input[name="day"]').val('');
+	            	});    
+	
+	                if (reg.sync && reg.sync.getTags) {
+	                  reg.sync.register('suggestions');
+	                }
+	                else {
+	                  reg.active.postMessage('pushSuggestions');
+	                }
+            	});
+            } else {
+            	pushSuggestions(item);
+            }	
+	
 		} else {
 			$target.html("You must fill at least the event name and year");
 		}
@@ -194,32 +209,31 @@ function initSuggestionForm(){
 	});	
 }
 
-function pushSuggestions(){
-	db.suggestions
-		.toArray()
-		.then(function(data){		
-			if (data.length){
-				var myInit = {
-						method: 'post',
-						headers: {
-							'Accept': 'application/json, text/plain, */*',
-							'Content-Type': 'application/json'
-						},
-						body: encodeURI(JSON.stringify(data))
-				}
+function pushSuggestions(data){
+	var myInit = {
+				method: 'post',
+				headers: {
+					'Accept': 'application/json, text/plain, */*',
+					'Content-Type': 'application/json'
+				},
+				body: encodeURI(JSON.stringify(data))
+		}
 
-				var myRequest = new Request('suggest.php');
+	var myRequest = new Request('suggest.php');
 
-				fetch(myRequest,myInit).then(function(response) {
-					console.log(response.ok);
-					return response.json();
-				}).then(function(result) {
-					if(result == 1){
-						suggestions.clear();
-					}
-				});
-			}
-		});
+	fetch(myRequest,myInit).then(function(response) {
+		console.log(response.ok);
+		return response.json();
+	}).then(function(result) {
+		if(result == 1){
+			suggestions.clear();
+    		$target.html('Suggestion successfully sent.');
+        	$('input[name="name"]').val('');
+        	$('input[name="year"]').val('');
+        	$('input[name="month"]').val('');
+        	$('input[name="day"]').val('');
+		}
+	});	
 }
 
 function opensuggest(){

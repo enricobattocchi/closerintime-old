@@ -59,19 +59,5 @@ if ('serviceWorker' in navigator) {
       console.error('Error during service worker registration:', e);
     });
 
-    
-    if ('SyncManager' in window) {
-    	navigator.serviceWorker.ready.then(function(swRegistration) {
-    		return swRegistration.sync.register('suggestions');
-    	}).catch(function() {
-  	    // system was unable to register for a sync,
-  	    // this could be an OS-level restriction
-  		  pushSuggestions();
-  	  });
-  	} else {
-  	  // serviceworker/sync not supported
-  		pushSuggestions();
-  	}
-
   });
 }
