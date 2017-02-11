@@ -9,7 +9,8 @@ $color-2: #5bc0eb; //blue jeans
 $color-3: #fa7921; //princeton orange
 $color-4: #e55934; //flame
 $color-5: #fde74c; //gargoyle gas
-$shadow: #444444;
+$shadow-1: rgba(0,0,0,0.12);
+$shadow-2: rgba(0,0,0,0.24);
 $text-color: #333;
 
 $num_icons: 10;
@@ -78,7 +79,7 @@ header#main{
 	text-align: center;
 	padding: 1px 0px;
 	background-color: $color-3;
-	box-shadow: 0px 0px 5px $shadow;
+	box-shadow: 0 1px 3px $shadow-1, 0 1px 2px $shadow-2;
 }
 
 
@@ -196,7 +197,7 @@ header#main h1 a:visited{
 	color: transparent;
 	/*font-size: 2.4rem;
 	line-height: 2rem;*/
-	box-shadow: 0px 0px 5px $shadow;
+	box-shadow: 0 1px 3px $shadow-1, 0 1px 2px $shadow-2;
 	box-sizing: border-box;	
 	/*background-color: $color-4;
 	max-width: 5vw;*/
@@ -374,7 +375,7 @@ footer{
 	line-height: 60px;
 	color: #ffffff;
 	padding: 0px 20px;
-	box-shadow: 0px 0px 5px $shadow;
+	box-shadow: 0 -1px 3px $shadow-1, 0 -1px 2px $shadow-2;
 	font-size: 2.6vw;
 	
 	@media screen and (min-width: $break-point-0) {
