@@ -171,30 +171,20 @@ function initSuggestionForm(){
         var $form = $(this);
         var $target = $($form.attr('data-target'));
 
-        if($('input[name="name"').val() && $('input[name="year"').val()){
-	        /*
-         	$.ajax({
-	            type: $form.attr('method'),
-	            url: $form.attr('action'),
-	            data: $form.serialize(),
+        if($('input[name="name"]').val() && $('input[name="year"]').val()){
 
-	            success: function(data, status) {
-	                $target.html(data);
-	            }
-	        });
-			*/
         	$form.serialize();
         	var item = {};
-        	item.name = $('input[name="name"').val();
-        	item.year = $('input[name="year"').val();
-        	item.month = $('input[name="month"').val();
-        	item.day = $('input[name="day"').val();
+        	item.name = $('input[name="name"]').val();
+        	item.year = $('input[name="year"]').val();
+        	item.month = $('input[name="month"]').val();
+        	item.day = $('input[name="day"]').val();
         	db.suggestions.add(item).then(function(){
         		$target.html('Suggestion successfully stored.');
-            	$('input[name="name"').val('');
-            	$('input[name="year"').val('');
-            	$('input[name="month"').val('');
-            	$('input[name="day"').val('');
+            	$('input[name="name"]').val('');
+            	$('input[name="year"]').val('');
+            	$('input[name="month"]').val('');
+            	$('input[name="day"]').val('');
         	});    	
 		} else {
 			$target.html("You must fill at least the event name and year");
@@ -234,11 +224,12 @@ function pushSuggestions(){
 
 function opensuggest(){
 	$('#suggest').removeClass('hide');
+	$('input[name="name"]').focus();
 }
 
 function closesuggest(){
 	var form = $('#suggest form');
-	form.find('input[type="text"]').val('');
+	form.find('input[type="text"]').val('').blur();
 	$(form.attr('data-target')).html('');
 	$('#suggest').addClass('hide');
 }
