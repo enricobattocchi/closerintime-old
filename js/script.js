@@ -177,8 +177,8 @@ function initSuggestionForm(){
         	var item = {};
         	item.name = $('input[name="name"]').val();
         	item.year = $('input[name="year"]').val();
-        	item.month = $('input[name="month"]').val();
-        	item.day = $('input[name="day"]').val();
+        	item.month = $('select[name="month"]').val();
+        	item.day = $('select[name="day"]').val();
         	
             if (navigator.serviceWorker) {
             	navigator.serviceWorker.ready.then(function(reg){            		                
@@ -186,8 +186,8 @@ function initSuggestionForm(){
 	            		$target.html('Suggestion successfully stored.');
 	                	$('input[name="name"]').val('');
 	                	$('input[name="year"]').val('');
-	                	$('input[name="month"]').val('');
-	                	$('input[name="day"]').val('');
+	                	$('select[name="month"]').val('');
+	                	$('select[name="day"]').val('');
 	            	});    
 	
 	                if (reg.sync && reg.sync.getTags) {
@@ -230,8 +230,8 @@ function pushSuggestions(data){
     		$target.html('Suggestion successfully sent.');
         	$('input[name="name"]').val('');
         	$('input[name="year"]').val('');
-        	$('input[name="month"]').val('');
-        	$('input[name="day"]').val('');
+        	$('select[name="month"]').val('');
+        	$('select[name="day"]').val('');
 		}
 	});	
 }
@@ -243,7 +243,7 @@ function opensuggest(){
 
 function closesuggest(){
 	var form = $('#suggest form');
-	form.find('input[type="text"]').val('').blur();
+	form.find('input[type="text"], select').val('').blur();
 	$(form.attr('data-target')).html('');
 	$('#suggest').addClass('hide');
 }
