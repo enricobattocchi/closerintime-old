@@ -450,6 +450,11 @@ foter .popover a:visited{
 	margin-bottom: 10px;
 }
 
+#form-suggest select[disabled] {
+    color: $gray-base;
+}
+
+
 #form-suggest button{
 	background-image: none;
 	background-color: $color-3;

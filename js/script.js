@@ -68,6 +68,10 @@ function loadComparison(){
 						chooser_event_one.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
 					}
 				}
+			}).catch(function (e) {
+			    console.log(e.toString());
+			    var chooser_event_one = $('#chooser-event-one');
+			    chooser_event_one.removeAttr('disabled').typeahead('val','');
 			});
 		}
 	}
@@ -173,6 +177,11 @@ function initPopover(){
 }
 
 function initSuggestionForm(){
+	$('input[name="name"]').val('');
+	$('input[name="year"]').val('');
+	$('select[name="month"]').val('').attr('disabled', 'disabled');
+	$('select[name="day"]').val('').attr('disabled', 'disabled');
+	
     $('form[data-async]').on('submit', function(event) {
         var $form = $(this);
         var $target = $($form.attr('data-target'));
@@ -192,8 +201,8 @@ function initSuggestionForm(){
 	            		$target.html('Suggestion successfully stored.');
 	                	$('input[name="name"]').val('');
 	                	$('input[name="year"]').val('');
-	                	$('select[name="month"]').val('');
-	                	$('select[name="day"]').val('');
+	                	$('select[name="month"]').val('').attr('disabled', 'disabled');
+	                	$('select[name="day"]').val('').attr('disabled', 'disabled');
 	            	});    
 	
 	                if (reg.sync && reg.sync.getTags) {
@@ -213,6 +222,36 @@ function initSuggestionForm(){
 
         event.preventDefault();
 	});	
+    
+    
+    $('input[name="year"]').change(function(){
+    	if(parseInt($(this).val()) === 0){
+    		$(this).val(-1);
+    	}
+    	
+    	if($(this).val()){
+    		$('select[name="month"]').removeAttr('disabled').val('').change();
+    	} else {
+    		$('select[name="month"]').val('').attr('disabled','disabled');
+    		$('select[name="day"]').val('').attr('disabled','disabled');
+    	}
+    });
+    
+    $('select[name="month"]').change(function(){
+    	var $day = $('select[name="day"]');
+    	var month = $(this).val();
+    	if(!month){
+    		$day.val('').attr('disabled','disabled');
+    	} else {
+    		var year = $('input[name="year"]').val();
+    		var days_in_month = moment().year(year).month(month-1).daysInMonth();
+    		$day.removeAttr('disabled').find('option').each(function(index, option){
+    			if( $(option).attr('value') == '' || $(option).attr('value') > days_in_month){
+    				$(option).attr('disabled', 'disabled');
+    			}
+			});
+		}
+    });
 }
 
 function pushSuggestions(data){
