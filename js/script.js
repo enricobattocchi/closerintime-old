@@ -29,7 +29,7 @@ $(function(){
 		event_objs[1] = null;
 	});
 	
-	$( window ).on('hashchange',function() {
+	$(window).on('hashchange',function() {
 		loadComparison();
 	});
 

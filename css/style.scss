@@ -101,6 +101,9 @@ header#main h1 a:visited{
 #chooser{
 	margin: 0 auto;
 	max-width: 1200px;
+	animation-name: appear;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
 }
 
 #chooser-header{
@@ -475,7 +478,7 @@ foter .popover a:visited{
 /*** material design form lookalike ***/
 .btn-default{
 	border: none;
-	border-radius: 0px;
+	border-radius: .125rem !important;
 }
 
 .input-group-addon {
@@ -497,10 +500,6 @@ foter .popover a:visited{
     box-shadow: none;
     border-bottom-color: $color-3;
     border-bottom-width: 2px;
-}
-
-.twitter-typeahead {
-    padding-right: 10px;
 }
 
 .twitter-typeahead .tt-input[disabled] {
