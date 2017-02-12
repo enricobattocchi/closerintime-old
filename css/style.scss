@@ -16,6 +16,8 @@ $text-color: #333;
 $num_icons: 10;
 
 
+@import 'closerintime-fa';
+
 @keyframes expand {
 	from {
 		margin-left: 25%;
@@ -215,7 +217,7 @@ header#main h1 a:visited{
 }
 /*
 .timeline-marker-icon:before{
-	font-family: FontAwesome;
+	font-family: closerintime;
 	top: 0;
 	left: 0px;
 	content: "\f133"; // calendar-o 
@@ -236,7 +238,7 @@ header#main h1 a:visited{
 }*/
 
 .chooser-event-pre:before{
-	font-family: FontAwesome;
+	font-family: closerintime;
 	font-style: normal;
 	content: "\f002"; /* search*/
 	width: 1.28571429em;

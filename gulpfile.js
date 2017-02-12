@@ -8,7 +8,7 @@ var packageJson = require('./package.json');
 
 
 //style paths
-var sassFiles = 'css/*.scss',  
+var sassFiles = 'css/style.scss',  
     cssDest = 'css/';
 
 gulp.task('default', ['style', 'generate-service-worker']);
