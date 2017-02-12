@@ -49,8 +49,26 @@ function loadComparison(){
 		var pars = hashpars.split('/');
 		event_ids[0] = pars[0];
 		if(pars[1]){
+			/* both events set, let's compute everything */
 			event_ids[1] = pars[1];
 			computeFromIDB();
+		} else {
+			/* just one event set, fill the chooser field */		
+			db.events.get(event_ids[0])
+			.then(function(data){
+				var chooser_event_one = $('#chooser-event-one');
+				if(chooser_event_one.typeahead('val') !== data.name+' – '+data.year){
+					chooser_event_one.attr('disabled', 'disabled').typeahead('val',data.name+' – '+data.year);
+					chooser_event_one.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(data.type).attr('data-content', data.type);
+					if(data.link){
+						chooser_event_one.closest('.input-group').find('.chooser-link').removeClass('hide').click(data,function(event){
+							window.open(event.data.link);				
+						});
+					} else{
+						chooser_event_one.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
+					}
+				}
+			});
 		}
 	}
 }
