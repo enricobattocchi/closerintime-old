@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'closerintime';
-  src:  url('../fonts/closerintime.eot?6bfa7k');
-  src:  url('../fonts/closerintime.eot?6bfa7k#iefix') format('embedded-opentype'),
-    url('../fonts/closerintime.ttf?6bfa7k') format('truetype'),
-    url('../fonts/closerintime.woff?6bfa7k') format('woff'),
-    url('../fonts/closerintime.svg?6bfa7k#closerintime') format('svg');
+  src:  url('../fonts/closerintime.eot?52dbap');
+  src:  url('../fonts/closerintime.eot?52dbap#iefix') format('embedded-opentype'),
+    url('../fonts/closerintime.ttf?52dbap') format('truetype'),
+    url('../fonts/closerintime.woff?52dbap') format('woff'),
+    url('../fonts/closerintime.svg?52dbap#closerintime') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -44,6 +44,12 @@ i {
 }
 .fa-book:before {
   content: "\f02d";
+}
+.fa-exclamation-triangle:before {
+  content: "\f071";
+}
+.fa-warning:before {
+  content: "\f071";
 }
 .fa-flask:before {
   content: "\f0c3";
