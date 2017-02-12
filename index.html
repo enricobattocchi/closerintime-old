@@ -30,7 +30,6 @@
 
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="css/font-awesome.min.css"/>
 	<link rel="stylesheet" href="css/typeahead.css"/>
 	<link rel="stylesheet" href="css/style.css"/>
@@ -134,8 +133,8 @@
 			<div id="sharing"></div>
 		</section>
 		<section id="suggest" class="hide">
-			<a href="javascript:closesuggest();"><i class="fa fa-close" id="close-suggest"></i></a>
-		   <form id="form-suggest" data-async data-target="#form-target" action="suggest.php" method="POST">
+			<form id="form-suggest" data-async data-target="#form-target" action="suggest.php" method="POST">
+				<a href="javascript:closesuggest();"><i class="fa fa-close" id="close-suggest"></i></a>
 		   		<h3>Suggest an event</h3>
 	   			<label class="sr-only" for="name">Event name</label>
       			<input type="text" class="form-control" name="name" placeholder="Event name"/>

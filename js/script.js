@@ -35,18 +35,6 @@ $(function(){
 
 });
 
-
-
-function preload(){
-    jQuery.ajax({
-        url: 'lookup.php',
-        success: function (result) {
-            jsondata = JSON.parse(result);
-        },
-        async: false
-    });	
-}
-
 function initJSONdata(){
 	db.events.toArray(function(array){
 		jsondata = array;
@@ -379,8 +367,12 @@ function populateIDB(data){
 		second_span = Math.abs(datenow.diff(datetime[1], 'years'));
 
 		percentage = 100*first_span/total_span;
-		result.start.date = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
-		result.middle.date = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
+		
+		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
+		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
+		
+		result.start.date = year_0;
+		result.middle.date = year_1;
 		result.now_date = datenow.year();
 
 		result.timeline_1 = first_span + " years";
@@ -477,7 +469,7 @@ function populateIDB(data){
 	middle_icon.removeClass().addClass('timeline-marker-icon '+result.middle.category_icon);
 	
 	if(chooser_event_one.typeahead('val') !== result.start.description){
-		chooser_event_one.attr('disabled', 'disabled').typeahead('val',result.start.description);
+		chooser_event_one.attr('disabled', 'disabled').typeahead('val',result.start.description+' – '+year_0);
 		chooser_event_one.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.start.category_icon).attr('data-content', result.start.category_icon);
 		if(result.start.link){
 			chooser_event_one.closest('.input-group').find('.chooser-link').removeClass('hide').click(result.start,function(event){
@@ -488,7 +480,7 @@ function populateIDB(data){
 		}
 	}
 	if(chooser_event_two.typeahead('val') !== result.middle.description){
-		chooser_event_two.attr('disabled', 'disabled').typeahead('val',result.middle.description);
+		chooser_event_two.attr('disabled', 'disabled').typeahead('val',result.middle.description+' – '+year_1);
 		chooser_event_two.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.middle.category_icon).attr('data-content', result.middle.category_icon);
 		if(result.middle.link){
 			chooser_event_two.closest('.input-group').find('.chooser-link').removeClass('hide').click(result.middle,function(event){

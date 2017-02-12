@@ -407,7 +407,7 @@ foter .popover a:visited{
 
 #suggest{
 	position: fixed;
-	background-color: #ffffff;
+	background-color: rgba(0,0,0,0.4);
 	top: 0px;
 	bottom: 0px;
 	left: 0px;
@@ -416,15 +416,16 @@ foter .popover a:visited{
 }
 
 #close-suggest{
-	font-size: 4vw;
-	color: $gray-base;
+	font-size: 30px;
+	color: #999;
 	position: absolute;
-	top:   20px;
-	right: 20px;
+	top: 5px;
+	right: 5px;
 }
 
 #form-suggest{
 	position: absolute;
+	background-color: #ffffff;
 	top: 50%;
 	left: 50%;
 	width: 300px;
@@ -433,15 +434,74 @@ foter .popover a:visited{
 	box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 }
 
+#form-suggest input{
+	margin-bottom: 10px;
+}
+
 #form-suggest select{
 	width: 100%;
 	height: 34px;
+	border-radius: 0;
+	border: none;
+	background-color: #fff;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	border-bottom: solid 1px #aaaaaa;
+	margin-bottom: 10px;
 }
 
 #form-suggest button{
-	width: 100%;
 	background-image: none;
 	background-color: $color-3;
 	color: #ffffff;
 	text-shadow: none;
+	background-image: none;
+	text-transform: uppercase;
+	font-weight: bold;
+	box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
+	border-radius: .125rem;
+	margin: 0 auto;
+	display: block;
+}
+
+
+/*** material design form lookalike ***/
+.btn-default{
+	border: none;
+	border-radius: 0px;
+}
+
+.input-group-addon {
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.form-control{
+	border: none;
+	border-bottom: solid 1px #aaaaaa;
+	background-color: #ffffff !important;
+	box-shadow: none;
+	border-radius: 0;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-bottom-color: $color-3;
+    border-bottom-width: 2px;
+}
+
+.twitter-typeahead {
+    padding-right: 10px;
+}
+
+.twitter-typeahead .tt-input[disabled] {
+    background-color: #fff !important;
+    font-weight: bold;
+}
+
+.tt-dropdown-menu, .tt-menu {
+    border: none;
+    border-radius: 0;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
