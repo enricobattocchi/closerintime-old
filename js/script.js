@@ -576,6 +576,48 @@ function initIndexedDB(){
                             
                         });
                         console.log("Added "+counteradd+" events");
+                        
+                        
+                        db.localevents
+                        	.orderBy('uuid')
+                        	.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
+                        	.uniqueKeys(function(uuids){
+                        		var requestjson = {};
+                        		if(uuids.length){
+                    				var myInit = {
+                    						method: 'post',
+                    						headers: {
+                    							'Accept': 'application/json, text/plain, */*',
+                    							'Content-Type': 'application/json'
+                    						},
+                    						body: encodeURI(JSON.stringify(uuids))
+                    				}
+
+                    				var myRequest = new Request('verify.php');
+
+                    				fetch(myRequest,myInit).then(function(response) {
+                    					console.log("Verification asked: "+response.ok);
+                    					return response.json();
+                    				}).then(function(result) {
+                    					console.log(result);
+                    					$.each(result,function(key,value){
+                    						if(parseInt(value) === 0){
+                    							db.localevents
+                    								.where('uuid')
+                    								.equals(key)
+                    	                          	.delete()
+                                                	.then(function (deleteCount) {
+                                                		if(deleteCount > 0){
+                                                			console.log( "Removed " + deleteCount + " events");
+                                                		}
+                                                    });
+                    						}
+                    					});
+                    				});
+                        		}
+                        		
+                        	});
+                        	
                     });
                 }).then(function () {
                     console.log ("Transaction committed");
