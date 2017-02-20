@@ -248,9 +248,6 @@ function initPopover(){
 /**
  * initalizes the suggestion form
  */
-/**
- * 
- */
 function initSuggestionForm(){
 
 	resetSuggestionForm();
@@ -451,10 +448,8 @@ function resetSuggestionForm(){
 	$('input[name="year"]').val('');
 	$('select[name="month"]').val('').attr('disabled', 'disabled');
 	$('select[name="day"]').val('').attr('disabled', 'disabled');
-	$('#type-submitted').prop('checked', false);
-	$('#type-personal').prop('checked', true);
-	$('#plural').prop('checked', false);
-	$('#singular').prop('checked', true);
+	$('#type-personal').click();
+	$('#singular').click();
 	$('#type-group').removeClass('hide');
 	$('#suggestions-delete').addClass('hide');
 }
@@ -554,26 +549,31 @@ function initIndexedDB(){
 			}).then(function (data) {
 				console.log("Got ajax response. We'll now add the objects.");
 				return db.transaction('rw', db.events, db.localevents, function () {
-					var counteradd = 0;
-					var counterdel = 0;
-					data.forEach(function (item) {
-						db.events.add(item);
-						counteradd++;
-
-						db.localevents
-						.where('uuid')
-						.equals(item.uuid)
-						.delete()
-						.then(function (deleteCount) {
-							if(deleteCount > 0){
-								console.log( "Deleted " + deleteCount + " events");
-							}
-						});
-
+					
+					// add events to DB
+					db.events
+					.bulkAdd(data)
+					.then(function(){
+						console.log("Added events");
 					});
-					console.log("Added "+counteradd+" events");
+					
+					//  extractd UUIDs
+					uuids = data.map(function(item){
+						return item.uuid;
+					});	
+					
+					// delete local events with matching UUIDS
+					db.localevents
+					.where('uuid')
+					.anyOf(uuids)
+					.delete()
+					.then(function (deleteCount) {
+						if(deleteCount > 0){
+							console.log( "Deleted " + deleteCount + " events");
+						}
+					});
 
-
+					// ask the server what happened to remaining submissions
 					db.localevents
 					.orderBy('uuid')
 					.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
@@ -912,6 +912,12 @@ function generateUUID() {
 };
 
 
+/**
+ * Shows a floating alert
+ * 
+ * @param message
+ * @param alert
+ */
 function showFlAlert(message, alert) {
 	var timeout = 4000;
 	var rand = moment().unix();
