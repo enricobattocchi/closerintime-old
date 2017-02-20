@@ -423,7 +423,11 @@ function initSuggestionForm(){
  */
 function setNameEtc(field, item, index){
 	resetChooserButtons(field);
-	field.typeahead('val',ucfirst(item.name) + ' – ' + item.year);
+	var year = item.year;
+	if(item.year < 0){
+		year = Math.abs(item.year)+ ' B.C.';
+	}
+	field.typeahead('val',ucfirst(item.name) + ' – ' + year);
 	event_ids[index] = item.id;
 	field.closest('.input-group').find('.chooser-event-pre').addClass(item.type).attr('data-content', item.type);
 	if(item.link){
