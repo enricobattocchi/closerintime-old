@@ -17,14 +17,14 @@ $results = array();
 
 foreach ($array as $uuid){
 
-	$sql = "SELECT count(id) as count "
+	$sql = "SELECT uuid  "
 			. "FROM events "
 			. "WHERE uuid = '".$uuid."'";
 
 	$res = $db->query( $sql );
 	if ( erli( $sql, $res, $db ) && ( mysqli_num_rows( $res ) > 0 ) ) {
 		while( $row = mysqli_fetch_assoc( $res )){
-			$results[$uuid] = $row['count'];
+			$results[] = $row['uuid'];
 		}
 	}
 }

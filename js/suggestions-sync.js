@@ -37,11 +37,15 @@ function pushSuggestionsSW(){
 					console.log("Suggestions sent: "+response.ok);
 					return response.json();
 				}).then(function(result) {
-					if(result == 1){
-						console.log("Marking suggestions as sent");
+					console.log(result);
+					if(result){
 						suggestions
-						.filter(function(item){return (item.type == 'submitted' && item.sent != 1);})
-						.modify({sent: 1});
+						.where('uuid')
+						.anyOf(result)
+						.modify({sent: 1})
+						.then(function(){
+							console.log("Suggestions marked as sent");
+						});
 					}
 				});
 			}

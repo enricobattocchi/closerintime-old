@@ -212,17 +212,21 @@
 						<input type="hidden" name="uuid" value=""/>
 						<input type="hidden" name="frominput" value=""/>
 						<div data-toggle="buttons" id="type-group" class="btn-group btn-group-justified">
-							<label class="btn btn-primary active"> <input
+							<label class="btn active"> <input
 								type="radio" name="type" autocomplete="off" id="type-personal" value="personal"
 								 checked="checked"><i class="fa personal"></i> Personal
 							</label>
-							<label class="btn btn-primary"> <input
+							<label class="btn"> <input
 								type="radio" name="type" autocomplete="off" id="type-submitted" value="submitted"><i class="fa submitted"></i> Suggestion
 							</label>
 						</div>
 						<label class="sr-only" for="name">Event name</label> <input
 							type="text" class="form-control" name="name"
-							placeholder="Event name" /> <label class="sr-only" for="year">Year</label>
+							placeholder="Event name" 
+							data-toggle="popover" data-trigger="focus" data-html="true"
+							data-content="Capitalize only when needed, e.g. '<em>Shakespeare's death</em>' but '<em>the foundation of Rome</em>'"
+							data-placement="top"/>
+							 <label class="sr-only" for="year">Year</label>
 						<input type="number" class="form-control" name="year" min="-3000"
 							max="2016" placeholder="Year" />
 							<label class="sr-only"
@@ -277,14 +281,13 @@
 							<option value="31">31</option>
 						</select>
 						<div class="btn-group" id="plural-group" data-toggle="buttons">
-  							<label class="btn btn-primary active">
+  							<label class="btn active">
     							<input type="radio" name="plural[]" id="singular" autocomplete="off" value="0" checked="checked"> is
   							</label>
-  							<label class="btn btn-primary">
+  							<label class="btn">
 								<input type="radio" name="plural[]" id="plural" autocomplete="off" value="1"> are
 							</label>&nbsp; closer in time…
 						</div>
-						<h3 id="form-target"></h3>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -317,5 +320,6 @@
 		</section>
 	</footer>
 	<script src="js/service-worker-registration.js"></script>
+	<div id="floating_alert"></div>
 </body>
 </html>

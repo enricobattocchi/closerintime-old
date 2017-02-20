@@ -9,7 +9,9 @@ CREATE TABLE `events` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   `plural` tinyint(1) NOT NULL DEFAULT '0',
   `link` varchar(255) DEFAULT NULL,
-  `uuid` varchar(40) DEFAULT NULL,
+  `uuid` varchar(40) DEFAULT '',
+  `creation_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `editing_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`),
   FULLTEXT KEY `name` (`name`)

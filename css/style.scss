@@ -4,6 +4,7 @@ $break-point-1: 1040px;
 $break-point-2: 1800px;
 
 $gray-base:     #999999;
+$gray-btn-bg: 	#cccccc;
 $color-1: #9bc53d; //android green
 $color-2: #5bc0eb; //blue jeans
 $color-3: #fa7921; //princeton orange
@@ -449,7 +450,9 @@ foter .popover a:visited{
 	box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 }*/
 
-#form-suggest input{
+#form-suggest input,
+#form-suggest select,
+#form-suggest .btn-group{
 	margin-bottom: 10px;
 }
 
@@ -462,7 +465,6 @@ foter .popover a:visited{
 	-moz-appearance: none;
 	-webkit-appearance: none;
 	border-bottom: solid 1px #aaaaaa;
-	margin-bottom: 10px;
 }
 
 #form-suggest select[disabled] {
@@ -473,14 +475,21 @@ foter .popover a:visited{
 	font-weight: normal;
 }
 
-
-#suggest .btn-primary{
-	background-color: $color-3;
+#suggest .btn{
+	background-color: $gray-btn-bg;
 	color: #ffffff;
 	border: none;
+	box-shadow: none;
 }
 
-#suggest .btn-primary.active,
+#suggest .btn-primary,
+#suggest .btn.active{
+	background-color: $color-3;
+	font-weight: bold;
+}
+
+#suggest .btn.active:hover,
+#suggest .btn.active:focus,
 #suggest .btn-primary:hover,
 #suggest .btn-primary:focus{
 	background-color: $color-4;
@@ -492,7 +501,6 @@ foter .popover a:visited{
 
 #suggest .modal-footer .btn-primary{
 	text-transform: uppercase;
-	font-weight: bold;
 	box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
 	border-radius: .125rem;
 }
@@ -533,4 +541,13 @@ foter .popover a:visited{
     border: none;
     border-radius: 0;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+
+/*** alert ***/
+#floating_alert {
+	position: absolute;
+	bottom: 80px;
+	right: 20px;
+	z-index: 5000;
 }

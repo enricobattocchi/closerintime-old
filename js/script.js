@@ -1,7 +1,7 @@
 var event_ids = new Array();
 var event_objs = new Array();
 var eventsengine = null;
-var jsondata = null;
+var jsondata = new Array();
 var db = null;
 
 
@@ -9,12 +9,14 @@ var db = null;
  * After the page has been loaded: initializations
  */
 $(function(){
-	
+
 	initPopover();
-	
+
 	initSuggestionForm();
-	
+
 	initIndexedDB();
+	
+	initTypeahead();
 
 	$('#chooser-event-one-cancel').on('click',function(){
 		$('#chooser-event-one').removeAttr('disabled');
@@ -33,7 +35,7 @@ $(function(){
 		event_ids[1] = null;
 		event_objs[1] = null;
 	});
-	
+
 	$(window).on('hashchange',function() {
 		loadComparison();
 	});
@@ -53,10 +55,12 @@ function initJSONdata(){
 			});
 			jsondata = jsondata.concat(array);
 		}).then(function(){
-			initTypeahead();
+			initEventEngine();
+		}).catch(function(){
+			initEventEngine();
 		});
 	});
-	
+
 }
 
 /**
@@ -80,10 +84,10 @@ function loadComparison(){
 				var chooser_event_one = $('#chooser-event-one');
 				setNameEtc(chooser_event_one, data, 0);
 			}).catch(function (e) {
-			    console.log(e.toString());
-			    var chooser_event_one = $('#chooser-event-one');
-			    chooser_event_one.removeAttr('disabled').typeahead('val','');
-			    resetChooserButtons(chooser_event_one);
+				console.log(e.toString());
+				var chooser_event_one = $('#chooser-event-one');
+				chooser_event_one.removeAttr('disabled').typeahead('val','');
+				resetChooserButtons(chooser_event_one);
 			});
 		}
 	}
@@ -95,16 +99,16 @@ function loadComparison(){
  */
 function initEventEngine(){
 	eventsengine = new Bloodhound({
-  		datumTokenizer: function(d) {
-  			var datumstrings = Bloodhound.tokenizers.whitespace(d.name.replace('"','')+' '+d.year+' '+d.type);
-  			datumstrings.push(d.name);
-  			return datumstrings;
-  	    },
-  		queryTokenizer:function(query) {
-  			var querystrings = whitespacelesshyphen(query);
-  			return querystrings;
-  	    }, 
-  		local: jsondata
+		datumTokenizer: function(d) {
+			var datumstrings = Bloodhound.tokenizers.whitespace(d.name.replace('"','')+' '+d.year+' '+d.type);
+			datumstrings.push(d.name);
+			return datumstrings;
+		},
+		queryTokenizer:function(query) {
+			var querystrings = whitespacelesshyphen(query);
+			return querystrings;
+		}, 
+		local: jsondata
 	});
 }
 
@@ -117,7 +121,7 @@ function initTypeahead(){
 
 	$('#chooser .typeahead').typeahead({
 		minLength: 3,
-		}, {
+	}, {
 		name: 'eventsengine',
 		/* display: 'name', */
 		display: function(data){
@@ -127,30 +131,30 @@ function initTypeahead(){
 				year = Math.abs(data.year)+ ' B.C.';
 			}
 			return data.name+' – '+year;
-			},
+		},
 		limit: 40,
 		source: function(query, syncResults){
 			eventsengine.search(query,function(suggestions){
-					syncResults(filterselected(suggestions));
-				});
+				syncResults(filterselected(suggestions));
+			});
 		},
 		templates: {
-    		notFound: [
-      		'<div class="empty-message">',
-        		'<i class="fa fa-exclamation-triangle"></i> Unable to find any matches. <a href="" data-toggle="modal" data-target="#suggest">Want to add an event?</a>',
-      		'</div>'
-    		].join('\n'),
-    		footer: [
-      		'<div class="empty-message">',
-        		'<i class="fa fa-pencil"></i> <a href="" data-toggle="modal" data-target="#suggest">Add an event</a>',
-      		'</div>'
-    		].join('\n'),
-    		suggestion: function(data){
-    			var year = data.year;
-    			if(data.year < 0){
-    				year = Math.abs(data.year)+ ' B.C.';
-    			}
-    			return '<div><i class="fa '+data.type+'"></i> <strong>'+ucfirst(data.name)+'</strong> – '+year+'</div>';}
+			notFound: [
+			           '<div class="empty-message">',
+			           '<i class="fa fa-exclamation-triangle"></i> Unable to find any matches. <a href="" data-toggle="modal" data-target="#suggest">Want to add an event?</a>',
+			           '</div>'
+			           ].join('\n'),
+			           footer: [
+			                    '<div class="empty-message">',
+			                    '<i class="fa fa-pencil"></i> <a href="" data-toggle="modal" data-target="#suggest">Add an event</a>',
+			                    '</div>'
+			                    ].join('\n'),
+			                    suggestion: function(data){
+			                    	var year = data.year;
+			                    	if(data.year < 0){
+			                    		year = Math.abs(data.year)+ ' B.C.';
+			                    	}
+			                    	return '<div><i class="fa '+data.type+'"></i> <strong>'+ucfirst(data.name)+'</strong> – '+year+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
 		var index = $('#chooser input[id^="chooser-"]').index(this);
@@ -160,8 +164,8 @@ function initTypeahead(){
 		updateHashFromIDS();
 	}).on('typeahead:render', function(){
 		if(!$(this).typeahead('val')){
-				var index = $('#chooser input[id^="chooser-"]').index(this);
-				event_ids[index] = '';
+			var index = $('#chooser input[id^="chooser-"]').index(this);
+			event_ids[index] = '';
 		}			
 	}).typeahead('val', '').removeAttr('disabled');	
 }
@@ -197,7 +201,7 @@ function updateHashFromIDS(){
 		}
 		computeFromIDB();
 	}
-	
+
 }
 
 
@@ -209,19 +213,19 @@ function updateHashFromIDS(){
  * @returns array of tokens from the string
  */
 function whitespacelesshyphen(str) {
-    str = (typeof str === "undefined" || str === null) ? "" : str + "";
-    str = str.split('–');
-    str = str[0];
-    return str ? str.split(/\s+/) : [];
+	str = (typeof str === "undefined" || str === null) ? "" : str + "";
+	str = str.split('–');
+	str = str[0];
+	return str ? str.split(/\s+/) : [];
 }
 
- /**
-	 * filters the typeahead suggestions so they don't show the already choosen
-	 * event
-	 * 
-	 * @param suggestions
-	 * @returns {Array}
-	 */
+/**
+ * filters the typeahead suggestions so they don't show the already choosen
+ * event
+ * 
+ * @param suggestions
+ * @returns {Array}
+ */
 function filterselected(suggestions){
 	var filtered = new Array();
 	if(suggestions.length > 0){
@@ -248,18 +252,18 @@ function initPopover(){
  * 
  */
 function initSuggestionForm(){
-	
+
 	resetSuggestionForm();
-	
+
 	$('#suggest').on('show.bs.modal', function (event) {
 		var modal = $(this);
 		var origin = $(event.relatedTarget); // what user clicked to show the
-												// modal
-		
+		// modal
+
 		// if the edit button was used
 		var id = parseInt(origin.attr('data-id'));
 		var frominput = parseInt(origin.attr('data-frominput'));
-		
+
 		var input = null;
 		if(frominput !== 0 || frominput !== 1 ){ // if the link in suggestions was used
 			input = origin.closest('.input-group').find('input[id^="chooser-"]'); // get the input
@@ -288,131 +292,128 @@ function initSuggestionForm(){
 	}).on('hidden.bs.modal',function (event){
 		resetSuggestionForm();
 	});
-	
-	
+
+
 	$('#suggestions-delete').on('click', function(event) {
 		if($('input[name="id"]').val()){
 			var id = parseInt($('input[name="id"]').val());
 			var frominput = parseInt($('input[name="frominput"]').val());
 			db.localevents.delete(id).then(function(){
 				id = 0-id;
-			    jsondata = jsondata.filter(function(obj){ return id !== parseInt(obj.id); });
-			    initEventEngine();
-			    $('#chooser input[id^="chooser-"]').eq(frominput).typeahead('val','');
-			    resetChooserButtons($('#chooser input[id^="chooser-"]').eq(frominput));
+				jsondata = jsondata.filter(function(obj){ return id !== parseInt(obj.id); });
+				initEventEngine();
+				$('#chooser input[id^="chooser-"]').eq(frominput).typeahead('val','');
+				resetChooserButtons($('#chooser input[id^="chooser-"]').eq(frominput));
+				showFlAlert('Event deleted.', 'success');
 			});
 		}
 		$('#suggest').modal('hide');
 	});
-	
-	
-    $('#suggestions-save').on('click', function(event) {
-        var $form = $(this);
-        var $target = $($form.attr('data-target'));
+
+
+	$('#suggestions-save').on('click', function(event) {
+		var $form = $(this);
 		var frominput = parseInt($('input[name="frominput"]').val());
-		
-        if($('input[name="name"]').val() && $('input[name="year"]').val()){
 
-        	$form.serialize();
-        	var item = {};
-        	var id = null;
-        	if($('input[name="id"]').val()){
-        		id = parseInt($('input[name="id"]').val());
-        	} else {
-        		item.uuid = generateUUID();
-        	}
-        	item.name = $('input[name="name"]').val();
-        	item.year = $('input[name="year"]').val();
-        	item.month = $('select[name="month"]').val();
-        	item.day = $('select[name="day"]').val();
-        	item.plural = $('input[name="plural[]"]:checked').val();
-        	// item.capitalize_first = 0;
-        	item.type = $('input[name="type"]:checked').val();
-        	        		
-    		if(id){
-    			db.localevents.update(id, item).then(function(updated){
-    				if (updated){
-    				    console.log ("Item updated");
-    				    item.id = 0-id;
-    				    jsondata = jsondata.filter(function(obj){ return item.id !== parseInt(obj.id); });
-    				    jsondata.push(item);
-    				    initEventEngine();
-	            		$target.html('Suggestion successfully stored.');
-	                    console.log('Setting up the name etc.');
-	                    setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
-	                    event_ids[frominput] = item.id;
-	                    computeFromIDB();
-    				} else {
-    				    console.log ("Nothing was updated");
-    				}
-    			});
-    		} else {
-            	db.localevents.add(item).then(function(newid){
-            		console.log ("Item added");
-            		item.id = 0-newid;
-            		jsondata.push(item);
-            		initEventEngine();	            		
-            		$target.html('Suggestion successfully stored.');
-            		
-                    if (navigator.serviceWorker) {
-                    	navigator.serviceWorker.ready.then(function(reg){    
-    		                if (reg.sync && reg.sync.getTags) {
-    		                  reg.sync.register('suggestions');
-    		                }
-    		                else {
-    		                  reg.active.postMessage('pushSuggestions');
-    		                }                
-    	            	});
-                    } else {
-                    	pushSuggestions(item);
-                    }            		
-            		
-                    console.log('Setting up the name etc.');
-                    setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
-                    event_ids[frominput] = item.id;
-                    computeFromIDB();
-            	});    
+		if($('input[name="name"]').val() && $('input[name="year"]').val()){
 
-    		}
-            		
-            $('#suggest').modal('hide');
+			$form.serialize();
+			var item = {};
+			var id = null;
+			if($('input[name="id"]').val()){
+				id = parseInt($('input[name="id"]').val());
+			} else {
+				item.uuid = generateUUID();
+			}
+			item.name = $('input[name="name"]').val();
+			item.year = $('input[name="year"]').val();
+			item.month = $('select[name="month"]').val();
+			item.day = $('select[name="day"]').val();
+			item.plural = $('input[name="plural[]"]:checked').val();
+			// item.capitalize_first = 0;
+			item.type = $('input[name="type"]:checked').val();
+
+			if(id){
+				db.localevents.update(id, item).then(function(updated){
+					if (updated){
+						console.log ("Item updated");
+						item.id = 0-id;
+						jsondata = jsondata.filter(function(obj){ return item.id !== parseInt(obj.id); });
+						jsondata.push(item);
+						initEventEngine();
+						showFlAlert('Event updated.', 'success');
+						setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
+						event_ids[frominput] = item.id;
+						computeFromIDB();
+					} else {
+						console.log ("Nothing was updated");
+					}
+				});
+			} else {
+				db.localevents.add(item).then(function(newid){
+					console.log ("Item added");
+					item.id = 0-newid;
+					jsondata.push(item);
+					initEventEngine();	            		
+					showFlAlert('Event stored.', 'success');
+
+					if (navigator.serviceWorker) {
+						navigator.serviceWorker.ready.then(function(reg){    
+							if (reg.sync && reg.sync.getTags) {
+								reg.sync.register('suggestions');
+							}
+							else {
+								reg.active.postMessage('pushSuggestions');
+							}                
+						});
+					} else {
+						pushSuggestions(item);
+					}            		
+					setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
+					event_ids[frominput] = item.id;
+					computeFromIDB();
+				});    
+
+			}
+
+			$('#suggest').modal('hide');
 		} else {
-			$target.html("You must fill at least the event name and year");
+			showFlAlert('You must fill at least the event name and year.', 'warning');
 		}
 
-        event.preventDefault();
-        
+		event.preventDefault();
+
 	});	
-    
-    
-    $('input[name="year"]').change(function(){
-    	if(parseInt($(this).val()) === 0){
-    		$(this).val(-1);
-    	}
-    	
-    	if($(this).val()){
-    		$('select[name="month"]').removeAttr('disabled').val('').change();
-    	} else {
-    		$('select[name="month"]').val('').attr('disabled','disabled');
-    		$('select[name="day"]').val('').attr('disabled','disabled');
-    	}
-    });
-    
-    $('select[name="month"]').change(function(){
-    	var $day = $('select[name="day"]');
-    	var month = $(this).val();
-    	if(!month){
-    		$day.val('').attr('disabled','disabled');
-    	} else {
-    		var year = $('input[name="year"]').val();
-    		var days_in_month = moment().year(year).month(month-1).daysInMonth();
-    		$day.removeAttr('disabled').find('option').each(function(index, option){
-    			if( $(option).attr('value') == '' || $(option).attr('value') > days_in_month){
-    				$(option).attr('disabled', 'disabled');
-    			}
+
+
+	$('input[name="year"]').change(function(){
+		if(parseInt($(this).val()) === 0){
+			$(this).val(-1);
+		}
+
+		if($(this).val()){
+			$('select[name="month"]').removeAttr('disabled').val('').change();
+		} else {
+			$('select[name="month"]').val('').attr('disabled','disabled');
+			$('select[name="day"]').val('').attr('disabled','disabled');
+		}
+	});
+
+	$('select[name="month"]').change(function(){
+		var $day = $('select[name="day"]');
+		var month = $(this).val();
+		if(!month){
+			$day.val('').attr('disabled','disabled');
+		} else {
+			var year = $('input[name="year"]').val();
+			var days_in_month = moment().year(year).month(month-1).daysInMonth();
+			$day.removeAttr('disabled').find('option').each(function(index, option){
+				if( $(option).attr('value') == '' || $(option).attr('value') > days_in_month){
+					$(option).attr('disabled', 'disabled');
+				}
 			});
 		}
-    });
+	});
 }
 
 
@@ -424,10 +425,10 @@ function initSuggestionForm(){
  * @param index
  */
 function setNameEtc(field, item, index){
-    resetChooserButtons(field);
+	resetChooserButtons(field);
 	field.typeahead('val',ucfirst(item.name) + ' – ' + item.year);
-    event_ids[index] = item.id;
-    field.closest('.input-group').find('.chooser-event-pre').addClass(item.type).attr('data-content', item.type);
+	event_ids[index] = item.id;
+	field.closest('.input-group').find('.chooser-event-pre').addClass(item.type).attr('data-content', item.type);
 	if(item.link){
 		field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
 			window.open(event.data.link);				
@@ -466,13 +467,13 @@ function resetSuggestionForm(){
  */
 function pushSuggestions(data){
 	var myInit = {
-				method: 'post',
-				headers: {
-					'Accept': 'application/json, text/plain, */*',
-					'Content-Type': 'application/json'
-				},
-				body: encodeURI(JSON.stringify(data))
-		}
+			method: 'post',
+			headers: {
+				'Accept': 'application/json, text/plain, */*',
+				'Content-Type': 'application/json'
+			},
+			body: encodeURI(JSON.stringify(data))
+	}
 
 	var myRequest = new Request('suggest.php');
 
@@ -485,8 +486,8 @@ function pushSuggestions(data){
 			.where(':id')
 			.equals(data.id)
 			.modify({sent: 1});
-    		$target.html('Suggestion successfully sent.');
-    		resetSuggestionForm();
+			showFlAlert('Event submitted.', 'success');
+			resetSuggestionForm();
 		}
 	});	
 }
@@ -499,141 +500,134 @@ function initIndexedDB(){
 	db = new Dexie("closerintime");
 
 	db.version(10).stores({
-	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
+		events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
 	});
-		
+
 	db.version(11).stores({
-	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
-	    suggestions: "++id, name, year, month, day"
+		events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
+		suggestions: "++id, name, year, month, day"
 	});
-	
-	
+
+
 	db.version(12).stores({
-	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link, uuid",
-	    myevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, uuid"
+		events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link, uuid",
+		myevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, uuid"
 	});
-	
+
 	db.version(13).stores({
-	   suggestions: null
+		suggestions: null
 	});
-	
+
 	db.version(14).stores({
-	    myevents: null,
+		myevents: null,
 		personalevents: "id, &name, year, month, day, type, plural, sent, capitalize_first, link, &uuid"
 	});
-	
+
 	db.version(15).stores({
-	    personalevents: null,
+		personalevents: null,
 		localevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, &uuid"
 	});
-	
+
 	db.version(16).stores({
 		events: "id, &name, year, month, day, type, plural, enabled, link, &uuid",
 		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
 	});
-	
-	
+
+
 	db.on('ready', function () {
-        return db.events.clear()
-        	.then(function(){
-                console.log("Database is empty. Populating from ajax call...");
-                return new Dexie.Promise(function (resolve, reject) {
-                    $.ajax('lookup.php', {
-                        type: 'get',
-                        dataType: 'json',
-                        error: function (xhr, textStatus) {
-                            // Rejecting promise to make db.open() fail.
-                            reject(textStatus);
-                        },
-                        success: function (data) {
-                            // Resolving Promise will launch then() below.
-                            resolve(data);
-                        }
-                    });
-                }).then(function (data) {
-                    console.log("Got ajax response. We'll now add the objects.");
-                    // By returning the db.transaction() promise, framework will
-					// keep
-                    // waiting for this transaction to commit before resuming
-					// other
-                    // db-operations.
-                    return db.transaction('rw', db.events, db.localevents, function () {
-                    	var counteradd = 0;
-                    	var counterdel = 0;
-                        data.forEach(function (item) {
-                            db.events.add(item);
-                            counteradd++;
-                            
-                            db.localevents
-                            	.where('uuid')
-                            	.equals(item.uuid)
-                            	.delete()
-                            	.then(function (deleteCount) {
-                            		if(deleteCount > 0){
-                            			console.log( "Deleted " + deleteCount + " events");
-                            		}
-                                });
-                            
-                        });
-                        console.log("Added "+counteradd+" events");
-                        
-                        
-                        db.localevents
-                        	.orderBy('uuid')
-                        	.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
-                        	.uniqueKeys(function(uuids){
-                        		var requestjson = {};
-                        		if(uuids.length){
-                    				var myInit = {
-                    						method: 'post',
-                    						headers: {
-                    							'Accept': 'application/json, text/plain, */*',
-                    							'Content-Type': 'application/json'
-                    						},
-                    						body: encodeURI(JSON.stringify(uuids))
-                    				}
+		return db.events.clear()
+		.then(function(){
+			console.log("Database is empty. Populating from ajax call...");
+			return new Dexie.Promise(function (resolve, reject) {
+				$.ajax('lookup.php', {
+					type: 'get',
+					dataType: 'json',
+					error: function (xhr, textStatus) {
+						// Rejecting promise to make db.open() fail.
+						reject(textStatus);
+					},
+					success: function (data) {
+						// Resolving Promise will launch then() below.
+						resolve(data);
+					}
+				});
+			}).then(function (data) {
+				console.log("Got ajax response. We'll now add the objects.");
+				return db.transaction('rw', db.events, db.localevents, function () {
+					var counteradd = 0;
+					var counterdel = 0;
+					data.forEach(function (item) {
+						db.events.add(item);
+						counteradd++;
 
-                    				var myRequest = new Request('verify.php');
+						db.localevents
+						.where('uuid')
+						.equals(item.uuid)
+						.delete()
+						.then(function (deleteCount) {
+							if(deleteCount > 0){
+								console.log( "Deleted " + deleteCount + " events");
+							}
+						});
 
-                    				fetch(myRequest,myInit).then(function(response) {
-                    					console.log("Verification asked: "+response.ok);
-                    					return response.json();
-                    				}).then(function(result) {
-                    					console.log(result);
-                    					$.each(result,function(key,value){
-                    						if(parseInt(value) === 0){
-                    							db.localevents
-                    								.where('uuid')
-                    								.equals(key)
-                    	                          	.delete()
-                                                	.then(function (deleteCount) {
-                                                		if(deleteCount > 0){
-                                                			console.log( "Removed " + deleteCount + " events");
-                                                		}
-                                                    });
-                    						}
-                    					});
-                    				});
-                        		}
-                        		
-                        	});
-                        	
-                    });
-                }).then(function () {
-                    console.log ("Transaction committed");
-                });
-            });
-        });
+					});
+					console.log("Added "+counteradd+" events");
 
 
-    db.open()
-    	.then(function(){
-    		initJSONdata();
-    		loadComparison();
-    	}).catch(function (error) {
-    		console.error(error.stack || error);
-    });
-	
+					db.localevents
+					.orderBy('uuid')
+					.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
+					.uniqueKeys(function(uuids){
+						var requestjson = {};
+						if(uuids.length){
+							var myInit = {
+									method: 'post',
+									headers: {
+										'Accept': 'application/json, text/plain, */*',
+										'Content-Type': 'application/json'
+									},
+									body: encodeURI(JSON.stringify(uuids))
+							}
+
+							var myRequest = new Request('verify.php');
+
+							fetch(myRequest,myInit).then(function(response) {
+								console.log("Verification asked: "+response.ok);
+								return response.json();
+							}).then(function(result) {
+								console.log(result);
+								db.localevents
+									.where('uuid')
+									.noneOf(result)
+									.modify({type: 'personal'})
+									.then(function (movedCount) {
+										if(movedCount > 0){
+											console.log( "Moved " + movedCount + " events to personal");
+											initJSONdata();
+										}
+									}).catch(function(){
+										initJSONdata();
+									});
+							});
+						}
+
+					});
+
+				});
+			}).then(function () {
+				console.log ("Transaction committed");
+				initJSONdata();
+				loadComparison();
+			});
+		});
+	});
+
+
+	db.open()
+	.catch(function (error) {
+		console.error(error.stack || error);
+	});
+
 }
 
 /**
@@ -642,7 +636,7 @@ function initIndexedDB(){
 function computeFromIDB(){
 	console.log("execute computeFromIDB");
 	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
-	
+
 	var data = new Array();
 	db.transaction('r', db.events, db.localevents, function(){
 		event_ids.forEach(function(event_id, index){
@@ -653,13 +647,13 @@ function computeFromIDB(){
 					item.id = 0-item.id;
 					data[index] = item;
 				}).catch (function (error) {
-				    console.error ("Error while getting event from DB: " + error);
+					console.error ("Error while getting event from DB: " + error);
 				});
 			} else {
 				db.events.get(id).then(function(item){
 					data[index] = item;
 				}).catch (function (error) {
-				    console.error ("Error while getting event from DB: " + error);
+					console.error ("Error while getting event from DB: " + error);
 				});
 			}
 		});
@@ -676,12 +670,12 @@ function computeFromIDB(){
 function populateIDB(data){
 	if (data.length != 2) return;
 	console.log("execute populateIDB");
-	
+
 	var header = $('#timeline-header');
 	var header_h3 = $('#timeline-header h3');
 	var permalink = $('#permalink');
 	var sharing = $('#sharing');
-	
+
 	var start_date = $('#timeline-marker-start .date');
 	var start_description = $('#timeline-marker-start .timeline-marker-description');
 	var start_icon = $('#timeline-marker-icon-start');
@@ -708,12 +702,12 @@ function populateIDB(data){
 	result.end = {};
 	var bol_years_only = true;
 	var datenow = moment();
-	
+
 	var total_span;
 	var first_span;
 	var second_span;
 	var percentage;
-	
+
 	var year_0;
 	var year_1;
 
@@ -722,13 +716,13 @@ function populateIDB(data){
 		bol_years_only = true;
 
 		var datetime = new Array(2);
-		
+
 		datetime[0] = moment().year(data[0].year);
-		
+
 		datetime[1] = moment().year(data[1].year);
-		
+
 		datenow = moment();
-		
+
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
 			data.reverse();
@@ -741,10 +735,10 @@ function populateIDB(data){
 		second_span = Math.abs(datenow.diff(datetime[1], 'years'));
 
 		percentage = 100*first_span/total_span;
-		
+
 		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
 		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
-		
+
 		result.start.date = year_0;
 		result.middle.date = year_1;
 		result.now_date = datenow.year();
@@ -755,11 +749,11 @@ function populateIDB(data){
 		bol_years_only = false;
 
 		var datetime = new Array(2);
-		
+
 		datetime[0] = moment().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day);
-		
+
 		datetime[1] = moment().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day);
-		
+
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
 			data.reverse();
@@ -773,12 +767,12 @@ function populateIDB(data){
 
 		percentage = 100*first_span/total_span;
 
-		
+
 		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
 		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
-				
+
 		var format = 'MMMM D';
-		
+
 		result.start.date = datetime[0].format(format)+', '+year_0;
 		result.middle.date = datetime[1].format(format)+', '+year_1;
 		result.now_date = datenow.format(format+', Y');
@@ -842,7 +836,7 @@ function populateIDB(data){
 	middle_date.html(result.middle.date);
 	middle_description.html(result.middle.description);
 	// chooser_event_two.typeahead('val', result.middle.description);
-	
+
 
 	end_date.html(result.now_date);
 
@@ -855,7 +849,7 @@ function populateIDB(data){
 
 	start_icon.removeClass().addClass('timeline-marker-icon '+result.start.category_icon);
 	middle_icon.removeClass().addClass('timeline-marker-icon '+result.middle.category_icon);
-	
+
 	if(chooser_event_one.typeahead('val') !== result.start.description){
 		var item = {};
 		item.id = result.start.id;
@@ -885,7 +879,7 @@ function populateIDB(data){
 function lcfirst (str) {
 	str += '';
 	var f = str.charAt(0)
-	    .toLowerCase();
+	.toLowerCase();
 	return f + str.substr(1);
 }
 
@@ -898,7 +892,7 @@ function lcfirst (str) {
 function ucfirst (str) {
 	str += '';
 	var f = str.charAt(0)
-	    .toUpperCase();
+	.toUpperCase();
 	return f + str.substr(1);
 }
 
@@ -908,11 +902,24 @@ function ucfirst (str) {
  * @returns a string containing the UUID
  */
 function generateUUID() {
-    var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-    });
-    return uuid;
+	var d = new Date().getTime();
+	var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = (d + Math.random()*16)%16 | 0;
+		d = Math.floor(d/16);
+		return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+	});
+	return uuid;
 };
+
+
+function showFlAlert(message, alert) {
+	var timeout = 4000;
+	var rand = moment().unix();
+	$('<div id="flalert-'+rand+'" class="alert alert-' + alert + ' fade in">\
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'
+			+ message + '&nbsp;&nbsp;</div>').appendTo('#floating_alert');
+
+	setTimeout(function () {
+		$(".alert").alert('close');
+	}, timeout);
+}

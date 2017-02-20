@@ -28,7 +28,7 @@ if($query){
 	$whr .= 'ORDER BY id ASC';
 }
 
-$sql = "SELECT * "
+$sql = "SELECT id, name, year, month, day, type, link, plural, uuid "
 		. "FROM events "
 		. "WHERE enabled <> 0 ".
 		$whr;

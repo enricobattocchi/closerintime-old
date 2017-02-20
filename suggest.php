@@ -12,8 +12,7 @@ if(!is_array($array)){
 	$array = array($array);
 }
 
-$suggestions = array();
-
+$result = array();
 if(count($array) > 0){
 	foreach ($array as $suggestion){
 		$name = $db->real_escape_string($suggestion->name);
@@ -23,20 +22,17 @@ if(count($array) > 0){
 		$uuid = $suggestion->uuid ? $db->real_escape_string($suggestion->uuid) : 'NULL';
 		$type = $suggestion->type ? $db->real_escape_string($suggestion->type) : 'NULL';
 	
-		$suggestions[] = "( '$name', $year, $month, $day, '$type', '0', '', '$uuid' )";
+		
+		$suggestions = "( '$name', $year, $month, $day, '$type', '0', '', '$uuid' )";
+		
+		$sql = "INSERT INTO events (`name`, `year`, `month`, `day`, `type`, `enabled`, `link`, `uuid`) VALUES " . $suggestions;
+		
+		$res = $db->query( $sql );
+		
+		if ( erli( $sql, $res, $db ) ) {
+			$result[] = $uuid;
+		}		
 	}
-}
-
-$result ='';
-
-$sql = "INSERT INTO events (`name`, `year`, `month`, `day`, `type`, `enabled`, `link`, `uuid`) VALUES "
-		. implode(' , ', $suggestions);
-
-$res = $db->query( $sql );
-if ( erli( $sql, $res, $db ) ) {
-	$result = 1;
-} else {
-	$result = 0;
 }
 
 echo json_encode($result);
