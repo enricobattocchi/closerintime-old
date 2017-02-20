@@ -1,8 +1,13 @@
 var event_ids = new Array();
 var event_objs = new Array();
+var eventsengine = null;
 var jsondata = null;
 var db = null;
 
+
+/**
+ * After the page has been loaded: initializations
+ */
 $(function(){
 	
 	initPopover();
@@ -15,7 +20,7 @@ $(function(){
 		$('#chooser-event-one').removeAttr('disabled');
 		$('#chooser-event-one').typeahead('val','');
 		$('#chooser-event-pre-one').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		$('#chooser-event-link-one').addClass('hide').off('click');
+		resetChooserButtons($('#chooser-event-one'));
 		event_ids[0] = null;
 		event_objs[0] = null;
 	});
@@ -24,7 +29,7 @@ $(function(){
 		$('#chooser-event-two').removeAttr('disabled');
 		$('#chooser-event-two').typeahead('val','');
 		$('#chooser-event-pre-two').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		$('#chooser-event-link-two').addClass('hide').off('click');
+		resetChooserButtons($('#chooser-event-two'));
 		event_ids[1] = null;
 		event_objs[1] = null;
 	});
@@ -35,15 +40,31 @@ $(function(){
 
 });
 
+/**
+ * Uses the DBs to populate the JSON array used to choose the events from
+ */
 function initJSONdata(){
 	db.events.toArray(function(array){
 		jsondata = array;
-		initTypeahead();
+	}).then(function(){
+		db.localevents.toArray(function(array){
+			array.forEach(function(item){
+				item.id = 0-item.id;
+			});
+			jsondata = jsondata.concat(array);
+		}).then(function(){
+			initTypeahead();
+		});
 	});
 	
 }
 
+/**
+ * Reads the hash part of the URL to fill the chooser input field and start the
+ * computation
+ */
 function loadComparison(){
+	console.log("execute loadComparison");
 	var hashpars = window.location.hash.substr(1);
 	if(hashpars){
 		var pars = hashpars.split('/');
@@ -57,28 +78,23 @@ function loadComparison(){
 			db.events.get(event_ids[0])
 			.then(function(data){
 				var chooser_event_one = $('#chooser-event-one');
-				if(chooser_event_one.typeahead('val') !== data.name+' – '+data.year){
-					chooser_event_one.attr('disabled', 'disabled').typeahead('val',data.name+' – '+data.year);
-					chooser_event_one.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(data.type).attr('data-content', data.type);
-					if(data.link){
-						chooser_event_one.closest('.input-group').find('.chooser-link').removeClass('hide').click(data,function(event){
-							window.open(event.data.link);				
-						});
-					} else{
-						chooser_event_one.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
-					}
-				}
+				setNameEtc(chooser_event_one, data, 0);
 			}).catch(function (e) {
 			    console.log(e.toString());
 			    var chooser_event_one = $('#chooser-event-one');
 			    chooser_event_one.removeAttr('disabled').typeahead('val','');
+			    resetChooserButtons(chooser_event_one);
 			});
 		}
 	}
 }
 
-function initTypeahead(){
-	var events = new Bloodhound({
+
+/**
+ * initializes the event search engine
+ */
+function initEventEngine(){
+	eventsengine = new Bloodhound({
   		datumTokenizer: function(d) {
   			var datumstrings = Bloodhound.tokenizers.whitespace(d.name.replace('"','')+' '+d.year+' '+d.type);
   			datumstrings.push(d.name);
@@ -90,12 +106,20 @@ function initTypeahead(){
   	    }, 
   		local: jsondata
 	});
+}
+
+
+/**
+ * initializes the typeahead fields
+ */
+function initTypeahead(){
+	initEventEngine();
 
 	$('#chooser .typeahead').typeahead({
 		minLength: 3,
 		}, {
-		name: 'events',
-		/*display: 'name',*/
+		name: 'eventsengine',
+		/* display: 'name', */
 		display: function(data){
 			var string = data.name;
 			var year = data.year;
@@ -106,14 +130,19 @@ function initTypeahead(){
 			},
 		limit: 40,
 		source: function(query, syncResults){
-			events.search(query,function(suggestions){
+			eventsengine.search(query,function(suggestions){
 					syncResults(filterselected(suggestions));
 				});
 		},
 		templates: {
     		notFound: [
       		'<div class="empty-message">',
-        		'<i class="fa fa-exclamation-triangle"></i> Unable to find any matches. <a href="javascript:opensuggest();">Want to send a suggestion?</a>',
+        		'<i class="fa fa-exclamation-triangle"></i> Unable to find any matches. <a href="" data-toggle="modal" data-target="#suggest">Want to add an event?</a>',
+      		'</div>'
+    		].join('\n'),
+    		footer: [
+      		'<div class="empty-message">',
+        		'<i class="fa fa-pencil"></i> <a href="" data-toggle="modal" data-target="#suggest">Add an event</a>',
       		'</div>'
     		].join('\n'),
     		suggestion: function(data){
@@ -121,38 +150,64 @@ function initTypeahead(){
     			if(data.year < 0){
     				year = Math.abs(data.year)+ ' B.C.';
     			}
-    			return '<div><i class="fa '+data.type+'"></i> <strong>'+data.name+'</strong> – '+year+'</div>';}
+    			return '<div><i class="fa '+data.type+'"></i> <strong>'+ucfirst(data.name)+'</strong> – '+year+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
 		var index = $('#chooser input[id^="chooser-"]').index(this);
 		event_ids[index] = obj.id;
-		event_objs[index] = obj;
+		setNameEtc($(this), obj, index);
+		// computeFromIDB();
 		updateHashFromIDS();
-		$(this).closest('.input-group').find('.chooser-event-pre').addClass(obj.type).attr('data-content', obj.type);
-		if(obj.link){
-			$(this).closest('.input-group').find('.chooser-link').removeClass('hide').click(obj,function(event){
-				window.open(event.data.link);				
-			});
-		} else{
-			$(this).closest('.input-group').find('.chooser-link').addClass('hide').off('click');
-		}
-		$(this).blur();
-		$(this).attr('disabled','disabled');
-		//computeFromIDB();	
 	}).on('typeahead:render', function(){
 		if(!$(this).typeahead('val')){
 				var index = $('#chooser input[id^="chooser-"]').index(this);
 				event_ids[index] = '';
 		}			
-	}).typeahead('val', '');	
+	}).typeahead('val', '').removeAttr('disabled');	
 }
 
+
+/**
+ * Hides the buttons and unsets click events for a given chooser field
+ * 
+ * @param field
+ */
+function resetChooserButtons(field){
+	field.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
+	field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id').removeAttr('data-frominput');
+	field.closest('.input-group').find('.chooser-event-pre').attr('data-content', '').removeClass().addClass('chooser-event-pre');
+	field.removeAttr('disabled');
+}
+
+/**
+ * reads the event_ids array and updates the url with the IDs in the hash part
+ */
 function updateHashFromIDS(){
+	console.log("execute updateHashFromIDS");
 	var url = window.location.href.split('#');
-	window.location.href = url[0] + '#'+(event_ids[0]?event_ids[0]:'')+'/'+(event_ids[1]?event_ids[1]:'');
+	var href = url[0] + '#';
+	if( event_ids[0] > 0 && event_ids[1] > 0){
+		href = href + event_ids[0] + '/' + event_ids[1];
+		if( window.location.href != href ){
+			window.location.href = href;
+		}
+	} else {
+		if( window.location.href != href ){
+			window.location.href = href;
+		}
+		computeFromIDB();
+	}
+	
 }
 
 
+/**
+ * service function for the typeahead engine lets it use only the name of the
+ * event, not the year part
+ * 
+ * @param str
+ * @returns array of tokens from the string
+ */
 function whitespacelesshyphen(str) {
     str = (typeof str === "undefined" || str === null) ? "" : str + "";
     str = str.split('–');
@@ -160,6 +215,13 @@ function whitespacelesshyphen(str) {
     return str ? str.split(/\s+/) : [];
 }
 
+ /**
+	 * filters the typeahead suggestions so they don't show the already choosen
+	 * event
+	 * 
+	 * @param suggestions
+	 * @returns {Array}
+	 */
 function filterselected(suggestions){
 	var filtered = new Array();
 	if(suggestions.length > 0){
@@ -172,55 +234,154 @@ function filterselected(suggestions){
 	return filtered;
 }
 
+/**
+ * initializes the popovers
+ */
 function initPopover(){
 	$('[data-toggle="popover"]').popover();	
 }
 
+/**
+ * initalizes the suggestion form
+ */
+/**
+ * 
+ */
 function initSuggestionForm(){
-	$('input[name="name"]').val('');
-	$('input[name="year"]').val('');
-	$('select[name="month"]').val('').attr('disabled', 'disabled');
-	$('select[name="day"]').val('').attr('disabled', 'disabled');
 	
-    $('form[data-async]').on('submit', function(event) {
+	resetSuggestionForm();
+	
+	$('#suggest').on('show.bs.modal', function (event) {
+		var modal = $(this);
+		var origin = $(event.relatedTarget); // what user clicked to show the
+												// modal
+		
+		// if the edit button was used
+		var id = parseInt(origin.attr('data-id'));
+		var frominput = parseInt(origin.attr('data-frominput'));
+		
+		var input = null;
+		if(frominput !== 0 || frominput !== 1 ){ // if the link in suggestions was used
+			input = origin.closest('.input-group').find('input[id^="chooser-"]'); // get the input
+			frominput = $('#chooser input[id^="chooser-"]').index(input); // get the input
+		}		
+		modal.find('input[name="frominput"]').val(frominput);
+		if(id < 0){
+			id = Math.abs(id);
+		}
+		if( id ){
+			modal.find('input[name="id"]').val(id);
+			db.localevents.get(id).then(function(item){
+				$('input[name="uuid"]').val(item.uuid);
+				$('input[name="name"]').val(item.name);
+				$('input[name="year"]').val(item.year).change();
+				$('select[name="month"]').val(item.month).change();
+				$('select[name="day"]').val(item.day);
+				$('input[name="plural[]"]').filter('[value="'+item.plural+'"]').attr('checked','checked');
+				$('#suggestions-delete').removeClass('hide');
+				$('#type-group').addClass('hide');
+			}).catch(function(){
+				console.log('Could not retrieve the event');
+				event.stopPropagation();
+			});
+		}
+	}).on('hidden.bs.modal',function (event){
+		resetSuggestionForm();
+	});
+	
+	
+	$('#suggestions-delete').on('click', function(event) {
+		if($('input[name="id"]').val()){
+			var id = parseInt($('input[name="id"]').val());
+			var frominput = parseInt($('input[name="frominput"]').val());
+			db.localevents.delete(id).then(function(){
+				id = 0-id;
+			    jsondata = jsondata.filter(function(obj){ return id !== parseInt(obj.id); });
+			    initEventEngine();
+			    $('#chooser input[id^="chooser-"]').eq(frominput).typeahead('val','');
+			    resetChooserButtons($('#chooser input[id^="chooser-"]').eq(frominput));
+			});
+		}
+		$('#suggest').modal('hide');
+	});
+	
+	
+    $('#suggestions-save').on('click', function(event) {
         var $form = $(this);
         var $target = $($form.attr('data-target'));
-
+		var frominput = parseInt($('input[name="frominput"]').val());
+		
         if($('input[name="name"]').val() && $('input[name="year"]').val()){
 
         	$form.serialize();
         	var item = {};
+        	var id = null;
+        	if($('input[name="id"]').val()){
+        		id = parseInt($('input[name="id"]').val());
+        	} else {
+        		item.uuid = generateUUID();
+        	}
         	item.name = $('input[name="name"]').val();
         	item.year = $('input[name="year"]').val();
         	item.month = $('select[name="month"]').val();
         	item.day = $('select[name="day"]').val();
-        	
-            if (navigator.serviceWorker) {
-            	navigator.serviceWorker.ready.then(function(reg){            		                
-	            	db.suggestions.add(item).then(function(){
+        	item.plural = $('input[name="plural[]"]:checked').val();
+        	// item.capitalize_first = 0;
+        	item.type = $('input[name="type"]:checked').val();
+        	        		
+    		if(id){
+    			db.localevents.update(id, item).then(function(updated){
+    				if (updated){
+    				    console.log ("Item updated");
+    				    item.id = 0-id;
+    				    jsondata = jsondata.filter(function(obj){ return item.id !== parseInt(obj.id); });
+    				    jsondata.push(item);
+    				    initEventEngine();
 	            		$target.html('Suggestion successfully stored.');
-	                	$('input[name="name"]').val('');
-	                	$('input[name="year"]').val('');
-	                	$('select[name="month"]').val('').attr('disabled', 'disabled');
-	                	$('select[name="day"]').val('').attr('disabled', 'disabled');
-	            	});    
-	
-	                if (reg.sync && reg.sync.getTags) {
-	                  reg.sync.register('suggestions');
-	                }
-	                else {
-	                  reg.active.postMessage('pushSuggestions');
-	                }
-            	});
-            } else {
-            	pushSuggestions(item);
-            }	
-	
+	                    console.log('Setting up the name etc.');
+	                    setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
+	                    event_ids[frominput] = item.id;
+	                    computeFromIDB();
+    				} else {
+    				    console.log ("Nothing was updated");
+    				}
+    			});
+    		} else {
+            	db.localevents.add(item).then(function(newid){
+            		console.log ("Item added");
+            		item.id = 0-newid;
+            		jsondata.push(item);
+            		initEventEngine();	            		
+            		$target.html('Suggestion successfully stored.');
+            		
+                    if (navigator.serviceWorker) {
+                    	navigator.serviceWorker.ready.then(function(reg){    
+    		                if (reg.sync && reg.sync.getTags) {
+    		                  reg.sync.register('suggestions');
+    		                }
+    		                else {
+    		                  reg.active.postMessage('pushSuggestions');
+    		                }                
+    	            	});
+                    } else {
+                    	pushSuggestions(item);
+                    }            		
+            		
+                    console.log('Setting up the name etc.');
+                    setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
+                    event_ids[frominput] = item.id;
+                    computeFromIDB();
+            	});    
+
+    		}
+            		
+            $('#suggest').modal('hide');
 		} else {
 			$target.html("You must fill at least the event name and year");
 		}
 
         event.preventDefault();
+        
 	});	
     
     
@@ -254,6 +415,55 @@ function initSuggestionForm(){
     });
 }
 
+
+/**
+ * Sets name, link, icon, buttons for a given chooser field
+ * 
+ * @param field
+ * @param item
+ * @param index
+ */
+function setNameEtc(field, item, index){
+    resetChooserButtons(field);
+	field.typeahead('val',ucfirst(item.name) + ' – ' + item.year);
+    event_ids[index] = item.id;
+    field.closest('.input-group').find('.chooser-event-pre').addClass(item.type).attr('data-content', item.type);
+	if(item.link){
+		field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
+			window.open(event.data.link);				
+		});
+	}
+	if(item.id < 0  && item.type != 'submitted'){
+		field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id).attr('data-frominput', index);
+	}
+	field.blur();
+	field.attr('disabled','disabled');
+}
+
+/**
+ * resets all the fields of the suggestion form
+ */
+function resetSuggestionForm(){
+	$('input[name="id"]').val('');
+	$('input[name="uuid"]').val('');
+	$('input[name="name"]').val('');
+	$('input[name="year"]').val('');
+	$('select[name="month"]').val('').attr('disabled', 'disabled');
+	$('select[name="day"]').val('').attr('disabled', 'disabled');
+	$('#type-submitted').prop('checked', false);
+	$('#type-personal').prop('checked', true);
+	$('#plural').prop('checked', false);
+	$('#singular').prop('checked', true);
+	$('#type-group').removeClass('hide');
+	$('#suggestions-delete').addClass('hide');
+}
+
+/**
+ * submits the suggestions to the server to be included in the global list of
+ * events
+ * 
+ * @param data
+ */
 function pushSuggestions(data){
 	var myInit = {
 				method: 'post',
@@ -271,28 +481,20 @@ function pushSuggestions(data){
 		return response.json();
 	}).then(function(result) {
 		if(result == 1){
-			suggestions.clear();
+			db.localevents
+			.where(':id')
+			.equals(data.id)
+			.modify({sent: 1});
     		$target.html('Suggestion successfully sent.');
-        	$('input[name="name"]').val('');
-        	$('input[name="year"]').val('');
-        	$('select[name="month"]').val('');
-        	$('select[name="day"]').val('');
+    		resetSuggestionForm();
 		}
 	});	
 }
 
-function opensuggest(){
-	$('#suggest').removeClass('hide');
-	$('input[name="name"]').focus();
-}
 
-function closesuggest(){
-	var form = $('#suggest form');
-	form.find('input[type="text"], select').val('').blur();
-	$(form.attr('data-target')).html('');
-	$('#suggest').addClass('hide');
-}
-
+/**
+ * initializes the IndexedDB (using Dexie library) with data from the server
+ */
 function initIndexedDB(){
 	db = new Dexie("closerintime");
 
@@ -304,6 +506,32 @@ function initIndexedDB(){
 	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
 	    suggestions: "++id, name, year, month, day"
 	});
+	
+	
+	db.version(12).stores({
+	    events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link, uuid",
+	    myevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, uuid"
+	});
+	
+	db.version(13).stores({
+	   suggestions: null
+	});
+	
+	db.version(14).stores({
+	    myevents: null,
+		personalevents: "id, &name, year, month, day, type, plural, sent, capitalize_first, link, &uuid"
+	});
+	
+	db.version(15).stores({
+	    personalevents: null,
+		localevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, &uuid"
+	});
+	
+	db.version(16).stores({
+		events: "id, &name, year, month, day, type, plural, enabled, link, &uuid",
+		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
+	});
+	
 	
 	db.on('ready', function () {
         return db.events.clear()
@@ -324,16 +552,30 @@ function initIndexedDB(){
                     });
                 }).then(function (data) {
                     console.log("Got ajax response. We'll now add the objects.");
-                    // By returning the db.transaction() promise, framework will keep
-                    // waiting for this transaction to commit before resuming other
+                    // By returning the db.transaction() promise, framework will
+					// keep
+                    // waiting for this transaction to commit before resuming
+					// other
                     // db-operations.
-                    return db.transaction('rw', db.events, function () {
-                    	var counter = 0;
+                    return db.transaction('rw', db.events, db.localevents, function () {
+                    	var counteradd = 0;
+                    	var counterdel = 0;
                         data.forEach(function (item) {
                             db.events.add(item);
-                            counter++;
+                            counteradd++;
+                            
+                            db.localevents
+                            	.where('uuid')
+                            	.equals(item.uuid)
+                            	.delete()
+                            	.then(function (deleteCount) {
+                            		if(deleteCount > 0){
+                            			console.log( "Deleted " + deleteCount + " events");
+                            		}
+                                });
+                            
                         });
-                        console.log("Added "+counter+" events");
+                        console.log("Added "+counteradd+" events");
                     });
                 }).then(function () {
                     console.log ("Transaction committed");
@@ -352,19 +594,46 @@ function initIndexedDB(){
 	
 }
 
+/**
+ * reads the events from the DB and starts the computation
+ */
 function computeFromIDB(){
+	console.log("execute computeFromIDB");
 	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
 	
-	db.events.where('id').
-		anyOf(event_ids[0],event_ids[1])
-		.toArray()
-		.then(function(data){
-			populateIDB(data);
+	var data = new Array();
+	db.transaction('r', db.events, db.localevents, function(){
+		event_ids.forEach(function(event_id, index){
+			var id = event_id;
+			if(event_id < 0){
+				id = Math.abs(event_id);
+				db.localevents.get(id).then(function(item){
+					item.id = 0-item.id;
+					data[index] = item;
+				}).catch (function (error) {
+				    console.error ("Error while getting event from DB: " + error);
+				});
+			} else {
+				db.events.get(id).then(function(item){
+					data[index] = item;
+				}).catch (function (error) {
+				    console.error ("Error while getting event from DB: " + error);
+				});
+			}
 		});
+	}).then(function(result){
+		populateIDB(data);
+	});
 }
 
+/**
+ * Compares the data and populates the diagram
+ * 
+ * @param data
+ */
 function populateIDB(data){
 	if (data.length != 2) return;
+	console.log("execute populateIDB");
 	
 	var header = $('#timeline-header');
 	var header_h3 = $('#timeline-header h3');
@@ -402,6 +671,9 @@ function populateIDB(data){
 	var first_span;
 	var second_span;
 	var percentage;
+	
+	var year_0;
+	var year_1;
 
 	if(!data[0].month || !data[1].month){
 		// let's use only the years
@@ -413,10 +685,13 @@ function populateIDB(data){
 		
 		datetime[1] = moment().year(data[1].year);
 		
+		datenow = moment();
+		
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
 			data.reverse();
 			datetime.reverse();
+			event_ids.reverse();
 		}
 
 		total_span = Math.abs(datenow.diff(datetime[0], 'years'));
@@ -447,6 +722,7 @@ function populateIDB(data){
 		if(datetime[1].isBefore(datetime[0])){
 			data.reverse();
 			datetime.reverse();
+			event_ids.reverse();
 		}
 
 		total_span = Math.abs(datenow.diff(datetime[0], 'days'));
@@ -469,20 +745,28 @@ function populateIDB(data){
 		result.timeline_2 = second_span + ' days';
 	}
 
-	result.start.id = data[0]['id'];
-	result.start.description = data[0].name;
+	result.start.id = data[0].id;
+	result.start.description = ucfirst(data[0].name);
 	result.start.category_icon = data[0].type;
 	result.start.size = percentage+"%";
 	result.start.link = data[0].link;
 
 	result.middle.id = data[1].id;
-	result.middle.description = data[1].name;
+	result.middle.description = ucfirst(data[1].name);
 	result.middle.category_icon = data[1].type;
 	result.middle.size = (100-percentage)+"%";
 	result.middle.verb = (data[1].plural == 1)? 'are' : 'is' ;
 	result.middle.link = data[1].link;
 
-	second_term_of_comparison = (data[0].capitalize_first == 1)? result.start.description : lcfirst(result.start.description);
+	// second_term_of_comparison = (data[0].capitalize_first == 1)?
+	// result.start.description : lcfirst(result.start.description);
+	var second_term_of_comparison = data[0].name;
+	/*
+	 * var words = second_term_of_comparison.split(' ');
+	 * if(words[0].toLowerCase() == 'the' || words[0].toLowerCase() == 'my' ||
+	 * words[0].toLowerCase() == 'our'){ second_term_of_comparison =
+	 * lcfirst(result.start.description); }
+	 */
 
 
 	if(percentage > 50){
@@ -498,19 +782,24 @@ function populateIDB(data){
 
 	header_h3.html(result.header);
 	document.title = result.title;
-	permalink.attr('href', '#'+result.start.id+'/'+result.middle.id);
 	var url = window.location.href.split('#');
-	window.location.href = url[0] + '#'+result.start.id+'/'+result.middle.id;
-	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(window.location.href)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>');
+	if(result.start.id>0 && result.middle.id>0){
+		permalink.attr('href', '#'+result.start.id+'/'+result.middle.id);
+		url = url[0] + '#'+result.start.id+'/'+result.middle.id;
+	} else {
+		permalink.attr('href', '#');
+		url = url[0];
+	}
+	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>');
 
 	start_date.html(result.start.date);
 	start_description.html(result.start.description);
-	//chooser_event_one.typeahead('val', result.start.description);
+	// chooser_event_one.typeahead('val', result.start.description);
 
 
 	middle_date.html(result.middle.date);
 	middle_description.html(result.middle.description);
-	//chooser_event_two.typeahead('val', result.middle.description);
+	// chooser_event_two.typeahead('val', result.middle.description);
 	
 
 	end_date.html(result.now_date);
@@ -526,32 +815,62 @@ function populateIDB(data){
 	middle_icon.removeClass().addClass('timeline-marker-icon '+result.middle.category_icon);
 	
 	if(chooser_event_one.typeahead('val') !== result.start.description){
-		chooser_event_one.attr('disabled', 'disabled').typeahead('val',result.start.description+' – '+year_0);
-		chooser_event_one.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.start.category_icon).attr('data-content', result.start.category_icon);
-		if(result.start.link){
-			chooser_event_one.closest('.input-group').find('.chooser-link').removeClass('hide').click(result.start,function(event){
-				window.open(event.data.link);				
-			});
-		} else{
-			chooser_event_one.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
-		}
+		var item = {};
+		item.id = result.start.id;
+		item.name = result.start.description;
+		item.year = year_0;
+		item.type = result.start.category_icon;
+		item.link = result.start.link;
+		setNameEtc(chooser_event_one, item, 0);		
 	}
 	if(chooser_event_two.typeahead('val') !== result.middle.description){
-		chooser_event_two.attr('disabled', 'disabled').typeahead('val',result.middle.description+' – '+year_1);
-		chooser_event_two.closest('.input-group').find('.chooser-event-pre').removeClass().addClass('chooser-event-pre').addClass(result.middle.category_icon).attr('data-content', result.middle.category_icon);
-		if(result.middle.link){
-			chooser_event_two.closest('.input-group').find('.chooser-link').removeClass('hide').click(result.middle,function(event){
-				window.open(event.data.link);				
-			});
-		} else{
-			chooser_event_two.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
-		}
+		var item = {};
+		item.id = result.middle.id;
+		item.name = result.middle.description;
+		item.year = year_1;
+		item.type = result.middle.category_icon;
+		item.link = result.middle.link;
+		setNameEtc(chooser_event_two, item, 1);	
 	}
 }
 
+/**
+ * Uncapitalizes the first letter of a string
+ * 
+ * @param str
+ * @returns
+ */
 function lcfirst (str) {
 	str += '';
 	var f = str.charAt(0)
 	    .toLowerCase();
 	return f + str.substr(1);
 }
+
+/**
+ * Capitalizes the first letter of a string
+ * 
+ * @param str
+ * @returns
+ */
+function ucfirst (str) {
+	str += '';
+	var f = str.charAt(0)
+	    .toUpperCase();
+	return f + str.substr(1);
+}
+
+/**
+ * generates a UUID (v4)
+ * 
+ * @returns a string containing the UUID
+ */
+function generateUUID() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+};

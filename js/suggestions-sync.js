@@ -16,8 +16,10 @@ var suggestions;
 function pushSuggestionsSW(){
 	db = new Dexie("closerintime");
 	db.open().then(function(db){
-		suggestions = db.table('suggestions');
-		suggestions.toArray()
+		suggestions = db.table('localevents');
+		suggestions
+		.filter(function(item){return (item.type == 'submitted' && item.sent != 1);})
+		.toArray()
 		.then(function(data){		
 			if (data.length){
 				var myInit = {
@@ -36,8 +38,10 @@ function pushSuggestionsSW(){
 					return response.json();
 				}).then(function(result) {
 					if(result == 1){
-						console.log("Clearing suggestions");
-						suggestions.clear();
+						console.log("Marking suggestions as sent");
+						suggestions
+						.filter(function(item){return (item.type == 'submitted' && item.sent != 1);})
+						.modify({sent: 1});
 					}
 				});
 			}

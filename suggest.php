@@ -20,14 +20,16 @@ if(count($array) > 0){
 		$year = $db->real_escape_string($suggestion->year);
 		$month = $suggestion->month ? $db->real_escape_string($suggestion->month) : 'NULL';
 		$day = $suggestion->day ? $db->real_escape_string($suggestion->day) : 'NULL';
+		$uuid = $suggestion->uuid ? $db->real_escape_string($suggestion->uuid) : 'NULL';
+		$type = $suggestion->type ? $db->real_escape_string($suggestion->type) : 'NULL';
 	
-		$suggestions[] = "( '$name', $year, $month, $day, 'person', '0', '' )";
+		$suggestions[] = "( '$name', $year, $month, $day, '$type', '0', '', '$uuid' )";
 	}
 }
 
 $result ='';
 
-$sql = "INSERT INTO events (`name`, `year`, `month`, `day`, `type`, `enabled`, `link`) VALUES "
+$sql = "INSERT INTO events (`name`, `year`, `month`, `day`, `type`, `enabled`, `link`, `uuid`) VALUES "
 		. implode(' , ', $suggestions);
 
 $res = $db->query( $sql );

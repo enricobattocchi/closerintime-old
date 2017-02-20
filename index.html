@@ -1,221 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>	
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta property="og:title" content="#closerintime">
-	<meta property="og:site_name" content="#closerintime">
-	<meta property="og:url" content="https://closerinti.me">
-	<meta property="og:description" content="Timespan comparisons between historical events.">
-	<meta property="og:type" content="website">
-	<meta property="og:image" content="https://closerinti.me/img/closerintime-FB.png">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta property="og:title" content="#closerintime">
+<meta property="og:site_name" content="#closerintime">
+<meta property="og:url" content="https://closerinti.me">
+<meta property="og:description"
+	content="Timespan comparisons between historical events.">
+<meta property="og:type" content="website">
+<meta property="og:image"
+	content="https://closerinti.me/img/closerintime-FB.png">
 
-	<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
-	<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
-	<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
-	<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
-	<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
-	<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
-	<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/manifest.json">
-	<meta name="msapplication-TileColor" content="#ffffff">
-	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-	<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114"
+	href="/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120"
+	href="/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144"
+	href="/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152"
+	href="/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180"
+	href="/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"
+	href="/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32"
+	href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96"
+	href="/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16"
+	href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
 
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/typeahead.css"/>
-	<link rel="stylesheet" href="css/style.css"/>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/typeahead.css" />
+<link rel="stylesheet" href="css/style.css" />
 
-	<script src="js/jquery-3.1.1.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/typeahead.bundle.min.js"></script>
-	<script src="js/dexie.min.js"></script>
-	<script src="js/moment.min.js"></script>
-	<script src="js/script.js" async></script>
+<script src="js/jquery-3.1.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/typeahead.bundle.min.js"></script>
+<script src="js/dexie.min.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/script.js" async></script>
 
-	<title>#closerintime</title>
+<title>#closerintime</title>
 
-	<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+<script>
+	(function(i, s, o, g, r, a, m) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function() {
+			(i[r].q = i[r].q || []).push(arguments)
+		}, i[r].l = 1 * new Date();
+		a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore(a, m)
+	})(window, document, 'script',
+			'https://www.google-analytics.com/analytics.js', 'ga');
 
-  ga('create', 'UA-13108600-3', 'auto');
-  ga('send', 'pageview');
-
-	</script>
+	ga('create', 'UA-13108600-3', 'auto');
+	ga('send', 'pageview');
+</script>
 </head>
 <body>
-		<header id="main">
-			<h1><a href="https://closerinti.me" rel="bookmark">#closerintime</a></h1>
-		</header>
-		<section id="chooser">
-			<h2 id="chooser-header">
-					Pick two events <i class="fa fa-question-circle-o"	
- 							 	data-toggle="popover" 
-							 	data-trigger="hover focus"
-		 						data-html="true"
-  							 	data-content="Start typing to get suggestions. You can also search by year or by category, e.g.
+	<header id="main">
+		<h1>
+			<a href="https://closerinti.me" rel="bookmark">#closerintime</a>
+		</h1>
+	</header>
+	<section id="chooser">
+		<h2 id="chooser-header">
+			Pick two events <i class="fa fa-question-circle-o"
+				data-toggle="popover" data-trigger="hover focus" data-html="true"
+				data-content="Start typing to get suggestions. You can also search by year or by category, e.g.
   							 	<ul>
-  							 	<li><i class='fa fa-music'></i> music</li>
-  							 	<li><i class='fa fa-university'></i> history</li>
-  							 	<li><i class='fa fa-microchip'></i> computer</li>
-  							 	<li><i class='fa fa-paint-brush'></i> art</li>
-  							 	<li><i class='fa fa-film'></i> film</li>
-  							 	<li><i class='fa fa-building'></i> building</li>
-  							 	<li><i class='fa fa-flask'></i> science</li>
-  							 	<li><i class='fa fa-book'></i> book</li>
-  							 	<li><i class='fa fa-futbol-o'></i> sport</li>
+  							 	<li><i class='fa music'></i> music</li>
+  							 	<li><i class='fa history'></i> history</li>
+  							 	<li><i class='fa computer'></i> computer</li>
+  							 	<li><i class='fa art'></i> art</li>
+  							 	<li><i class='fa film'></i> film</li>
+  							 	<li><i class='fa building'></i> building</li>
+  							 	<li><i class='fa science'></i> science</li>
+  							 	<li><i class='fa book'></i> book</li>
+  							 	<li><i class='fa sport'></i> sport</li>
+  							 	<li><i class='fa personal'></i> personal</li>
+  							 	<li><i class='fa submitted'></i> submitted</li>
   							 	</ul>"
-  							 	data-placement="bottom"></i>
-			</h2>
-			<div class="container-fluid">
-				<div class="row">
-					<div class="col-md-6">
-						<label class="sr-only" for="chooser-event-one">Lookup an event</label>
-						<div class="input-group">
-							<span class="input-group-addon"><i id="chooser-event-pre-one" class="chooser-event-pre"></i></span>
-  							<input type="text" class="form-control typeahead" placeholder="Lookup an event" id="chooser-event-one" name="chooser-event-one" value=""/>
-							<span class="input-group-btn">
-        						<button class="btn btn-default hide chooser-link" id="chooser-event-link-one" type="button"><i class="fa fa-wikipedia-w"></i></button>
-        						<button class="btn btn-default" id="chooser-event-one-cancel" type="button"><i class="fa fa-close"></i></button>
-							</span>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<label class="sr-only" for="chooser-event-one">Lookup another event</label>
-						<div class="input-group">
-							<span class="input-group-addon"><i id="chooser-event-pre-two" class="chooser-event-pre"></i></span>
-  							<input type="text" class="form-control typeahead" placeholder="Lookup another event" id="chooser-event-two" value=""/>
-							<span class="input-group-btn">
-        						<button class="btn btn-default hide chooser-link" id="chooser-event-link-two" type="button"><i class="fa fa-wikipedia-w"></i></button>
-        						<button class="btn btn-default" id="chooser-event-two-cancel" type="button"><i class="fa fa-close"></i></button>
-							</span>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-		<section id="timeline-section">
-			<div id="timeline">
-				
-				<div id="timeline-marker-start" class="timeline-marker">
-					<div id="timeline-marker-icon-start"  class="timeline-marker-icon"></div>
-					<div class="timeline-marker-label">
-						<h5 class="date"></h5>
-						<div class="timeline-marker-description"></div>
+				data-placement="bottom"></i>
+		</h2>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-6">
+					<label class="sr-only" for="chooser-event-one">Lookup an
+						event</label>
+					<div class="input-group">
+						<span class="input-group-addon"><i
+							id="chooser-event-pre-one" class="chooser-event-pre"></i></span> <input
+							type="text" class="form-control typeahead"
+							placeholder="Lookup an event" id="chooser-event-one"
+							name="chooser-event-one" value="" /> <span
+							class="input-group-btn">
+							<button class="btn btn-default hide chooser-link"
+								id="chooser-event-link-one" type="button">
+								<i class="fa fa-wikipedia-w"></i>
+							</button>
+							<button class="btn btn-default hide chooser-edit"
+								id="chooser-event-edit-one" 
+								data-toggle="modal" data-target="#suggest"
+								type="button">
+								<i class="fa fa-pencil"></i>
+							</button>
+							<button class="btn btn-default" id="chooser-event-one-cancel"
+								type="button">
+								<i class="fa fa-close"></i>
+							</button>
+						</span>
 					</div>
 				</div>
-				<div id="timeline-part-one" class="timeline-part" style="width: 50%;">
-					<h6 class="timeline-part-label"></h6>
-				</div>
-				<div id="timeline-marker-middle" class="timeline-marker" style="left: 50%;">
-					<div class="timeline-marker-label">
-						<h5 class="date"></h5>
-						<div class="timeline-marker-description"></div>
-					</div>
-					<div id="timeline-marker-icon-middle" class="timeline-marker-icon"></div>
-				</div>
-				<div id="timeline-part-two" class="timeline-part"  style="width: 50%;">
-					<h6 class="timeline-part-label"></h6>
-				</div>
-				<div id="timeline-marker-end" class="timeline-marker">
-					<div id="timeline-marker-icon-end" class="timeline-marker-icon"></div>
-					<div class="timeline-marker-label">
-						<h5 class="date"></h5>
-						<div class="timeline-marker-description">Now</div>
+				<div class="col-md-6">
+					<label class="sr-only" for="chooser-event-one">Lookup
+						another event</label>
+					<div class="input-group">
+						<span class="input-group-addon"><i
+							id="chooser-event-pre-two" class="chooser-event-pre"></i></span> <input
+							type="text" class="form-control typeahead"
+							placeholder="Lookup another event" id="chooser-event-two"
+							value="" /> <span class="input-group-btn">
+							<button class="btn btn-default hide chooser-link"
+								id="chooser-event-link-two" type="button">
+								<i class="fa fa-wikipedia-w"></i>
+							</button>
+							<button class="btn btn-default hide chooser-edit"
+								id="chooser-event-edit-two" 
+								data-toggle="modal" data-target="#suggest"
+								type="button">
+								<i class="fa fa-pencil"></i>
+							</button>
+							<button class="btn btn-default" id="chooser-event-two-cancel"
+								type="button">
+								<i class="fa fa-close"></i>
+							</button>
+						</span>
 					</div>
 				</div>
 			</div>
-		</section>
-		<section id="timeline-header">
-			<a href="" id="permalink" rel="bookmark">
-				<h3>
-				</h3>
-			</a>
-			<div id="sharing"></div>
-		</section>
-		<section id="suggest" class="hide">
-			<form id="form-suggest" data-async data-target="#form-target" action="suggest.php" method="POST">
-				<a href="javascript:closesuggest();"><i class="fa fa-close" id="close-suggest"></i></a>
-		   		<h3>Suggest an event</h3>
-	   			<label class="sr-only" for="name">Event name</label>
-      			<input type="text" class="form-control" name="name" placeholder="Event name"/>
-      			<label class="sr-only" for="year">Year</label>
-      			<input type="number" class="form-control" name="year" min="-3000" max="2016" placeholder="Year"/>
-      			<label class="sr-only" for="month">Month</label>
-      			<select name="month" placeholder="Month" disabled="disabled">
-      				<option value="">Month</option>
-      				<option value="01">January</option>
-      				<option value="02">February</option>
-      				<option value="03">March</option>
-      				<option value="04">April</option>
-      				<option value="05">May</option>
-      				<option value="06">June</option>
-      				<option value="07">July</option>
-      				<option value="08">August</option>
-      				<option value="09">September</option>
-      				<option value="10">October</option>
-      				<option value="11">November</option>
-      				<option value="12">December</option>
-      			</select>
-      			<label class="sr-only" for="day">Day</label>
-				<select name="day" placeholder="Day" disabled="disabled">
-      				<option value="">Day</option>
-      				<option value="01">1</option>
-      				<option value="02">2</option>
-      				<option value="03">3</option>
-      				<option value="04">4</option>
-      				<option value="05">5</option>
-      				<option value="06">6</option>
-      				<option value="07">7</option>
-      				<option value="08">8</option>
-      				<option value="09">9</option>
-      				<option value="10">10</option>
-    				<option value="11">11</option>
-      				<option value="12">12</option>
-      				<option value="13">13</option>
-      				<option value="14">14</option>
-      				<option value="15">15</option>
-      				<option value="16">16</option>
-      				<option value="17">17</option>
-      				<option value="18">18</option>
-      				<option value="19">19</option>
-      				<option value="20">20</option>
-      				<option value="21">21</option>
-      				<option value="22">22</option>
-      				<option value="23">23</option>
-      				<option value="24">24</option>
-      				<option value="25">25</option>
-      				<option value="26">26</option>
-      				<option value="27">27</option>
-      				<option value="28">28</option>
-      				<option value="29">29</option>
-      				<option value="30">30</option>
-      				<option value="31">31</option>
-      			</select>
-      			<button type="submit" class="btn btn-default">Send</button>
-      			<h3 id="form-target"></h3>
-			</form>
-		</section>
-		<footer>
-			<section class="right">
-				A progressive web app from <a href="https://lopo.it" rel="author noopener" target="_blank">Lopo.it</a>
-				- v1.0
-				- <a href="https://github.com/enricobattocchi/closerintime" rel="author noopener" target="_blank">Github</a>
-		 		- <a href="#" data-toggle="popover" 
-					data-trigger="focus"
-					data-html="true"
-					title="Credits"
-					data-content="<ul>
+		</div>
+	</section>
+	<section id="timeline-section">
+		<div id="timeline">
+
+			<div id="timeline-marker-start" class="timeline-marker">
+				<div id="timeline-marker-icon-start" class="timeline-marker-icon"></div>
+				<div class="timeline-marker-label">
+					<h5 class="date"></h5>
+					<div class="timeline-marker-description"></div>
+				</div>
+			</div>
+			<div id="timeline-part-one" class="timeline-part" style="width: 50%;">
+				<h6 class="timeline-part-label"></h6>
+			</div>
+			<div id="timeline-marker-middle" class="timeline-marker"
+				style="left: 50%;">
+				<div class="timeline-marker-label">
+					<h5 class="date"></h5>
+					<div class="timeline-marker-description"></div>
+				</div>
+				<div id="timeline-marker-icon-middle" class="timeline-marker-icon"></div>
+			</div>
+			<div id="timeline-part-two" class="timeline-part" style="width: 50%;">
+				<h6 class="timeline-part-label"></h6>
+			</div>
+			<div id="timeline-marker-end" class="timeline-marker">
+				<div id="timeline-marker-icon-end" class="timeline-marker-icon"></div>
+				<div class="timeline-marker-label">
+					<h5 class="date"></h5>
+					<div class="timeline-marker-description">Now</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section id="timeline-header">
+		<a href="" id="permalink" rel="bookmark">
+			<h3></h3>
+		</a>
+		<div id="sharing"></div>
+	</section>
+
+	<div class="modal fade" id="suggest" tabindex="-1" role="dialog"
+		aria-labelledby="Suggestion Form">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h3 class="modal-title" id="suggest-label">Add/edit an event</h3>
+				</div>
+				<div class="modal-body">
+					<form id="form-suggest" data-async data-target="#form-target"
+						action="suggest.php" method="POST">
+						<input type="hidden" name="id" value=""/>
+						<input type="hidden" name="uuid" value=""/>
+						<input type="hidden" name="frominput" value=""/>
+						<div data-toggle="buttons" id="type-group" class="btn-group btn-group-justified">
+							<label class="btn btn-primary active"> <input
+								type="radio" name="type" autocomplete="off" id="type-personal" value="personal"
+								 checked="checked"><i class="fa personal"></i> Personal
+							</label>
+							<label class="btn btn-primary"> <input
+								type="radio" name="type" autocomplete="off" id="type-submitted" value="submitted"><i class="fa submitted"></i> Suggestion
+							</label>
+						</div>
+						<label class="sr-only" for="name">Event name</label> <input
+							type="text" class="form-control" name="name"
+							placeholder="Event name" /> <label class="sr-only" for="year">Year</label>
+						<input type="number" class="form-control" name="year" min="-3000"
+							max="2016" placeholder="Year" />
+							<label class="sr-only"
+							for="month">Month</label> <select name="month"
+							placeholder="Month" disabled="disabled">
+							<option value="">Month</option>
+							<option value="01">January</option>
+							<option value="02">February</option>
+							<option value="03">March</option>
+							<option value="04">April</option>
+							<option value="05">May</option>
+							<option value="06">June</option>
+							<option value="07">July</option>
+							<option value="08">August</option>
+							<option value="09">September</option>
+							<option value="10">October</option>
+							<option value="11">November</option>
+							<option value="12">December</option>
+						</select> <label class="sr-only" for="day">Day</label> <select name="day"
+							placeholder="Day" disabled="disabled">
+							<option value="">Day</option>
+							<option value="01">1</option>
+							<option value="02">2</option>
+							<option value="03">3</option>
+							<option value="04">4</option>
+							<option value="05">5</option>
+							<option value="06">6</option>
+							<option value="07">7</option>
+							<option value="08">8</option>
+							<option value="09">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+							<option value="15">15</option>
+							<option value="16">16</option>
+							<option value="17">17</option>
+							<option value="18">18</option>
+							<option value="19">19</option>
+							<option value="20">20</option>
+							<option value="21">21</option>
+							<option value="22">22</option>
+							<option value="23">23</option>
+							<option value="24">24</option>
+							<option value="25">25</option>
+							<option value="26">26</option>
+							<option value="27">27</option>
+							<option value="28">28</option>
+							<option value="29">29</option>
+							<option value="30">30</option>
+							<option value="31">31</option>
+						</select>
+						<div class="btn-group" id="plural-group" data-toggle="buttons">
+  							<label class="btn btn-primary active">
+    							<input type="radio" name="plural[]" id="singular" autocomplete="off" value="0" checked="checked"> is
+  							</label>
+  							<label class="btn btn-primary">
+								<input type="radio" name="plural[]" id="plural" autocomplete="off" value="1"> are
+							</label>&nbsp; closer in time…
+						</div>
+						<h3 id="form-target"></h3>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary hide" id="suggestions-delete">Delete</button>
+					<button type="button" class="btn btn-primary" id="suggestions-save">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer>
+		<section class="right">
+			A progressive web app from <a href="https://lopo.it"
+				rel="author noopener" target="_blank">Lopo.it</a> - v1.5 - <a
+				href="https://github.com/enricobattocchi/closerintime"
+				rel="author noopener" target="_blank">Github</a> - <a href="#"
+				data-toggle="popover" data-trigger="click focus" data-html="true"
+				title="Credits"
+				data-content="<ul>
 						<li><a href='https://jquery.com/' rel='external noopener' target='_blank'>jQuery</a></li>
 						<li><a href='http://getbootstrap.com/' rel='external noopener' target='_blank'>Bootstrap</a></li>
 						<li><a href='http://fontawesome.io/' rel='external noopener' target='_blank'>Font Awesome</a></li>
@@ -225,10 +312,10 @@
 						<li><a href='https://github.com/GoogleChrome/sw-precache' rel='external noopener' target='_blank'>sw-precache</a></li>
 						<li><a href='http://www.dafont.com/it/comfortaa.font' rel='external noopener' target='_blank'>Comfortaa</a></li>				
 						</ul>"
-					data-placement="top">Credits</a>
-				 - <a href="https://paypal.me/lopo" rel="external noopener" target="_blank">Donate</a>
-			</section>
-		</footer>
-		<script src="js/service-worker-registration.js"></script>
+				data-placement="top">Credits</a> - <a href="https://paypal.me/lopo"
+				rel="external noopener" target="_blank">Donate</a>
+		</section>
+	</footer>
+	<script src="js/service-worker-registration.js"></script>
 </body>
 </html>
