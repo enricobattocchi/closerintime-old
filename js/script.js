@@ -56,9 +56,13 @@ function initJSONdata(){
 			jsondata = jsondata.concat(array);
 		}).then(function(){
 			initEventEngine();
-		}).catch(function(){
+		}).catch(function (error){
+			console.error('Failed to initialise local data: '+ error);
 			initEventEngine();
 		});
+	}).catch(function (error) {
+	    console.error ("Failed to initialise data: " + error);
+		showFlAlert('Failed to initialise data!','danger');
 	});
 
 }
@@ -84,7 +88,7 @@ function loadComparison(){
 				var chooser_event_one = $('#chooser-event-one');
 				setNameEtc(chooser_event_one, data, 0);
 			}).catch(function (e) {
-				console.log(e.toString());
+				console.error('Error populating the chooser field: '+ e.toString());
 				var chooser_event_one = $('#chooser-event-one');
 				chooser_event_one.removeAttr('disabled').typeahead('val','');
 				resetChooserButtons(chooser_event_one);
@@ -281,8 +285,8 @@ function initSuggestionForm(){
 				$('input[name="plural[]"]').filter('[value="'+item.plural+'"]').attr('checked','checked');
 				$('#suggestions-delete').removeClass('hide');
 				$('#type-group').addClass('hide');
-			}).catch(function(){
-				console.log('Could not retrieve the event');
+			}).catch(function(error){
+				console.error('Could not retrieve the event: ' + error);
 				event.stopPropagation();
 			});
 		}
@@ -302,6 +306,9 @@ function initSuggestionForm(){
 				$('#chooser input[id^="chooser-"]').eq(frominput).typeahead('val','');
 				resetChooserButtons($('#chooser input[id^="chooser-"]').eq(frominput));
 				showFlAlert('Event deleted.', 'success');
+			}).catch(function(error){
+				console.error('Error deleting object: ' + error);
+				showFlAlert('There was a problem deleting the event.', 'warning');
 			});
 		}
 		$('#suggest').modal('hide');
@@ -369,6 +376,9 @@ function initSuggestionForm(){
 					setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
 					event_ids[frominput] = item.id;
 					computeFromIDB();
+				}).catch(function(error){
+					console.error('Error adding local item: '+error);
+					showFlAlert('There was a problem adding your event.', 'warning');
 				});    
 
 			}
@@ -484,9 +494,14 @@ function pushSuggestions(data){
 			db.localevents
 			.where(':id')
 			.equals(data.id)
-			.modify({sent: 1});
-			showFlAlert('Event submitted.', 'success');
-			resetSuggestionForm();
+			.modify({sent: 1})
+			.then(function(){
+				showFlAlert('Event submitted.', 'success');
+				resetSuggestionForm();
+			}).catch(function(error){
+				console.error('error submitting suggestion: ' + error);
+				showFlAlert('There was an error submitting your suggestion.', 'warning');
+			});
 		}
 	});	
 }
@@ -559,6 +574,8 @@ function initIndexedDB(){
 					.bulkAdd(data)
 					.then(function(){
 						console.log("Added events");
+					}).catch(Dexie.BulkError, function (e) {
+					    console.error ("Some events not added. " + e.failures.length + " errors.");
 					});
 					
 					//  extractd UUIDs
@@ -575,6 +592,8 @@ function initIndexedDB(){
 						if(deleteCount > 0){
 							console.log( "Deleted " + deleteCount + " events");
 						}
+					}).catch(function(error){
+						console.error('error deleting superseded local events: ' + error);
 					});
 
 					// ask the server what happened to remaining submissions
@@ -600,18 +619,35 @@ function initIndexedDB(){
 								return response.json();
 							}).then(function(result) {
 								console.log(result);
-								db.localevents
-									.where('uuid')
-									.noneOf(result)
-									.modify({type: 'personal'})
-									.then(function (movedCount) {
-										if(movedCount > 0){
-											console.log( "Moved " + movedCount + " events to personal");
-											initJSONdata();
-										}
-									}).catch(function(){
-										initJSONdata();
-									});
+								
+								db.transaction('rw', db.localevents, function () {
+									
+									if(result['to_move'] && result['to_move'].length){
+										db.localevents
+										.where('uuid')
+										.anyOf(result['to_move'])
+										.modify({type: 'personal'})
+										.catch(function(error){
+											console.error('error moving local events to personal list: ' + error);
+										});
+									}
+									
+									if(result['to_delete'] && result['to_delete'].length){
+										db.localevents
+										.where('uuid')
+										.anyOf(result['to_delete'])
+										.delete()
+										.catch(function(error){
+											console.error('error deleting substituted local events: ' + error);
+										});
+									}
+								}).then(function(){
+									showFlAlert('Local database updated','success');
+									initJSONdata();
+								}).catch(function(error){
+									console.error('Failed transaction: '+ error.stack);
+								});
+
 							});
 						}
 
@@ -623,6 +659,9 @@ function initIndexedDB(){
 				initJSONdata();
 				loadComparison();
 			});
+		}).catch(function(error){
+			console.error('Error clearing the DB: '+error);
+			showFlAlert('There was an error initialising the database.','danger');
 		});
 	});
 
@@ -663,6 +702,8 @@ function computeFromIDB(){
 		});
 	}).then(function(result){
 		populateIDB(data);
+	}).catch(function(error){
+		console.error('Failed transaction: '+ error.stack);
 	});
 }
 

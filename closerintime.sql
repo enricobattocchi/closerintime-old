@@ -1,3 +1,4 @@
+
 DROP TABLE IF EXISTS `events`;
 CREATE TABLE `events` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -9,9 +10,9 @@ CREATE TABLE `events` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   `plural` tinyint(1) NOT NULL DEFAULT '0',
   `link` varchar(255) DEFAULT NULL,
-  `uuid` varchar(40) DEFAULT '',
-  `creation_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `editing_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `uuid` varchar(40) DEFAULT NULL,
+  `creation_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `editing_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`),
   FULLTEXT KEY `name` (`name`)
@@ -28,3 +29,24 @@ END IF;
 END;;
 
 DELIMITER ;
+
+DROP TABLE IF EXISTS `substitutions`;
+CREATE TABLE `substitutions` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `source_uuid` varchar(40) NOT NULL,
+  `target_uuid` varchar(40) NOT NULL,
+  `creation_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `editing_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `source_uuid` (`source_uuid`),
+  KEY `target_uuid` (`target_uuid`),
+  CONSTRAINT `substitutions_ibfk_1` FOREIGN KEY (`target_uuid`) REFERENCES `events` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+DROP VIEW IF EXISTS `verification_view`;
+CREATE TABLE `verification_view` (`uuid` varchar(40), `source_uuid` varchar(40));
+
+
+DROP TABLE IF EXISTS `verification_view`;
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `verification_view` AS select `e`.`uuid` AS `uuid`,`s`.`source_uuid` AS `source_uuid` from (`events` `e` left join `substitutions` `s` on((`e`.`uuid` = `s`.`target_uuid`)));

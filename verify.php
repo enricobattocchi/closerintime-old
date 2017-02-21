@@ -17,15 +17,21 @@ $results = array();
 
 foreach ($array as $uuid){
 
-	$sql = "SELECT uuid  "
-			. "FROM events "
-			. "WHERE uuid = '".$uuid."'";
+	$sql = "SELECT *  "
+			. "FROM verification_view "
+			. "WHERE uuid = '".$uuid."' OR source_uuid = '".$uuid."'";
 
 	$res = $db->query( $sql );
 	if ( erli( $sql, $res, $db ) && ( mysqli_num_rows( $res ) > 0 ) ) {
 		while( $row = mysqli_fetch_assoc( $res )){
-			$results[] = $row['uuid'];
+			if($uuid == $row['source_uuid']){
+				$results['to_delete'][] = $uuid;
+			} else {
+				$results['noop'][] = $uuid;
+			}
 		}
+	} else {
+		$results['to_move'][] = $uuid;
 	}
 }
 
