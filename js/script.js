@@ -112,6 +112,9 @@ function initEventEngine(){
 			var querystrings = whitespacelesshyphen(query);
 			return querystrings;
 		}, 
+		sorter: function() {
+			  return .5 - Math.random();
+		},
 		local: jsondata
 	});
 }
@@ -136,7 +139,7 @@ function initTypeahead(){
 			}
 			return data.name+' – '+year;
 		},
-		limit: 40,
+		limit: 7,
 		source: function(query, syncResults){
 			eventsengine.search(query,function(suggestions){
 				syncResults(filterselected(suggestions));
