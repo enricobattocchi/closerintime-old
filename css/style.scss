@@ -550,4 +550,10 @@ foter .popover a:visited{
 	bottom: 80px;
 	right: 20px;
 	z-index: 5000;
+	
+	@media screen and (max-width: $break-point-0) {
+		right: 5px;
+		left: 5px;
+		text-align: center;
+	}
 }

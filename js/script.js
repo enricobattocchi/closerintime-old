@@ -661,7 +661,7 @@ function initIndexedDB(){
 			});
 		}).catch(function(error){
 			console.error('Error clearing the DB: '+error);
-			showFlAlert('There was an error initialising the database.','danger');
+			showFlAlert('There was an error initialising the database.<br/>Safari and older browsers are not fully supported.','danger');
 		});
 	});
 
