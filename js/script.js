@@ -978,8 +978,10 @@ function generateUUID() {
  * @param message
  * @param alert
  */
-function showFlAlert(message, alert) {
-	var timeout = 4000;
+function showFlAlert(message, alert, timeout) {
+	if(!timeout){
+		timeout = 4000;
+	}
 	var rand = moment().unix();
 	$('<div id="flalert-'+rand+'" class="alert alert-' + alert + ' fade in">\
 			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'
