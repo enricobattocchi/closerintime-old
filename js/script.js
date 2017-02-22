@@ -1,5 +1,4 @@
 var event_ids = new Array();
-var event_objs = new Array();
 var eventsengine = null;
 var jsondata = new Array();
 var db = null;
@@ -24,7 +23,6 @@ $(function(){
 		$('#chooser-event-pre-one').attr('data-content', '').removeClass().addClass('chooser-event-pre');
 		resetChooserButtons($('#chooser-event-one'));
 		event_ids[0] = null;
-		event_objs[0] = null;
 	});
 
 	$('#chooser-event-two-cancel').on('click',function(){
@@ -33,7 +31,6 @@ $(function(){
 		$('#chooser-event-pre-two').attr('data-content', '').removeClass().addClass('chooser-event-pre');
 		resetChooserButtons($('#chooser-event-two'));
 		event_ids[1] = null;
-		event_objs[1] = null;
 	});
 
 	$(window).on('hashchange',function() {
@@ -144,6 +141,7 @@ function initTypeahead(){
 			if(query == ''){
 				var rand_array = [];
 				var local = eventsengine.local;
+				var i;
 				for(i = 0; i < 10; i++){
 					var item = local[Math.floor(Math.random()*local.length)];
 					rand_array.push(item);
@@ -596,7 +594,7 @@ function initIndexedDB(){
 					});
 					
 					//  extractd UUIDs
-					uuids = data.map(function(item){
+					var uuids = data.map(function(item){
 						return item.uuid;
 					});	
 					

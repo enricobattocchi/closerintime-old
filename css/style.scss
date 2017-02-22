@@ -114,11 +114,21 @@ header#main h1 a:visited{
 
 #chooser-header i.fa{
 	color: $gray-base;
+	font-size: 20px;
+	cursor: pointer;
 }
 
 #chooser-event-one-cancel,
 #chooser-event-two-cancel{
 	cursor: pointer;
+}
+
+.btn.btn-default:focus {
+    background-color: transparent;
+}
+
+.btn.btn-default:hover {
+    background-color: $gray-btn-bg;
 }
 
 
@@ -552,8 +562,4 @@ foter .popover a:visited{
 		left: 5px;
 		text-align: center;
 	}
-}
-
-#openinstructions{
-	cursor: pointer;
 }
