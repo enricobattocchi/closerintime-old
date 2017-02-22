@@ -13,7 +13,7 @@ $shadow-1: rgba(0,0,0,0.12);
 $shadow-2: rgba(0,0,0,0.24);
 $text-color: #333;
 
-$num_icons: 12;
+$num_icons: 13;
 
 
 @import 'closerintime-fa';
@@ -359,6 +359,14 @@ header#main h1 a:visited{
 
 .submitted{
 	background-position: 0% calc(100% / #{$num_icons} * 12);
+}
+
+.media:before{
+	content: "\f26c"; /* tv */
+}
+
+.media{
+	background-position: 0% calc(100% / #{$num_icons} * 13);
 }
 
 
