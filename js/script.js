@@ -248,7 +248,7 @@ function filterselected(suggestions){
 	var filtered = new Array();
 	if(suggestions.length > 0){
 		suggestions.forEach(function(item){
-			if(item.id !== event_ids[0] && item.id !== event_ids[1]){
+			if(item && item.id !== event_ids[0] && item.id !== event_ids[1]){
 				filtered.push(item);
 			}
 		});	
