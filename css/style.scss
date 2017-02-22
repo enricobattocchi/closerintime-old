@@ -1,4 +1,3 @@
-$outline-width: 0;
 $break-point-0: 640px;
 $break-point-1: 1040px;
 $break-point-2: 1800px;
@@ -436,29 +435,6 @@ foter .popover a:visited{
 #twitter-share-button{
 	font-weight: bold;
 }
-
-/*-
-#suggest{
-	position: fixed;
-	background-color: rgba(0,0,0,0.4);
-	top: 0px;
-	bottom: 0px;
-	left: 0px;
-	right: 0px;
-	z-index: 100;
-}
-
-
-#form-suggest{
-	position: absolute;
-	background-color: #ffffff;
-	top: 50%;
-	left: 50%;
-	width: 300px;
-	transform: translate(-50%,-50%);
-	padding: 40px;
-	box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
-}*/
 
 #form-suggest input,
 #form-suggest select,
