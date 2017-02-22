@@ -475,23 +475,23 @@ foter .popover a:visited{
 	font-weight: normal;
 }
 
-#suggest .btn{
+.modal-dialog .btn{
 	background-color: $gray-btn-bg;
 	color: #ffffff;
 	border: none;
 	box-shadow: none;
 }
 
-#suggest .btn-primary,
-#suggest .btn.active{
+.modal-dialog .btn-primary,
+.modal-dialog .btn.active{
 	background-color: $color-3;
 	font-weight: bold;
 }
 
-#suggest .btn.active:hover,
-#suggest .btn.active:focus,
-#suggest .btn-primary:hover,
-#suggest .btn-primary:focus{
+.modal-dialog .btn.active:hover,
+.modal-dialog .btn.active:focus,
+.modal-dialog .btn-primary:hover,
+.modal-dialog .btn-primary:focus{
 	background-color: $color-4;
 }
 
@@ -499,7 +499,7 @@ foter .popover a:visited{
 	line-height: 32px;
 }
 
-#suggest .modal-footer .btn-primary{
+.modal-dialog .modal-footer .btn-primary{
 	text-transform: uppercase;
 	box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
 	border-radius: .125rem;
@@ -556,4 +556,8 @@ foter .popover a:visited{
 		left: 5px;
 		text-align: center;
 	}
+}
+
+#openinstructions{
+	cursor: pointer;
 }

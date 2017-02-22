@@ -127,7 +127,7 @@ function initTypeahead(){
 	initEventEngine();
 
 	$('#chooser .typeahead').typeahead({
-		minLength: 3,
+		minLength: 0,
 	}, {
 		name: 'eventsengine',
 		/* display: 'name', */
@@ -141,9 +141,19 @@ function initTypeahead(){
 		},
 		limit: 7,
 		source: function(query, syncResults){
-			eventsengine.search(query,function(suggestions){
-				syncResults(filterselected(suggestions));
-			});
+			if(query == ''){
+				var rand_array = [];
+				var local = eventsengine.local;
+				for(i = 0; i < 10; i++){
+					var item = local[Math.floor(Math.random()*local.length)];
+					rand_array.push(item);
+				}
+				syncResults(filterselected(rand_array));				
+			} else {
+				eventsengine.search(query,function(suggestions){
+					syncResults(filterselected(suggestions));
+				});
+			}
 		},
 		templates: {
 			notFound: [
@@ -184,8 +194,9 @@ function initTypeahead(){
  * @param field
  */
 function resetChooserButtons(field){
+	field.closest('.input-group').find('.chooser-cancel').addClass('hide');
 	field.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
-	field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id').removeAttr('data-frominput');
+	field.closest('.input-group').find('.chooser-edit').removeClass('hide').removeAttr('data-id');
 	field.closest('.input-group').find('.chooser-event-pre').attr('data-content', '').removeClass().addClass('chooser-event-pre');
 	field.removeAttr('disabled');
 }
@@ -443,13 +454,16 @@ function setNameEtc(field, item, index){
 	field.typeahead('val',ucfirst(item.name) + ' – ' + year);
 	event_ids[index] = item.id;
 	field.closest('.input-group').find('.chooser-event-pre').addClass(item.type).attr('data-content', item.type);
+	field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
 	if(item.link){
 		field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
 			window.open(event.data.link);				
 		});
 	}
 	if(item.id < 0  && item.type != 'submitted'){
-		field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id).attr('data-frominput', index);
+		field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id);
+	} else {
+		field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id',item.id);
 	}
 	field.blur();
 	field.attr('disabled','disabled');

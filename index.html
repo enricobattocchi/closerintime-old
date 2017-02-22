@@ -84,29 +84,13 @@
 	</header>
 	<section id="chooser">
 		<h2 id="chooser-header">
-			Pick two events <i class="fa fa-question-circle-o"
-				data-toggle="popover" data-trigger="hover focus" data-html="true"
-				data-content="Start typing to get suggestions. You can also search by year or by category:
-  							 	<ul>
-  							 	<li><i class='fa music'></i> music</li>
-  							 	<li><i class='fa history'></i> history</li>
-  							 	<li><i class='fa computer'></i> computer</li>
-  							 	<li><i class='fa art'></i> art</li>
-  							 	<li><i class='fa film'></i> film</li>
-  							 	<li><i class='fa building'></i> building</li>
-  							 	<li><i class='fa science'></i> science</li>
-  							 	<li><i class='fa book'></i> book</li>
-  							 	<li><i class='fa sport'></i> sport</li>
-  							 	<li><i class='fa personal'></i> personal</li>
-  							 	<li><i class='fa submitted'></i> submitted</li>
-  							 	</ul>"
-				data-placement="bottom"></i>
+			Pick two events <i id="openinstructions" class="fa fa-question-circle-o"
+				data-toggle="modal" data-target="#instructions"></i>
 		</h2>
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-md-6">
-					<label class="sr-only" for="chooser-event-one">Lookup an
-						event</label>
+					<label class="sr-only" for="chooser-event-one">Lookup an event or add your own</label>
 					<div class="input-group">
 						<span class="input-group-addon"><i
 							id="chooser-event-pre-one" class="chooser-event-pre"></i></span> <input
@@ -118,13 +102,13 @@
 								id="chooser-event-link-one" type="button">
 								<i class="fa fa-wikipedia-w"></i>
 							</button>
-							<button class="btn btn-default hide chooser-edit"
-								id="chooser-event-edit-one" 
+							<button class="btn btn-default chooser-edit"
+								id="chooser-event-edit-one" data-frominput="0" 
 								data-toggle="modal" data-target="#suggest"
 								type="button">
 								<i class="fa fa-pencil"></i>
 							</button>
-							<button class="btn btn-default" id="chooser-event-one-cancel"
+							<button class="btn btn-default hide chooser-cancel" id="chooser-event-one-cancel"
 								type="button">
 								<i class="fa fa-close"></i>
 							</button>
@@ -132,8 +116,7 @@
 					</div>
 				</div>
 				<div class="col-md-6">
-					<label class="sr-only" for="chooser-event-one">Lookup
-						another event</label>
+					<label class="sr-only" for="chooser-event-one">Lookup another event or add your own</label>
 					<div class="input-group">
 						<span class="input-group-addon"><i
 							id="chooser-event-pre-two" class="chooser-event-pre"></i></span> <input
@@ -144,13 +127,13 @@
 								id="chooser-event-link-two" type="button">
 								<i class="fa fa-wikipedia-w"></i>
 							</button>
-							<button class="btn btn-default hide chooser-edit"
-								id="chooser-event-edit-two" 
+							<button class="btn btn-default chooser-edit"
+								id="chooser-event-edit-two" data-frominput="1"
 								data-toggle="modal" data-target="#suggest"
 								type="button">
 								<i class="fa fa-pencil"></i>
 							</button>
-							<button class="btn btn-default" id="chooser-event-two-cancel"
+							<button class="btn btn-default hide chooser-cancel" id="chooser-event-two-cancel"
 								type="button">
 								<i class="fa fa-close"></i>
 							</button>
@@ -207,7 +190,7 @@
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<i class="fa fa-close" aria-hidden="true"></i>
 					</button>
 					<h3 class="modal-title" id="suggest-label">Add/edit an event</h3>
 				</div>
@@ -303,10 +286,48 @@
 			</div>
 		</div>
 	</div>
+	
+		<div class="modal fade" id="instructions" tabindex="-1" role="dialog"
+		aria-labelledby="Instructions">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<i class="fa fa-close" aria-hidden="true"></i>
+					</button>
+					<h3 class="modal-title" id="suggest-label">Instructions</h3>
+				</div>
+				<div class="modal-body">
+					<p>Choose two events by typing in the text fields to get suggestions. You can also search by year or by category:</p>
+					 	<ul>
+							<li><i class='fa music'></i> music</li>
+							<li><i class='fa history'></i> history</li>
+							<li><i class='fa computer'></i> computer</li>
+							<li><i class='fa art'></i> art</li>
+							<li><i class='fa film'></i> film</li>
+							<li><i class='fa building'></i> building</li>
+							<li><i class='fa science'></i> science</li>
+							<li><i class='fa book'></i> book</li>
+							<li><i class='fa sport'></i> sport</li>
+							<li><i class='fa personal'></i> personal</li>
+							<li><i class='fa submitted'></i> submitted</li>
+						</ul>
+						<p>After you've chosen two events, the timeline will be updated to show the timespans.</p>
+						<p>You can add your personal events (e.g. the day of your birth) that will be stored locally in your browser and not shared with anyone.</p> 						
+						<p>If you add an event as a suggestion, it will be submitted to be included in the general database of events.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v3.0 - <a
+				rel="author noopener" target="_blank">Lopo.it</a> - v3.1 - <a
 				href="https://github.com/enricobattocchi/closerintime"
 				rel="author noopener" target="_blank">Github</a> - <a href="#"
 				data-toggle="popover" data-trigger="click focus" data-html="true"
