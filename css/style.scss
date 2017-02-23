@@ -2,6 +2,8 @@ $break-point-0: 640px;
 $break-point-1: 1040px;
 $break-point-2: 1800px;
 
+$v-break-point-0: 600px;
+
 $gray-base:     #999999;
 $gray-btn-bg: 	#cccccc;
 $color-1: #9bc53d; //android green
@@ -51,15 +53,13 @@ $num_icons: 13;
 
 html{
 	font-size: 1.2vw;
+	height: 100%;
 }
 
 body{
-	position: absolute;
-	top: 0px;
-	bottom: 0px;
-	left: 0px;
-	right: 0px;
-		font-family: 'Comfortaa', cursive;
+	position: relative;
+	min-height: 100%;
+	font-family: 'Comfortaa', cursive;
 }
 
 h1,h2{
@@ -151,10 +151,10 @@ header#main h1 a:visited{
 #timeline-header{
 	text-align: center;
 	position: relative;
-	top: 300px;
+	margin-top: 300px;
 	margin-left: 11%;
 	margin-right: 11%;
-	padding-bottom: 60px;
+	padding-bottom: 80px;
 }
 
 .timeline-part{
@@ -228,27 +228,7 @@ header#main h1 a:visited{
 	background-size: cover;
 	background-repeat: none;
 }
-/*
-.timeline-marker-icon:before{
-	font-family: closerintime;
-	top: 0;
-	left: 0px;
-	content: "\f133"; // calendar-o 
-	color: #ffffff;
-	background-color: $color-3;
-	width: 5vw;
-	height: 5vw;
-	position: absolute;
-	line-height: 5vw;
-	border-radius: 3vw;
-	font-size: 2vw;
-	max-width: 90px;
-	max-height: 90px;
 
-	@media screen and (min-width: $break-point-2) {
-		font-size: 36px;
-	}
-}*/
 
 .chooser-event-pre:before{
 	font-family: closerintime;
@@ -266,12 +246,6 @@ header#main h1 a:visited{
 #timeline-marker-icon-end{
 	background-position: 0% calc(100% / #{$num_icons} * 1); //calendar-check-o
 }
-
-/*
-#timeline-marker-icon-end:before{
-	content: "\f274"; // calendar-check-o 
-}
-*/
 
 .history:before{
 	content: "\f19c"; /* university */
@@ -407,7 +381,7 @@ h5.date{
 
 footer{
 	background-color: $color-3;
-	position: fixed;
+	position: absolute;
 	bottom: 0px;
 	width: 100%;
 	height: 60px;
@@ -415,7 +389,7 @@ footer{
 	color: #ffffff;
 	padding: 0px 20px;
 	box-shadow: 0 -1px 3px $shadow-1, 0 -1px 2px $shadow-2;
-	font-size: 2.6vw;
+	font-size: 2.4vw;
 	
 	@media screen and (min-width: $break-point-0) {
 		font-size: 14px;
