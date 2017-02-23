@@ -1,3 +1,3 @@
 <filesMatch "service-worker.js$">
-Header set Cache-Control "max-age=60, public"
+Header set Cache-Control "max-age=0, public"
 </filesMatch>
