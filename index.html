@@ -286,8 +286,7 @@
 			</div>
 		</div>
 	</div>
-	
-		<div class="modal fade" id="instructions" tabindex="-1" role="dialog"
+	<div class="modal fade" id="instructions" tabindex="-1" role="dialog"
 		aria-labelledby="Instructions">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -324,16 +323,23 @@
 			</div>
 		</div>
 	</div>
-	
-	<footer>
-		<section class="right">
-			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v3.2 - <a
+	<div class="modal fade" id="credits" tabindex="-1" role="dialog"
+		aria-labelledby="Credits">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<i class="fa fa-close" aria-hidden="true"></i>
+					</button>
+					<h3 class="modal-title" id="suggest-label">Credits</h3>
+				</div>
+				<div class="modal-body">
+					<p>You can find the project's repository on <a
 				href="https://github.com/enricobattocchi/closerintime"
-				rel="author noopener" target="_blank">Github</a> - <a href="#"
-				data-toggle="popover" data-trigger="click focus" data-html="true"
-				title="Credits"
-				data-content="<ul>
+				rel="author noopener" target="_blank">Github</a>.</p>
+				<p>Libraries and resources used:</p>
+					<ul>
 						<li><a href='https://jquery.com/' rel='external noopener' target='_blank'>jQuery</a></li>
 						<li><a href='http://getbootstrap.com/' rel='external noopener' target='_blank'>Bootstrap</a></li>
 						<li><a href='http://fontawesome.io/' rel='external noopener' target='_blank'>Font Awesome</a></li>
@@ -342,9 +348,20 @@
 						<li><a href='https://momentjs.com/' rel='external noopener' target='_blank'>moment.js</a></li>
 						<li><a href='https://github.com/GoogleChrome/sw-precache' rel='external noopener' target='_blank'>sw-precache</a></li>
 						<li><a href='http://www.dafont.com/it/comfortaa.font' rel='external noopener' target='_blank'>Comfortaa</a></li>				
-						</ul>"
-				data-placement="top">Credits</a> - <a href="https://paypal.me/lopo"
-				rel="external noopener" target="_blank">Donate</a>
+						</ul>
+					<p>You can <a href="https://paypal.me/lopo"	rel="external noopener" target="_blank">donate</a> to support (part of the donations will be forwarded to the above-mentioned projects).</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer>
+		<section class="right">
+			A progressive web app from <a href="https://lopo.it"
+				rel="author noopener" target="_blank">Lopo.it</a> - v3.3 - <a href="#"
+				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>
 	<script src="js/service-worker-registration.js"></script>
