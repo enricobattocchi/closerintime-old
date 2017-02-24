@@ -613,6 +613,7 @@ function initIndexedDB(){
 				.delete();
 			}).catch(function(error){
 				console.error('error deleting superseded local events: ' + error);
+				showFlAlert('There was an error syncing the local database.<br/>Safari and older browsers are not fully supported.','warning');
 			}).then(function (deleteCount) {
 				if(deleteCount > 0){
 					console.log( "Deleted " + deleteCount + " events");
@@ -668,6 +669,7 @@ function initIndexedDB(){
 								initJSONdata();
 							}).catch(function(error){
 								console.error('Failed transaction: '+ error.stack);
+								showFlAlert('There was an error cleaning the local database.<br/>Safari and older browsers are not fully supported.','danger');
 							});
 
 						});
@@ -678,6 +680,9 @@ function initIndexedDB(){
 				console.log ("Transaction committed");
 				initJSONdata();
 				loadComparison();
+			}).catch(function (error){
+				showFlAlert('There was an error verifying the local database.<br/>Safari and older browsers are not fully supported.','danger');
+				console.error('Failed filtering: '+ error.stack);
 			});
 		});
 	});
