@@ -651,7 +651,7 @@ function initIndexedDB(){
 						return new Dexie.Promise(function (resolve, reject) {
 							$.ajax('verify.php', {
 								type: 'post',
-								data: uuids,
+								data: JSON.stringify(uuids),
 								dataType: 'json',
 								error: function (xhr, textStatus) {
 									// Rejecting promise to make db.open() fail.
