@@ -684,8 +684,10 @@ function initIndexedDB(){
 				initJSONdata();
 				loadComparison();
 			}).catch(function (error){
-				showFlAlert('There was an error verifying the local database. '+error,'danger');
+				showFlAlert('There was an error verifying the local database. Some duplicate events could be appearing. ','warning');
 				console.error('Failed filtering: '+ error.stack);
+				initJSONdata();
+				loadComparison();
 			});
 		});
 	});
