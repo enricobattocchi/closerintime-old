@@ -384,7 +384,9 @@ function initSuggestionForm(){
 							}                
 						});
 					} else {
-						pushSuggestions(item);
+						if(item.type == 'submitted'){
+							pushSuggestions(item);
+						}
 					}            		
 					setNameEtc($('#chooser input[id^="chooser-"]').eq(frominput), item, frominput);
 					event_ids[frominput] = item.id;
