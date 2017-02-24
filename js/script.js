@@ -684,7 +684,7 @@ function initIndexedDB(){
 				initJSONdata();
 				loadComparison();
 			}).catch(function (error){
-				showFlAlert('There was an error verifying the local database.<br/>Safari and older browsers are not fully supported.','danger');
+				showFlAlert('There was an error verifying the local database. '+error,'danger');
 				console.error('Failed filtering: '+ error.stack);
 			});
 		});
