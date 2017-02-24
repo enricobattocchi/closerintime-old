@@ -114,6 +114,8 @@ function initEventEngine(){
 		},
 		local: jsondata
 	});
+	
+	$('#chooser').removeClass('transparent');
 }
 
 

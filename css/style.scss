@@ -101,9 +101,14 @@ header#main h1 a:visited{
 #chooser{
 	margin: 0 auto;
 	max-width: 1200px;
-	animation-name: appear;
+	/*animation-name: appear;
     animation-duration: 2s;
-    animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;*/
+    transition: opacity 2s ease-in-out;
+}
+
+.transparent{
+	opacity: 0;
 }
 
 #chooser-header{
