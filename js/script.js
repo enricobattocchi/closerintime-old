@@ -597,6 +597,7 @@ function initIndexedDB(){
 					.bulkPut(jsondata);
 			}).catch(Dexie.BulkError, function (e) {
 			    console.error ("Some events not added. " + e.failures.length + " errors.");
+			    showFlAlert('There was an error populating the database.<br/>Safari and older browsers are not fully supported.','danger');
 			}).then(function(){
 				console.log("Added events");
 				
