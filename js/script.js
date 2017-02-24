@@ -565,6 +565,10 @@ function initIndexedDB(){
 
 	db.on('ready', function () {
 		return db.events.clear()
+		.catch(function(error){
+			console.error('Error clearing the DB: '+error);
+			showFlAlert('There was an error initialising the database.<br/>Safari and older browsers are not fully supported.','danger');
+		})
 		.then(function(){
 			console.log("Database is empty. Populating from ajax call...");
 			return new Dexie.Promise(function (resolve, reject) {
@@ -577,96 +581,90 @@ function initIndexedDB(){
 					},
 					success: function (data) {
 						// Resolving Promise will launch then() below.
-						resolve(data);
+						jsondata = data;
+						resolve();
 					}
 				});
-			}).then(function (data) {
+			}).then(function () {
 				console.log("Got ajax response. We'll now put the objects.");
-				return db.transaction('rw', db.events, db.localevents, function () {
-					
-					// add events to DB
-					db.events
-					.bulkPut(data)
-					.then(function(){
-						console.log("Added events");
-					}).catch(Dexie.BulkError, function (e) {
-					    console.error ("Some events not added. " + e.failures.length + " errors.");
-					});
-					
-					//  extractd UUIDs
-					var uuids = data.map(function(item){
-						return item.uuid;
-					});	
-					
-					// delete local events with matching UUIDS
-					db.localevents
-					.where('uuid')
-					.anyOf(uuids)
-					.delete()
-					.then(function (deleteCount) {
-						if(deleteCount > 0){
-							console.log( "Deleted " + deleteCount + " events");
+				return db.events
+					.bulkPut(jsondata);
+			}).catch(Dexie.BulkError, function (e) {
+			    console.error ("Some events not added. " + e.failures.length + " errors.");
+			}).then(function(){
+				console.log("Added events");
+				
+				//  extract UUIDs
+				var uuids = jsondata.map(function(item){
+					return item.uuid;
+				});	
+				
+				// delete local events with matching UUIDS
+				return db.localevents
+				.where('uuid')
+				.anyOf(uuids)
+				.delete();
+			}).catch(function(error){
+				console.error('error deleting superseded local events: ' + error);
+			}).then(function (deleteCount) {
+				if(deleteCount > 0){
+					console.log( "Deleted " + deleteCount + " events");
+				}
+				
+				// ask the server what happened to remaining submissions
+				return db.localevents
+				.orderBy('uuid')
+				.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
+				.uniqueKeys(function(uuids){
+					var requestjson = {};
+					if(uuids.length){
+						var myInit = {
+								method: 'post',
+								headers: {
+									'Accept': 'application/json, text/plain, */*',
+									'Content-Type': 'application/json'
+								},
+								body: encodeURI(JSON.stringify(uuids))
 						}
-					}).catch(function(error){
-						console.error('error deleting superseded local events: ' + error);
-					});
 
-					// ask the server what happened to remaining submissions
-					db.localevents
-					.orderBy('uuid')
-					.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
-					.uniqueKeys(function(uuids){
-						var requestjson = {};
-						if(uuids.length){
-							var myInit = {
-									method: 'post',
-									headers: {
-										'Accept': 'application/json, text/plain, */*',
-										'Content-Type': 'application/json'
-									},
-									body: encodeURI(JSON.stringify(uuids))
-							}
+						var myRequest = new Request('verify.php');
 
-							var myRequest = new Request('verify.php');
-
-							fetch(myRequest,myInit).then(function(response) {
-								console.log("Verification asked: "+response.ok);
-								return response.json();
-							}).then(function(result) {
-								console.log(result);
+						fetch(myRequest,myInit).then(function(response) {
+							console.log("Verification asked: "+response.ok);
+							return response.json();
+						}).then(function(result) {
+							console.log(result);
+							
+							db.transaction('rw', db.localevents, function () {
 								
-								db.transaction('rw', db.localevents, function () {
-									
-									if(result['to_move'] && result['to_move'].length){
-										db.localevents
-										.where('uuid')
-										.anyOf(result['to_move'])
-										.modify({type: 'personal'})
-										.catch(function(error){
-											console.error('error moving local events to personal list: ' + error);
-										});
-									}
-									
-									if(result['to_delete'] && result['to_delete'].length){
-										db.localevents
-										.where('uuid')
-										.anyOf(result['to_delete'])
-										.delete()
-										.catch(function(error){
-											console.error('error deleting substituted local events: ' + error);
-										});
-									}
-								}).then(function(){
-									showFlAlert('Local database updated','success');
-									initJSONdata();
-								}).catch(function(error){
-									console.error('Failed transaction: '+ error.stack);
-								});
-
+								if(result['to_move'] && result['to_move'].length){
+									db.localevents
+									.where('uuid')
+									.anyOf(result['to_move'])
+									.modify({type: 'personal'})
+									.catch(function(error){
+										console.error('error moving local events to personal list: ' + error);
+									});
+								}
+								
+								if(result['to_delete'] && result['to_delete'].length){
+									db.localevents
+									.where('uuid')
+									.anyOf(result['to_delete'])
+									.delete()
+									.catch(function(error){
+										console.error('error deleting substituted local events: ' + error);
+									});
+								}
+							}).then(function(){
+								showFlAlert('Local database updated','success');
+								initJSONdata();
+							}).catch(function(error){
+								console.error('Failed transaction: '+ error.stack);
 							});
-						}
 
-					});
+						});
+					}
 
 				});
 			}).then(function () {
@@ -674,9 +672,6 @@ function initIndexedDB(){
 				initJSONdata();
 				loadComparison();
 			});
-		}).catch(function(error){
-			console.error('Error clearing the DB: '+error);
-			showFlAlert('There was an error initialising the database.<br/>Safari and older browsers are not fully supported.','danger');
 		});
 	});
 
