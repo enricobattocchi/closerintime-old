@@ -581,12 +581,12 @@ function initIndexedDB(){
 					}
 				});
 			}).then(function (data) {
-				console.log("Got ajax response. We'll now add the objects.");
+				console.log("Got ajax response. We'll now put the objects.");
 				return db.transaction('rw', db.events, db.localevents, function () {
 					
 					// add events to DB
 					db.events
-					.bulkAdd(data)
+					.bulkPut(data)
 					.then(function(){
 						console.log("Added events");
 					}).catch(Dexie.BulkError, function (e) {
