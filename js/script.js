@@ -391,7 +391,7 @@ function initSuggestionForm(){
 					computeFromIDB();
 				}).catch(function(error){
 					console.error('Error adding local item: '+error);
-					showFlAlert('There was a problem adding your event.', 'warning');
+					showFlAlert('There was a problem adding your event.' + error, 'warning');
 				});    
 
 			}
@@ -516,7 +516,7 @@ function pushSuggestions(data){
 				resetSuggestionForm();
 			}).catch(function(error){
 				console.error('error submitting suggestion: ' + error);
-				showFlAlert('There was an error submitting your suggestion.', 'warning');
+				showFlAlert('There was an error submitting your suggestion:' + error, 'warning');
 			});
 		}
 	});	
