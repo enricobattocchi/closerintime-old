@@ -647,20 +647,20 @@ function initIndexedDB(){
 				.keys(function(uuids){
 					var requestjson = {};
 					if(uuids.length){
-						var myInit = {
-								method: 'post',
-								headers: {
-									'Accept': 'application/json, text/plain, */*',
-									'Content-Type': 'application/json'
+						
+						return new Dexie.Promise(function (resolve, reject) {
+							$.ajax('verify.php', {
+								type: 'post',
+								dataType: 'json',
+								error: function (xhr, textStatus) {
+									// Rejecting promise to make db.open() fail.
+									reject(textStatus);
 								},
-								body: encodeURI(JSON.stringify(uuids))
-						}
-
-						var myRequest = new Request('verify.php');
-
-						fetch(myRequest,myInit).then(function(response) {
-							console.log("Verification asked: "+response.ok);
-							return response.json();
+								success: function (data) {
+									console.log("Verification asked.");
+									resolve(data);
+								}
+							});
 						}).then(function(result) {
 							console.log(result);
 							
