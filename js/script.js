@@ -52,6 +52,7 @@ function initJSONdata(){
 			});
 			jsondata = jsondata.concat(array);
 		}).then(function(){
+			$('#chooser').removeClass('transparent');
 			initEventEngine();
 		}).catch(function (error){
 			console.error('Failed to initialise local data: '+ error);
@@ -114,8 +115,6 @@ function initEventEngine(){
 		},
 		local: jsondata
 	});
-	
-	$('#chooser').removeClass('transparent');
 }
 
 
