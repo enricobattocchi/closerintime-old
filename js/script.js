@@ -672,6 +672,9 @@ function initIndexedDB(){
 								showFlAlert('There was an error cleaning the local database.<br/>Safari and older browsers are not fully supported.','danger');
 							});
 
+						}).catch(function(error){
+							showFlAlert('Error while fetching: '+error,'warning',10000);
+							console.error('Failed fetch: '+ error.stack);
 						});
 					}
 
