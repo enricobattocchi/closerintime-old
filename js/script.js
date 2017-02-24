@@ -623,7 +623,7 @@ function initIndexedDB(){
 				return db.localevents
 				.orderBy('uuid')
 				.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
-				.uniqueKeys(function(uuids){
+				.keys(function(uuids){
 					var requestjson = {};
 					if(uuids.length){
 						var myInit = {
