@@ -500,9 +500,7 @@ function pushSuggestions(data){
 			body: encodeURI(JSON.stringify(data))
 	}
 
-	var myRequest = new Request('suggest.php');
-
-	fetch(myRequest,myInit).then(function(response) {
+	fetch('suggest.php',myInit).then(function(response) {
 		console.log(response.ok);
 		return response.json();
 	}).then(function(result) {
