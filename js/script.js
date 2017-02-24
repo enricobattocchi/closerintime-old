@@ -491,33 +491,56 @@ function resetSuggestionForm(){
  * @param data
  */
 function pushSuggestions(data){
-	var myInit = {
-			method: 'post',
-			headers: {
-				'Accept': 'application/json, text/plain, */*',
-				'Content-Type': 'application/json'
-			},
-			body: encodeURI(JSON.stringify(data))
-	}
-
-	fetch('suggest.php',myInit).then(function(response) {
-		console.log(response.ok);
-		return response.json();
-	}).then(function(result) {
-		if(result == 1){
-			db.localevents
-			.where(':id')
-			.equals(data.id)
-			.modify({sent: 1})
-			.then(function(){
-				showFlAlert('Event submitted.', 'success');
-				resetSuggestionForm();
-			}).catch(function(error){
-				console.error('error submitting suggestion: ' + error);
-				showFlAlert('There was an error submitting your suggestion:' + error, 'warning');
-			});
+	if(self.fetch) {	
+		var myInit = {
+				method: 'post',
+				headers: {
+					'Accept': 'application/json, text/plain, */*',
+					'Content-Type': 'application/json'
+				},
+				body: encodeURI(JSON.stringify(data))
 		}
-	});	
+	
+		var myRequest = new Request('suggest.php');
+	
+		fetch('suggest.php',myInit).then(function(response) {
+			console.log(response.ok);
+			return response.json();
+		}).then(function(result) {
+			if(result == 1){
+				db.localevents
+				.where(':id')
+				.equals(data.id)
+				.modify({sent: 1})
+				.then(function(){
+					showFlAlert('Event submitted.', 'success');
+					resetSuggestionForm();
+				}).catch(function(error){
+					console.error('error submitting suggestion: ' + error);
+					showFlAlert('There was an error submitting your suggestion:' + error, 'warning');
+				});
+			}
+		});	
+	} else {
+		jQuery.post( 'suggest.php',
+				JSON.stringify(data),
+				function(result){
+					if(result == 1){
+						db.localevents
+						.where(':id')
+						.equals(data.id)
+						.modify({sent: 1})
+						.then(function(){
+							showFlAlert('Event submitted.', 'success');
+							resetSuggestionForm();
+						}).catch(function(error){
+							console.error('error submitting suggestion: ' + error);
+							showFlAlert('There was an error submitting your suggestion:' + error, 'warning');
+						});
+					}
+				},
+				'json' );
+	}
 }
 
 
