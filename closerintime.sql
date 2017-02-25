@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS `events`;
 CREATE TABLE `events` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
