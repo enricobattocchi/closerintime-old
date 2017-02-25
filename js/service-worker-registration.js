@@ -42,7 +42,8 @@ if ('serviceWorker' in navigator) {
                 // It's the perfect time to display a "New content is available; please refresh."
                 // message in the page's interface.
                 console.log('New or updated content is available.');
-                showFlAlert('The app has been successfully upgraded! Please <a href="javascript:window.location.reload(true);">reload</a> to get the newest version working.', 'danger', 120000);
+                showFlAlert('The app has been successfully upgraded! <a href="javascript:window.location.reload(true);">Reloading</a> to get the newest version working...', 'danger', 120000);
+                window.location.reload(true);
               } else {
                 // At this point, everything has been precached.
                 // It's the perfect time to display a "Content is cached for offline use." message.
