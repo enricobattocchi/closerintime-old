@@ -97,9 +97,11 @@ function loadComparison(){
 			if(pars[0] == 'cancel'){
 				db.localevents.clear().then(function(){
 					showFlAlert('Local events cleared.','info');
+					updateHashFromIDS();
 				}).catch(function(error){
 					console.error('Failed to clear local events: '+error);
 					showFlAlert('Failed to clear local events.','warning');
+					updateHashFromIDS();
 				});
 				
 			}
