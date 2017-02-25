@@ -26,6 +26,8 @@ foreach ($array as $uuid){
 		while( $row = mysqli_fetch_assoc( $res )){
 			if($uuid == $row['source_uuid']){
 				$results['to_delete'][] = $uuid;
+				$sql2 = "UPDATE substitutions SET request_count = request_count + 1 WHERE source_uuid = '".$uuid."'";
+				$res2 = $db->query( $sql2 );
 			} else {
 				$results['noop'][] = $uuid;
 			}

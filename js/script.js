@@ -154,7 +154,6 @@ function initTypeahead(){
 			if(query == ''){
 				var rand_array = [];
 				var local = eventsengine.local;
-				console.log(local);
 				var i;
 				for(i = 0; i < 10; i++){
 					var item = local[Math.floor(Math.random()*local.length)];
