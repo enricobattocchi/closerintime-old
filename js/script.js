@@ -512,8 +512,8 @@ function pushSuggestions(data){
 		}).then(function(result) {
 			if(result == 1){
 				db.localevents
-				.where(':id')
-				.equals(Math.abs(data.id))
+				..where('uuid')
+				.anyOf(result)
 				.modify({sent: 1})
 				.then(function(){
 					showFlAlert('Event submitted.', 'success');
@@ -530,8 +530,8 @@ function pushSuggestions(data){
 				function(result){
 					if(result == 1){
 						db.localevents
-						.where(':id')
-						.equals(Math.abs(data.id))
+						.where('uuid')
+						.anyOf(result)
 						.modify({sent: 1})
 						.then(function(){
 							showFlAlert('Event submitted.', 'success');
