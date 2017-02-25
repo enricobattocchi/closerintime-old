@@ -74,23 +74,29 @@ function loadComparison(){
 	var hashpars = window.location.hash.substr(1);
 	if(hashpars){
 		var pars = hashpars.split('/');
-		event_ids[0] = pars[0];
-		if(pars[1]){
-			/* both events set, let's compute everything */
-			event_ids[1] = pars[1];
-			computeFromIDB();
+		if(isNumeric(pars[0])){
+			event_ids[0] = pars[0];
+			if(pars[1]){
+				/* both events set, let's compute everything */
+				event_ids[1] = pars[1];
+				computeFromIDB();
+			} else {
+				/* just one event set, fill the chooser field */		
+				db.events.get(event_ids[0])
+				.then(function(data){
+					var chooser_event_one = $('#chooser-event-one');
+					setNameEtc(chooser_event_one, data, 0);
+				}).catch(function (e) {
+					console.error('Error populating the chooser field: '+ e.toString());
+					var chooser_event_one = $('#chooser-event-one');
+					chooser_event_one.removeAttr('disabled').typeahead('val','');
+					resetChooserButtons(chooser_event_one);
+				});
+			}
 		} else {
-			/* just one event set, fill the chooser field */		
-			db.events.get(event_ids[0])
-			.then(function(data){
-				var chooser_event_one = $('#chooser-event-one');
-				setNameEtc(chooser_event_one, data, 0);
-			}).catch(function (e) {
-				console.error('Error populating the chooser field: '+ e.toString());
-				var chooser_event_one = $('#chooser-event-one');
-				chooser_event_one.removeAttr('disabled').typeahead('val','');
-				resetChooserButtons(chooser_event_one);
-			});
+			if(pars[0] == 'cancel'){
+				db.localevents.clear();
+			}
 		}
 	}
 }
