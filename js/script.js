@@ -74,7 +74,7 @@ function loadComparison(){
 	var hashpars = window.location.hash.substr(1);
 	if(hashpars){
 		var pars = hashpars.split('/');
-		if(isNumeric(pars[0])){
+		if($.isNumeric(pars[0])){
 			event_ids[0] = pars[0];
 			if(pars[1]){
 				/* both events set, let's compute everything */
