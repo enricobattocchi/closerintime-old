@@ -142,6 +142,7 @@ function initTypeahead(){
 			if(query == ''){
 				var rand_array = [];
 				var local = eventsengine.local;
+				console.log(local);
 				var i;
 				for(i = 0; i < 10; i++){
 					var item = local[Math.floor(Math.random()*local.length)];
@@ -285,10 +286,10 @@ function initSuggestionForm(){
 		}		
 		modal.find('input[name="frominput"]').val(frominput);
 		if(id < 0){
-			id = Math.abs(id);
+			id = Math.abs(id); 
 		}
 		if( id ){
-			modal.find('input[name="id"]').val(id);
+			modal.find('input[name="id"]').val(id); // positive id
 			db.localevents.get(id).then(function(item){
 				$('input[name="uuid"]').val(item.uuid);
 				$('input[name="name"]').val(item.name);
@@ -313,7 +314,7 @@ function initSuggestionForm(){
 			var id = parseInt($('input[name="id"]').val());
 			var frominput = parseInt($('input[name="frominput"]').val());
 			db.localevents.delete(id).then(function(){
-				id = 0-id;
+				id = 0-id; // to negative id
 				jsondata = jsondata.filter(function(obj){ return id !== parseInt(obj.id); });
 				initEventEngine();
 				$('#chooser input[id^="chooser-"]').eq(frominput).typeahead('val','');
@@ -338,7 +339,7 @@ function initSuggestionForm(){
 			var item = {};
 			var id = null;
 			if($('input[name="id"]').val()){
-				id = parseInt($('input[name="id"]').val());
+				id = parseInt($('input[name="id"]').val()); // positive id
 			} else {
 				item.uuid = generateUUID();
 			}
@@ -354,7 +355,7 @@ function initSuggestionForm(){
 				db.localevents.update(id, item).then(function(updated){
 					if (updated){
 						console.log ("Item updated");
-						item.id = 0-id;
+						item.id = 0-id; // to negative id
 						jsondata = jsondata.filter(function(obj){ return item.id !== parseInt(obj.id); });
 						jsondata.push(item);
 						initEventEngine();
@@ -369,7 +370,7 @@ function initSuggestionForm(){
 			} else {
 				db.localevents.add(item).then(function(newid){
 					console.log ("Item added");
-					item.id = 0-newid;
+					item.id = 0-newid; // to negative id
 					jsondata.push(item);
 					initEventEngine();	            		
 					showFlAlert('Event stored.', 'success');
@@ -512,7 +513,7 @@ function pushSuggestions(data){
 			if(result == 1){
 				db.localevents
 				.where(':id')
-				.equals(data.id)
+				.equals(Math.abs(data.id))
 				.modify({sent: 1})
 				.then(function(){
 					showFlAlert('Event submitted.', 'success');
@@ -530,7 +531,7 @@ function pushSuggestions(data){
 					if(result == 1){
 						db.localevents
 						.where(':id')
-						.equals(data.id)
+						.equals(Math.abs(data.id))
 						.modify({sent: 1})
 						.then(function(){
 							showFlAlert('Event submitted.', 'success');
