@@ -510,7 +510,7 @@ function pushSuggestions(data){
 			console.log(response.ok);
 			return response.json();
 		}).then(function(result) {
-			if(result == 1){
+			if(result.length > 0){
 				db.localevents
 				.where('uuid')
 				.anyOf(result)
@@ -528,7 +528,7 @@ function pushSuggestions(data){
 		jQuery.post( 'suggest.php',
 				JSON.stringify(data),
 				function(result){
-					if(result == 1){
+					if(result.length > 0){
 						db.localevents
 						.where('uuid')
 						.anyOf(result)
