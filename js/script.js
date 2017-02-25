@@ -512,7 +512,7 @@ function pushSuggestions(data){
 		}).then(function(result) {
 			if(result == 1){
 				db.localevents
-				..where('uuid')
+				.where('uuid')
 				.anyOf(result)
 				.modify({sent: 1})
 				.then(function(){
