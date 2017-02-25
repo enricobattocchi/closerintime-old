@@ -407,7 +407,7 @@ function initSuggestionForm(){
 					computeFromIDB();
 				}).catch(function(error){
 					console.error('Error adding local item: '+error);
-					showFlAlert('There was a problem adding your event.' + error, 'warning');
+					showFlAlert('There was a problem adding your event.', 'warning');
 				});    
 
 			}
@@ -533,7 +533,7 @@ function pushSuggestions(data){
 					resetSuggestionForm();
 				}).catch(function(error){
 					console.error('error submitting suggestion: ' + error);
-					showFlAlert('There was an error submitting your suggestion:' + error, 'warning');
+					showFlAlert('There was an error submitting your suggestion.', 'warning');
 				});
 			}
 		});	
@@ -551,7 +551,7 @@ function pushSuggestions(data){
 							resetSuggestionForm();
 						}).catch(function(error){
 							console.error('error submitting suggestion: ' + error);
-							showFlAlert('There was an error submitting your suggestion:' + error, 'warning');
+							showFlAlert('There was an error submitting your suggestion.', 'warning');
 						});
 					}
 				},
@@ -610,7 +610,7 @@ function initIndexedDB(){
 		return db.events.clear()
 		.catch(function(error){
 			console.error('Error clearing the DB: '+error);
-			showFlAlert('There was an error initialising the database.<br/>Safari and older browsers are not fully supported.','danger');
+			showFlAlert('There was an error initialising the database.<br/>Some older browsers may be not fully supported.','danger');
 		})
 		.then(function(){
 			console.log("Database is empty. Populating from ajax call...");
@@ -634,7 +634,7 @@ function initIndexedDB(){
 					.bulkPut(jsondata);
 			}).catch(Dexie.BulkError, function (e) {
 			    console.error ("Some events not added. " + e.failures.length + " errors.");
-			    showFlAlert('There was an error populating the database.<br/>Safari and older browsers are not fully supported.','danger');
+			    showFlAlert('There was an error populating the database.<br/>Some older browsers may be not fully supported.','danger');
 			}).then(function(){
 				console.log("Added events");
 				
@@ -650,7 +650,7 @@ function initIndexedDB(){
 				.delete();
 			}).catch(function(error){
 				console.error('error deleting superseded local events: ' + error);
-				showFlAlert('There was an error syncing the local database.<br/>Safari and older browsers are not fully supported.','warning');
+				showFlAlert('There was an error syncing the local database.<br/>Some older browsers may be not fully supported.','warning');
 			}).then(function (deleteCount) {
 				if(deleteCount > 0){
 					console.log( "Deleted " + deleteCount + " events");
@@ -707,12 +707,12 @@ function initIndexedDB(){
 								initJSONdata();
 							}).catch(function(error){
 								console.error('Failed transaction: '+ error.stack);
-								showFlAlert('There was an error cleaning the local database.<br/>Safari and older browsers are not fully supported.','danger');
+								showFlAlert('There was an error cleaning the local database.<br/>Some browsers may be not fully supported.','danger');
 							});
 
 						}).catch(function(error){
-							showFlAlert('Error while fetching: '+error,'warning',10000);
-							console.error('Failed fetch: '+ error.stack);
+							showFlAlert('Error while querying the server for updates', 'warning');
+							console.error('Failed AJAX verify: '+ error.stack);
 						});
 					}
 
