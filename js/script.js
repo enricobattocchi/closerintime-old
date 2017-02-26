@@ -422,7 +422,7 @@ function initSuggestionForm(){
 	});	
 
 
-	$('input[name="year"]').change(function(){
+	$('input[name="year"]').on('change keyup paste', function(){
 		if(parseInt($(this).val()) === 0){
 			$(this).val(-1);
 		}
@@ -435,7 +435,7 @@ function initSuggestionForm(){
 		}
 	});
 
-	$('select[name="month"]').change(function(){
+	$('select[name="month"]').on('change keyup paste', function(){
 		var $day = $('select[name="day"]');
 		var month = $(this).val();
 		if(!month){
