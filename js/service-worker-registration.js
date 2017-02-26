@@ -43,7 +43,7 @@ if ('serviceWorker' in navigator) {
                 // message in the page's interface.
                 console.log('New or updated content is available.');
                 showFlAlert('The app has been successfully upgraded! <a href="javascript:window.location.reload(true);">Reloading</a> to get the newest version working...', 'danger', 120000);
-                setTimeOut(function(){
+                setTimeout(function(){
                 	window.location.reload(true);
                 	}, 4000);
               } else {

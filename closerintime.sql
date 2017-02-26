@@ -5,7 +5,7 @@ CREATE TABLE `events` (
   `year` smallint(6) NOT NULL,
   `month` tinyint(3) unsigned DEFAULT NULL,
   `day` tinyint(3) unsigned DEFAULT NULL,
-  `type` enum('music','film','building','book','history','science','art','computer','media','sport','submitted') NOT NULL,
+  `type` enum('music','film','building','book','history','science','art','computer','pop culture','sport','submitted') NOT NULL,
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   `plural` tinyint(1) NOT NULL DEFAULT '0',
   `link` varchar(255) DEFAULT NULL,

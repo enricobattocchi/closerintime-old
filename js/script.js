@@ -184,7 +184,7 @@ function initTypeahead(){
 			                    	if(data.year < 0){
 			                    		year = Math.abs(data.year)+ ' B.C.';
 			                    	}
-			                    	return '<div><i class="fa '+data.type+'"></i> <strong>'+ucfirst(data.name)+'</strong> – '+year+'</div>';}
+			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong> – '+year+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
 		var index = $('#chooser input[id^="chooser-"]').index(this);
@@ -468,7 +468,7 @@ function setNameEtc(field, item, index){
 	}
 	field.typeahead('val',ucfirst(item.name) + ' – ' + year);
 	event_ids[index] = item.id;
-	field.closest('.input-group').find('.chooser-event-pre').addClass(item.type).attr('data-content', item.type);
+	field.closest('.input-group').find('.chooser-event-pre').addClass(replaceSpaces(item.type)).attr('data-content', item.type);
 	field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
 	if(item.link){
 		field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
@@ -904,16 +904,7 @@ function populateIDB(data){
 	result.middle.verb = (data[1].plural == 1)? 'are' : 'is' ;
 	result.middle.link = data[1].link;
 
-	// second_term_of_comparison = (data[0].capitalize_first == 1)?
-	// result.start.description : lcfirst(result.start.description);
 	var second_term_of_comparison = data[0].name;
-	/*
-	 * var words = second_term_of_comparison.split(' ');
-	 * if(words[0].toLowerCase() == 'the' || words[0].toLowerCase() == 'my' ||
-	 * words[0].toLowerCase() == 'our'){ second_term_of_comparison =
-	 * lcfirst(result.start.description); }
-	 */
-
 
 	if(percentage > 50){
 		result.header = result.middle.description+" "+result.middle.verb+" closer in time to us than to "+second_term_of_comparison+".";
@@ -940,13 +931,9 @@ function populateIDB(data){
 
 	start_date.html(result.start.date);
 	start_description.html(result.start.description);
-	// chooser_event_one.typeahead('val', result.start.description);
-
 
 	middle_date.html(result.middle.date);
 	middle_description.html(result.middle.description);
-	// chooser_event_two.typeahead('val', result.middle.description);
-
 
 	end_date.html(result.now_date);
 
@@ -957,8 +944,8 @@ function populateIDB(data){
 	timeline_part_two.width(result.middle.size);
 	middle.css('left', result.start.size);
 
-	start_icon.removeClass().addClass('timeline-marker-icon '+result.start.category_icon);
-	middle_icon.removeClass().addClass('timeline-marker-icon '+result.middle.category_icon);
+	start_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result.start.category_icon));
+	middle_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result.middle.category_icon));
 
 	if(chooser_event_one.typeahead('val') !== result.start.description){
 		var item = {};
@@ -1040,4 +1027,8 @@ function showFlAlert(message, alert, timeout) {
 	setTimeout(function () {
 		$(".alert").alert('close');
 	}, timeout);
+}
+
+function replaceSpaces(string){
+	return string.split(' ').join('-');
 }

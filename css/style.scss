@@ -340,11 +340,11 @@ header#main h1 a:visited{
 	background-position: 0% calc(100% / #{$num_icons} * 12);
 }
 
-.media:before{
-	content: "\f26c"; /* tv */
+.pop-culture:before{
+	content: "\f259"; /* tv */
 }
 
-.media{
+.pop-culture{
 	background-position: 0% calc(100% / #{$num_icons} * 13);
 }
 
