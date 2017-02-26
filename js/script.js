@@ -563,6 +563,9 @@ function pushSuggestions(data){
 /**
  * initializes the IndexedDB (using Dexie library) with data from the server
  */
+/**
+ * 
+ */
 function initIndexedDB(){
 	db = new Dexie("closerintime");
 
@@ -995,6 +998,13 @@ function showFlAlert(message, alert, timeout) {
 	}, timeout);
 }
 
+
+/**
+ * Converts "a string" to "a-string" (useful for CSS classes)
+ * 
+ * @param string
+ * @returns
+ */
 function replaceSpaces(string){
 	return string.split(' ').join('-');
 }
