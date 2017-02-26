@@ -566,40 +566,6 @@ function pushSuggestions(data){
 function initIndexedDB(){
 	db = new Dexie("closerintime");
 
-	db.version(10).stores({
-		events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
-	});
-
-	db.version(11).stores({
-		events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link",
-		suggestions: "++id, name, year, month, day"
-	});
-
-
-	db.version(12).stores({
-		events: "id, &name, year, month, day, type, plural, enabled, capitalize_first, link, uuid",
-		myevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, uuid"
-	});
-
-	db.version(13).stores({
-		suggestions: null
-	});
-
-	db.version(14).stores({
-		myevents: null,
-		personalevents: "id, &name, year, month, day, type, plural, sent, capitalize_first, link, &uuid"
-	});
-
-	db.version(15).stores({
-		personalevents: null,
-		localevents: "++id, &name, year, month, day, type, plural, sent, capitalize_first, link, &uuid"
-	});
-
-	db.version(16).stores({
-		events: "id, &name, year, month, day, type, plural, enabled, link, &uuid",
-		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
-	});
-
 	db.version(17).stores({
 		events: "id, name, year, month, day, type, plural, enabled, link, uuid",
 		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
