@@ -435,7 +435,7 @@ function initSuggestionForm(){
 		}
 	});
 
-	$('select[name="month"]').on('change keyup paste', function(){
+	$('select[name="month"]').change(function(){
 		var $day = $('select[name="day"]');
 		var month = $(this).val();
 		if(!month){
