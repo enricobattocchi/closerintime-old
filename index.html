@@ -55,6 +55,7 @@
 <script src="js/typeahead.bundle.min.js"></script>
 <script src="js/dexie.min.js"></script>
 <script src="js/moment.min.js"></script>
+<script src="js/moment-precise-range.js"></script>
 <script src="js/script.js" async></script>
 
 <title>#closerintime</title>
@@ -86,6 +87,8 @@
 		<h2 id="chooser-header">
 			Pick two events <i id="openinstructions" class="fa fa-question-circle-o"
 				data-toggle="modal" data-target="#instructions"></i>
+				<i id="opensettings" class="fa fa-cog"
+				data-toggle="modal" data-target="#settings"></i>
 		</h2>
 		<div class="container-fluid">
 			<div class="row">
@@ -182,7 +185,6 @@
 		</a>
 		<div id="sharing"></div>
 	</section>
-
 	<div class="modal fade" id="suggest" tabindex="-1" role="dialog"
 		aria-labelledby="Suggestion Form">
 		<div class="modal-dialog modal-sm" role="document">
@@ -286,6 +288,51 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" id="settings" tabindex="-1" role="dialog"
+		aria-labelledby="Settings">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<i class="fa fa-close" aria-hidden="true"></i>
+					</button>
+					<h3 class="modal-title" id="settings-label">Settings</h3>
+				</div>
+				<div class="modal-body">
+					<fieldset>
+						<legend>Chooser</legend>
+						<div class="btn-group" id="showdates-group" data-toggle="buttons">
+	 							<label class="btn active">
+	   							<input type="radio" name="showdates" id="showdatesshow" autocomplete="off" value="0" checked="checked"> Show
+	 							</label>
+	 							<label class="btn">
+								<input type="radio" name="showdates" id="showdatesdont" autocomplete="off" value="1"> Don't show
+							</label>&nbsp; dates when selecting events
+						</div>
+					</fieldset>
+					<fieldset>
+						<legend>Timespan label format</legend>
+						<div class="btn-group" id="timespanformat-group" data-toggle="buttons">
+							<label class="btn active">
+	  							<input type="radio" name="timespanformat" id="timespanformatdays" autocomplete="off" value="0" checked="checked"> X days
+							</label>
+							<label class="btn">
+								<input type="radio" name="timespanformat" id="timespanformatyears" autocomplete="off" value="1"> Y years
+							</label>
+							<label class="btn">
+								<input type="radio" name="timespanformat" id="timespanformatprecise" autocomplete="off" value="2"> X years Y months Z days
+							</label>
+						</div>
+					</fieldset>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary hide" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="settings-save">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>	
 	<div class="modal fade" id="instructions" tabindex="-1" role="dialog"
 		aria-labelledby="Instructions">
 		<div class="modal-dialog" role="document">
@@ -361,7 +408,7 @@
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-alpha3 - <a href="#"
+				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-alpha4 - <a href="#"
 				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>

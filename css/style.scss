@@ -66,7 +66,7 @@ h1,h2{
 		font-family: 'Comfortaa', cursive;
 }
 
-h4, h5, h6, .timeline-marker-label, #timeline-header{
+h5, h6, .timeline-marker-label, #timeline-header{
 	opacity: 0;
 	animation-name: appear;
 	animation-duration: 2s;
@@ -449,30 +449,48 @@ foter .popover a:visited{
 	color: #ffffff;
 	border: none;
 	box-shadow: none;
+	font-weight: bold;
 }
 
 .modal-dialog .btn-primary,
 .modal-dialog .btn.active{
 	background-color: $color-3;
-	font-weight: bold;
 }
 
 .modal-dialog .btn.active:hover,
 .modal-dialog .btn.active:focus,
-.modal-dialog .btn-primary:hover,
-.modal-dialog .btn-primary:focus{
+.modal-dialog .btn:hover,
+.modal-dialog .btn:focus{
 	background-color: $color-4;
 }
 
-#suggest #plural-group{
+.modal-body .btn-group{
 	line-height: 32px;
 }
+
+.modal-body .btn-group .btn{
+	border-left: solid 1px $gray-base;
+}
+
+.btn-group > .btn:first-child{
+	border: none;
+}
+
 
 .modal-dialog .modal-footer .btn-primary{
 	text-transform: uppercase;
 	box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2);
 	border-radius: .125rem;
 }
+
+fieldset{
+	margin-bottom: 30px;
+}
+
+legend{
+	font-size: 18px;
+}
+
 
 /*** material design form lookalike ***/
 .btn-default{
