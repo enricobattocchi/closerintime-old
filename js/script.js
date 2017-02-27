@@ -182,7 +182,7 @@ function initTypeahead(){
         		if(data.year < 0){
         			year = Math.abs(data.year)+ ' B.C.';
         		}
-        		postfix = ' — '+year;
+        		postfix = ' – '+year;
         	}
 			return data.name+postfix;
 		},
@@ -221,7 +221,7 @@ function initTypeahead(){
 			                    		if(data.year < 0){
 			                    			year = Math.abs(data.year)+ ' B.C.';
 			                    		}
-			                    		postfix = ' — '+year;
+			                    		postfix = ' – '+year;
 			                    	}
 			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong>'+postfix+'</div>';}
 		}
@@ -284,7 +284,7 @@ function updateHashFromIDS(){
  */
 function whitespacelesshyphen(str) {
 	str = (typeof str === "undefined" || str === null) ? "" : str + "";
-	str = str.split('—');
+	str = str.split('–');
 	str = str[0];
 	return str ? str.split(/\s+/) : [];
 }
@@ -540,7 +540,7 @@ function setNameEtc(field, item, index){
 		if(item.year < 0){
 			year = Math.abs(item.year)+ ' B.C.';
 		}
-		postfix = ' — '+year;
+		postfix = ' – '+year;
 	}
 	field.typeahead('val',ucfirst(item.name) + postfix);
 	event_ids[index] = item.id;
