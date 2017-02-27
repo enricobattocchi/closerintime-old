@@ -193,8 +193,8 @@ function initTypeahead(){
 				var local = eventsengine.local;
 				var i;
 				for(i = 0; i < 10; i++){
-					var item = local[Math.floor(Math.random()*local.length)];
-					rand_array.push(item);
+					var item = local.splice(Math.floor(Math.random()*local.length), 1);
+					rand_array.push(item[0]);
 				}
 				syncResults(filterselected(rand_array));				
 			} else {
