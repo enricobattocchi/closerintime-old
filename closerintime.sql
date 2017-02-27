@@ -58,6 +58,7 @@ CREATE TABLE `suggestions` (
   `uuid` varchar(40) DEFAULT NULL,
   `creation_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `editing_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ip` varbinary(16) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`),
   FULLTEXT KEY `name` (`name`)
