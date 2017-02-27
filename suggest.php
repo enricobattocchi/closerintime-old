@@ -25,7 +25,7 @@ if(count($array) > 0){
 		
 		$suggestions = "( '$name', $year, $month, $day, '$type', '0', '', '$uuid' )";
 		
-		$sql = "INSERT INTO events (`name`, `year`, `month`, `day`, `type`, `enabled`, `link`, `uuid`) VALUES " . $suggestions;
+		$sql = "INSERT INTO suggestions (`name`, `year`, `month`, `day`, `type`, `enabled`, `link`, `uuid`) VALUES " . $suggestions;
 		
 		$res = $db->query( $sql );
 		
