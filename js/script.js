@@ -465,7 +465,15 @@ function initSuggestionForm(){
 		if(parseInt($(this).val()) === 0){
 			$(this).val(-1);
 		}
+		
+		if(parseInt($(this).val()) < -3000){
+			$(this).val(-3000);
+		}
 
+		if(parseInt($(this).val()) > moment.utc().year()){
+			$(this).val(moment.utc().year());
+		}
+		
 		if($(this).val()){
 			$('select[name="month"]').removeAttr('disabled').val('').change();
 		} else {
