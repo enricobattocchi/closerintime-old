@@ -3,6 +3,11 @@ var eventsengine = null;
 var jsondata = new Array();
 var db = null;
 
+var settings = {
+	showdates: 0,
+	timespanformat: 0,
+};
+
 
 /**
  * After the page has been loaded: initializations
@@ -12,6 +17,9 @@ $(function(){
 	initPopover();
 
 	initSuggestionForm();
+	
+	initSettings();
+	initSettingsForm();
 
 	initIndexedDB();
 	
@@ -38,6 +46,30 @@ $(function(){
 	});
 
 });
+
+
+function storageAvailable(type) {
+	try {
+		var storage = window[type],
+			x = '__storage_test__';
+		storage.setItem(x, x);
+		storage.removeItem(x);
+		return true;
+	}
+	catch(e) {
+		return false;
+	}
+}
+
+function initSettings(){
+	if (storageAvailable('localStorage')) {
+		settings.showdates = window.localStorage.getItem('showdates') ? window.localStorage.getItem('showdates') : 0;
+		settings.timespanformat = window.localStorage.getItem('timespanformat') ? window.localStorage.getItem('timespanformat') : 0;
+	}
+	else {
+		$('#opensettings').addClass('hide');
+	}
+}
 
 /**
  * Uses the DBs to populate the JSON array used to choose the events from
@@ -144,12 +176,15 @@ function initTypeahead(){
 		name: 'eventsengine',
 		/* display: 'name', */
 		display: function(data){
-			var string = data.name;
-			var year = data.year;
-			if(data.year < 0){
-				year = Math.abs(data.year)+ ' B.C.';
-			}
-			return data.name+' – '+year;
+        	var postfix = '';
+        	if(settings.showdates == 0){
+        		var year = data.year;
+        		if(data.year < 0){
+        			year = Math.abs(data.year)+ ' B.C.';
+        		}
+        		postfix = ' — '+year;
+        	}
+			return data.name+postfix;
 		},
 		limit: 7,
 		source: function(query, syncResults){
@@ -180,11 +215,15 @@ function initTypeahead(){
 			                    '</div>'
 			                    ].join('\n'),
 			                    suggestion: function(data){
-			                    	var year = data.year;
-			                    	if(data.year < 0){
-			                    		year = Math.abs(data.year)+ ' B.C.';
+			                    	var postfix = '';
+			                    	if(settings.showdates == 0){
+			                    		var year = data.year;
+			                    		if(data.year < 0){
+			                    			year = Math.abs(data.year)+ ' B.C.';
+			                    		}
+			                    		postfix = ' — '+year;
 			                    	}
-			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong> – '+year+'</div>';}
+			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong>'+postfix+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
 		var index = $('#chooser input[id^="chooser-"]').index(this);
@@ -192,12 +231,12 @@ function initTypeahead(){
 		setNameEtc($(this), obj, index);
 		// computeFromIDB();
 		updateHashFromIDS();
-	}).on('typeahead:render', function(){
+	})/*.on('typeahead:render', function(){
 		if(!$(this).typeahead('val')){
 			var index = $('#chooser input[id^="chooser-"]').index(this);
 			event_ids[index] = '';
 		}			
-	}).typeahead('val', '').removeAttr('disabled');	
+	})*/.typeahead('val', '').removeAttr('disabled');	
 }
 
 
@@ -245,7 +284,7 @@ function updateHashFromIDS(){
  */
 function whitespacelesshyphen(str) {
 	str = (typeof str === "undefined" || str === null) ? "" : str + "";
-	str = str.split('–');
+	str = str.split('—');
 	str = str[0];
 	return str ? str.split(/\s+/) : [];
 }
@@ -309,7 +348,7 @@ function initSuggestionForm(){
 				$('input[name="year"]').val(item.year).change();
 				$('select[name="month"]').val(item.month).change();
 				$('select[name="day"]').val(item.day);
-				$('input[name="plural[]"]').filter('[value="'+item.plural+'"]').attr('checked','checked');
+				$('input[name="plural[]"]').filter('[value="'+item.plural+'"]').closest('.btn').button('toggle');
 				$('#suggestions-delete').removeClass('hide');
 				$('#type-group').addClass('hide');
 			}).catch(function(error){
@@ -453,6 +492,39 @@ function initSuggestionForm(){
 }
 
 
+function initSettingsForm(){
+	
+	$('#settings').on('show.bs.modal', function (event) {
+		
+		var showdates = window.localStorage.getItem('showdates');
+		var timespanformat = window.localStorage.getItem('timespanformat');
+		
+		$('input[name="showdates"]').filter('[value="'+showdates+'"]').closest('.btn').button('toggle');
+		$('input[name="timespanformat"]').filter('[value="'+timespanformat+'"]').closest('.btn').button('toggle');
+		
+	});
+	
+
+	$('#settings-save').on('click', function(event) {
+		
+		var showdates = $('input[name="showdates"]:checked').val();
+		var timespanformat = $('input[name="timespanformat"]:checked').val();
+		
+		window.localStorage.setItem('showdates', showdates);
+		window.localStorage.setItem('timespanformat', timespanformat);
+		
+		initSettings();
+		$('#chooser .typeahead').typeahead('destroy');
+		initTypeahead();
+		computeFromIDB();
+		
+		$('#settings').modal('hide');
+
+	});	
+
+}
+
+
 /**
  * Sets name, link, icon, buttons for a given chooser field
  * 
@@ -462,11 +534,15 @@ function initSuggestionForm(){
  */
 function setNameEtc(field, item, index){
 	resetChooserButtons(field);
-	var year = item.year;
-	if(item.year < 0){
-		year = Math.abs(item.year)+ ' B.C.';
+	var postfix = '';
+	if(settings.showdates == 0){
+		var year = item.year;
+		if(item.year < 0){
+			year = Math.abs(item.year)+ ' B.C.';
+		}
+		postfix = ' — '+year;
 	}
-	field.typeahead('val',ucfirst(item.name) + ' – ' + year);
+	field.typeahead('val',ucfirst(item.name) + postfix);
 	event_ids[index] = item.id;
 	field.closest('.input-group').find('.chooser-event-pre').addClass(replaceSpaces(item.type)).attr('data-content', item.type);
 	field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
@@ -780,7 +856,7 @@ function populateIDB(data){
 	result.middle = {};
 	result.end = {};
 	var bol_years_only = true;
-	var datenow = moment();
+	var datenow = moment.utc().hour(12).minute(0).seconds(0);
 
 	var total_span;
 	var first_span;
@@ -796,9 +872,9 @@ function populateIDB(data){
 
 		var datetime = new Array(2);
 
-		datetime[0] = moment().year(data[0].year);
+		datetime[0] = moment.utc().year(data[0].year);
 
-		datetime[1] = moment().year(data[1].year);
+		datetime[1] = moment.utc().year(data[1].year);
 
 		datenow = moment();
 
@@ -822,16 +898,16 @@ function populateIDB(data){
 		result.middle.date = year_1;
 		result.now_date = datenow.year();
 
-		result.timeline_1 = first_span + " years";
-		result.timeline_2 = second_span + " years";
+		result.timeline_1 = first_span + (first_span > 1 ? " years" : " year");
+		result.timeline_2 = second_span + (second_span > 1 ? " years" : " year");
 	} else {
 		bol_years_only = false;
 
 		var datetime = new Array(2);
 
-		datetime[0] = moment().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day);
+		datetime[0] = moment.utc().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day).hour(12).minute(0).seconds(0);
 
-		datetime[1] = moment().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day);
+		datetime[1] = moment.utc().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day).hour(12).minute(0).seconds(0);
 
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
@@ -840,6 +916,7 @@ function populateIDB(data){
 			event_ids.reverse();
 		}
 
+		
 		total_span = Math.abs(datenow.diff(datetime[0], 'days'));
 		first_span = Math.abs(datetime[1].diff(datetime[0], 'days'));
 		second_span = Math.abs(datenow.diff(datetime[1], 'days'));
@@ -856,8 +933,18 @@ function populateIDB(data){
 		result.middle.date = datetime[1].format(format)+', '+year_1;
 		result.now_date = datenow.format(format+', Y');
 
-		result.timeline_1 = first_span + ' days';
-		result.timeline_2 = second_span + ' days';
+		if(settings.timespanformat == 2){
+			result.timeline_1 = moment.preciseDiff(datetime[1], datetime[0]);
+			result.timeline_2 = moment.preciseDiff(datenow, datetime[1]);
+		} else if(settings.timespanformat == 1){
+			first_span = Math.abs(datetime[1].diff(datetime[0], 'years'));
+			second_span = Math.abs(datenow.diff(datetime[1], 'years'));
+			result.timeline_1 = first_span + (first_span > 1 ? " years" : " year");
+			result.timeline_2 = second_span + (second_span > 1 ? " years" : " year");	
+		} else {
+			result.timeline_1 = first_span + (first_span > 1 ? " days" : " day");
+			result.timeline_2 = second_span + (second_span > 1 ? " days" : " day");
+		}
 	}
 
 	result.start.id = data[0].id;
