@@ -466,12 +466,12 @@ function initSuggestionForm(){
 			$(this).val(-1);
 		}
 		
-		if(parseInt($(this).val()) < -3000){
-			$(this).val(-3000);
+		if(parseInt($(this).val()) < -10000){
+			$(this).val(-10000);
 		}
 
-		if(parseInt($(this).val()) > moment.utc().year()){
-			$(this).val(moment.utc().year());
+		if(parseInt($(this).val()) >= moment.utc().year()){
+			$(this).val(moment.utc().subtract(1, 'years').year());
 		}
 		
 		if($(this).val()){
