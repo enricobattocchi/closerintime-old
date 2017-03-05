@@ -4,6 +4,7 @@ var jsondata = new Array();
 var db = null;
 
 var settings = {
+	numberevents : 2,
 	showdates: 0,
 	timespanformat: 0,
 };
@@ -24,22 +25,19 @@ $(function(){
 	initIndexedDB();
 	
 	initTypeahead();
-
-	$('#chooser-event-one-cancel').on('click',function(){
-		$('#chooser-event-one').removeAttr('disabled');
-		$('#chooser-event-one').typeahead('val','');
-		$('#chooser-event-pre-one').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		resetChooserButtons($('#chooser-event-one'));
-		event_ids[0] = null;
+	
+	$('.chooser-cancel').on('click',function(){
+		var chooser_group = $(this).closest('.input-group');
+		var chooser_field = chooser_group.find('.tt-input');
+		var chooser_pre = chooser_group.find('.chooser-event-pre');
+		chooser_field.removeAttr('disabled');
+		chooser_field.typeahead('val','');
+		chooser_pre.attr('data-content', '').removeClass().addClass('chooser-event-pre');
+		resetChooserButtons(chooser_field);
+		event_ids[chooser_field.attr('data-index')] = null;
+		updateHashFromIDS();
 	});
-
-	$('#chooser-event-two-cancel').on('click',function(){
-		$('#chooser-event-two').removeAttr('disabled');
-		$('#chooser-event-two').typeahead('val','');
-		$('#chooser-event-pre-two').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		resetChooserButtons($('#chooser-event-two'));
-		event_ids[1] = null;
-	});
+	
 
 	$(window).on('hashchange',function() {
 		loadComparison();
@@ -63,6 +61,7 @@ function storageAvailable(type) {
 
 function initSettings(){
 	if (storageAvailable('localStorage')) {
+		settings.numberevents = window.localStorage.getItem('numberevents') ? window.localStorage.getItem('numberevents') : 2;
 		settings.showdates = window.localStorage.getItem('showdates') ? window.localStorage.getItem('showdates') : 0;
 		settings.timespanformat = window.localStorage.getItem('timespanformat') ? window.localStorage.getItem('timespanformat') : 0;
 	}
@@ -104,29 +103,24 @@ function initJSONdata(){
 function loadComparison(){
 	console.log("execute loadComparison");
 	var hashpars = window.location.hash.substr(1);
+	var chooser_events = $('#chooser input.tt-input');
 	if(hashpars){
 		var pars = hashpars.split('/');
-		if($.isNumeric(pars[0])){
-			event_ids[0] = pars[0];
-			if(pars[1]){
-				/* both events set, let's compute everything */
-				event_ids[1] = pars[1];
-				computeFromIDB();
+		var index;
+		event_ids = [];
+		var command = null;
+		for(index = 0; index < pars.length; index++){
+			if($.isNumeric(pars[index])){
+				event_ids[index] = pars[index];
 			} else {
-				/* just one event set, fill the chooser field */		
-				db.events.get(event_ids[0])
-				.then(function(data){
-					var chooser_event_one = $('#chooser-event-one');
-					setNameEtc(chooser_event_one, data, 0);
-				}).catch(function (e) {
-					console.error('Error populating the chooser field: '+ e.toString());
-					var chooser_event_one = $('#chooser-event-one');
-					chooser_event_one.removeAttr('disabled').typeahead('val','');
-					resetChooserButtons(chooser_event_one);
-				});
+				if(typeof pars[index] == 'string'){
+					command = pars[index]; 
+				}
 			}
-		} else {
-			if(pars[0] == 'cancel'){
+		}
+		if (command){
+			if(command == 'cancel'){
+				command = pars[index]; 
 				db.localevents.clear().then(function(){
 					showFlAlert('Local events cleared.','info');
 					updateHashFromIDS();
@@ -135,12 +129,22 @@ function loadComparison(){
 					showFlAlert('Failed to clear local events.','warning');
 					updateHashFromIDS();
 				});
-				
 			}
+		} else {
+			db.events
+			.where(':id')
+			.anyOf(event_ids)
+			.toArray(function(events){
+				var index;
+				for(index = 0; index < events.length; index++){
+					var chooser_event = chooser_events.eq(index);
+					setNameEtc(chooser_event, events[index], index);
+				}
+				computeFromIDB();
+			});		
 		}
 	}
 }
-
 
 /**
  * initializes the event search engine
@@ -260,18 +264,22 @@ function updateHashFromIDS(){
 	console.log("execute updateHashFromIDS");
 	var url = window.location.href.split('#');
 	var href = url[0] + '#';
-	if( event_ids[0] > 0 && event_ids[1] > 0){
-		href = href + event_ids[0] + '/' + event_ids[1];
-		if( window.location.href != href ){
-			window.location.href = href;
+	var index;
+	var hashpars = [];
+	for(index = 0; index < event_ids.length; index++){
+		if( event_ids[index] > 0){
+			hashpars.push(event_ids[index]);
+		} else if( event_ids[index] < 0){
+			hashpars = {};
+			break;
 		}
-	} else {
-		if( window.location.href != href ){
-			window.location.href = href;
-		}
-		computeFromIDB();
 	}
-
+	if(hashpars.length > 0){
+		href = href + hashpars.join('/');
+		if( window.location.href != href ){
+			window.location.href = href;
+		}
+	}
 }
 
 
@@ -300,7 +308,7 @@ function filterselected(suggestions){
 	var filtered = new Array();
 	if(suggestions.length > 0){
 		suggestions.forEach(function(item){
-			if(item && item.id !== event_ids[0] && item.id !== event_ids[1]){
+			if(item && event_ids.indexOf(item.id) === -1){
 				filtered.push(item);
 			}
 		});	
@@ -503,10 +511,11 @@ function initSuggestionForm(){
 function initSettingsForm(){
 	
 	$('#settings').on('show.bs.modal', function (event) {
-		
+		var numberevents = window.localStorage.getItem('numberevents');
 		var showdates = window.localStorage.getItem('showdates');
-		var timespanformat = window.localStorage.getItem('timespanformat');
+		var timespanformat = window.localStorage.getItem('timespanformat');				
 		
+		$('input[name="numberevents"]').filter('[value="'+numberevents+'"]').closest('.btn').button('toggle');
 		$('input[name="showdates"]').filter('[value="'+showdates+'"]').closest('.btn').button('toggle');
 		$('input[name="timespanformat"]').filter('[value="'+timespanformat+'"]').closest('.btn').button('toggle');
 		
@@ -515,9 +524,11 @@ function initSettingsForm(){
 
 	$('#settings-save').on('click', function(event) {
 		
+		var numberevents = $('input[name="numberevents"]:checked').val();
 		var showdates = $('input[name="showdates"]:checked').val();
 		var timespanformat = $('input[name="timespanformat"]:checked').val();
 		
+		window.localStorage.setItem('numberevents', numberevents);
 		window.localStorage.setItem('showdates', showdates);
 		window.localStorage.setItem('timespanformat', timespanformat);
 		
@@ -542,30 +553,32 @@ function initSettingsForm(){
  */
 function setNameEtc(field, item, index){
 	resetChooserButtons(field);
-	var postfix = '';
-	if(settings.showdates == 0){
-		var year = item.year;
-		if(item.year < 0){
-			year = Math.abs(item.year)+ ' B.C.';
+	if(item.name && item.id && index >= 0){
+		var postfix = '';
+		if(settings.showdates == 0){
+			var year = item.year;
+			if(item.year < 0){
+				year = Math.abs(item.year)+ ' B.C.';
+			}
+			postfix = ' – '+year;
 		}
-		postfix = ' – '+year;
+		field.typeahead('val',ucfirst(item.name) + postfix);
+		event_ids[index] = item.id;
+		field.closest('.input-group').find('.chooser-event-pre').addClass(replaceSpaces(item.type)).attr('data-content', item.type);
+		field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
+		if(item.link){
+			field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
+				window.open(event.data.link);				
+			});
+		}
+		if(item.id < 0  && item.type != 'submitted'){
+			field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id);
+		} else {
+			field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id',item.id);
+		}
+		field.blur();
+		field.attr('disabled','disabled');
 	}
-	field.typeahead('val',ucfirst(item.name) + postfix);
-	event_ids[index] = item.id;
-	field.closest('.input-group').find('.chooser-event-pre').addClass(replaceSpaces(item.type)).attr('data-content', item.type);
-	field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
-	if(item.link){
-		field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
-			window.open(event.data.link);				
-		});
-	}
-	if(item.id < 0  && item.type != 'submitted'){
-		field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id);
-	} else {
-		field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id',item.id);
-	}
-	field.blur();
-	field.attr('disabled','disabled');
 }
 
 /**
@@ -796,26 +809,28 @@ function initIndexedDB(){
  */
 function computeFromIDB(){
 	console.log("execute computeFromIDB");
-	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
+	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return; // TO REVIEW
 
 	var data = new Array();
 	db.transaction('r', db.events, db.localevents, function(){
 		event_ids.forEach(function(event_id, index){
-			var id = event_id;
-			if(event_id < 0){
-				id = Math.abs(event_id);
-				db.localevents.get(id).then(function(item){
-					item.id = 0-item.id;
-					data[index] = item;
-				}).catch (function (error) {
-					console.error ("Error while getting event from DB: " + error);
-				});
-			} else {
-				db.events.get(id).then(function(item){
-					data[index] = item;
-				}).catch (function (error) {
-					console.error ("Error while getting event from DB: " + error);
-				});
+			if(event_id){
+				var id = event_id;
+				if(event_id < 0){
+					id = Math.abs(event_id);
+					db.localevents.get(id).then(function(item){
+						item.id = 0-item.id;
+						data[index] = item;
+					}).catch (function (error) {
+						console.error ("Error while getting event from DB: " + error);
+					});
+				} else {
+					db.events.get(id).then(function(item){
+						data[index] = item;
+					}).catch (function (error) {
+						console.error ("Error while getting event from DB: " + error);
+					});
+				}
 			}
 		});
 	}).then(function(result){
@@ -831,7 +846,7 @@ function computeFromIDB(){
  * @param data
  */
 function populateIDB(data){
-	if (data.length != 2) return;
+	if (data.length < 2) return;
 	console.log("execute populateIDB");
 
 	var header = $('#timeline-header');
@@ -847,8 +862,11 @@ function populateIDB(data){
 	var middle_date = $('#timeline-marker-middle .date');
 	var middle_description = $('#timeline-marker-middle .timeline-marker-description');
 	var middle_icon = $('#timeline-marker-icon-middle');
-
+	
+	var end = $('#timeline-marker-end');
 	var end_date = $('#timeline-marker-end .date');
+	var end_description = $('#timeline-marker-end .timeline-marker-description');
+	var end_icon = $('#timeline-marker-icon-end');
 
 	var timeline_part_one = $('#timeline-part-one');
 	var timeline_part_one_label = $('#timeline-part-one .timeline-part-label');
@@ -856,179 +874,236 @@ function populateIDB(data){
 	var timeline_part_two = $('#timeline-part-two');
 	var timeline_part_two_label = $('#timeline-part-two .timeline-part-label');
 
-	var chooser_event_one = $('#chooser-event-one');
-	var chooser_event_two = $('#chooser-event-two');
+	var chooser_events = $('#chooser input.tt-input');
 
-	var result = {};
-	result.start = {};
-	result.middle = {};
-	result.end = {};
+	var result = new Array(); 
+	
+	for (i = 0; i < settings.numberevents; i++){
+		result[i] = {}; 
+	}
+	
 	var bol_years_only = true;
-	var datenow = moment.utc().hour(12).minute(0).seconds(0);
 
 	var total_span;
 	var first_span;
 	var second_span;
 	var percentage;
 
-	var year_0;
-	var year_1;
+	var year = [];
 
-	if(!data[0].month || !data[1].month){
+	if(!data[0].month || !data[1].month || (data[2] && !data[2].month)){
 		// let's use only the years
 		bol_years_only = true;
 
-		var datetime = new Array(2);
+		var datetime = new Array(3);
 
 		datetime[0] = moment.utc().year(data[0].year);
-
 		datetime[1] = moment.utc().year(data[1].year);
-
-		datenow = moment();
-
-		// reverse order if first event is more recent
-		if(datetime[1].isBefore(datetime[0])){
-			data.reverse();
-			datetime.reverse();
-			event_ids.reverse();
+		if(data[2] && data[2].year){
+			datetime[2] = moment.utc().year(data[2].year);
+		} else {
+			datetime[2] = moment.utc();
+			data[2] = {
+					name: 'Now'
+			}
 		}
 
-		total_span = Math.abs(datenow.diff(datetime[0], 'years'));
+		var arrays = sortArrays(datetime, data);
+		
+		datetime = arrays['datetime'];
+		data = arrays['data'];
+		event_ids = arrays['event_ids'];
+		
+		total_span = Math.abs(datetime[2].diff(datetime[0], 'years'));
 		first_span = Math.abs(datetime[0].diff(datetime[1], 'years'));
-		second_span = Math.abs(datenow.diff(datetime[1], 'years'));
+		second_span = Math.abs(datetime[2].diff(datetime[1], 'years'));
 
 		percentage = 100*first_span/total_span;
+		
+		datetime.forEach(function(date, index, datetime){
+			year[index] = (date.year() < 0)? Math.abs(date.year())+' B.C.' : date.year();
+		});
 
-		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
-		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
-
-		result.start.date = year_0;
-		result.middle.date = year_1;
-		result.now_date = datenow.year();
-
-		result.timeline_1 = first_span + (first_span > 1 ? " years" : " year");
-		result.timeline_2 = second_span + (second_span > 1 ? " years" : " year");
+		year.forEach(function (year, index, years){
+			result[index].date = year;
+		});
+		
+		timeline_1 = first_span + (first_span > 1 ? " years" : " year");
+		timeline_2 = second_span + (second_span > 1 ? " years" : " year");
 	} else {
 		bol_years_only = false;
 
 		var datetime = new Array(2);
 
 		datetime[0] = moment.utc().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day).hour(12).minute(0).seconds(0);
-
 		datetime[1] = moment.utc().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day).hour(12).minute(0).seconds(0);
-
-		// reverse order if first event is more recent
-		if(datetime[1].isBefore(datetime[0])){
-			data.reverse();
-			datetime.reverse();
-			event_ids.reverse();
+		
+		if(data[2] && data[2].year){
+			datetime[2] = moment.utc().year(data[2].year).month(parseInt(data[2].month)-1).date(data[2].day).hour(12).minute(0).seconds(0);
+		} else {
+			datetime[2] = moment.utc().hour(12).minute(0).seconds(0);
+			data[2] = {
+					name: 'Now'
+			}
 		}
 
+		var arrays = sortArrays(datetime, data);
 		
-		total_span = Math.abs(datenow.diff(datetime[0], 'days'));
+		datetime = arrays['datetime'];
+		data = arrays['data'];
+		event_ids = arrays['event_ids'];
+		
+		total_span = Math.abs(datetime[2].diff(datetime[0], 'days'));
 		first_span = Math.abs(datetime[1].diff(datetime[0], 'days'));
-		second_span = Math.abs(datenow.diff(datetime[1], 'days'));
+		second_span = Math.abs(datetime[2].diff(datetime[1], 'days'));
 
 		percentage = 100*first_span/total_span;
 
-
-		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
-		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
+		datetime.forEach(function(date, index, datetime){
+			year[index] = (date.year() < 0)? Math.abs(date.year())+' B.C.' : date.year();
+		});
 
 		var format = 'MMMM D';
-
-		result.start.date = datetime[0].format(format)+', '+year_0;
-		result.middle.date = datetime[1].format(format)+', '+year_1;
-		result.now_date = datenow.format(format+', Y');
-
+		
+		year.forEach(function (year, index, years){
+			result[index].date = datetime[index].format(format)+', '+year;
+		});
+		
 		if(settings.timespanformat == 2){
-			result.timeline_1 = moment.preciseDiff(datetime[1], datetime[0]);
-			result.timeline_2 = moment.preciseDiff(datenow, datetime[1]);
+			timeline_1 = moment.preciseDiff(datetime[1], datetime[0]);
+			timeline_2 = moment.preciseDiff(datetime[2], datetime[1]);
 		} else if(settings.timespanformat == 1){
 			first_span = Math.abs(datetime[1].diff(datetime[0], 'years'));
-			second_span = Math.abs(datenow.diff(datetime[1], 'years'));
-			result.timeline_1 = first_span + (first_span > 1 ? " years" : " year");
-			result.timeline_2 = second_span + (second_span > 1 ? " years" : " year");	
+			second_span = Math.abs(datetime[2].diff(datetime[1], 'years'));
+			timeline_1 = first_span + (first_span > 1 ? " years" : " year");
+			timeline_2 = second_span + (second_span > 1 ? " years" : " year");	
 		} else {
-			result.timeline_1 = first_span + (first_span > 1 ? " days" : " day");
-			result.timeline_2 = second_span + (second_span > 1 ? " days" : " day");
+			timeline_1 = first_span + (first_span > 1 ? " days" : " day");
+			timeline_2 = second_span + (second_span > 1 ? " days" : " day");
 		}
 	}
 
-	result.start.id = data[0].id;
-	result.start.description = ucfirst(data[0].name);
-	result.start.category_icon = data[0].type;
-	result.start.size = percentage+"%";
-	result.start.link = data[0].link;
-
-	result.middle.id = data[1].id;
-	result.middle.description = ucfirst(data[1].name);
-	result.middle.category_icon = data[1].type;
-	result.middle.size = (100-percentage)+"%";
-	result.middle.verb = (data[1].plural == 1)? 'are' : 'is' ;
-	result.middle.link = data[1].link;
+	data.forEach(function(datum, index, data){
+		if(datum){
+			result[index].id = datum.id;
+			result[index].description = ucfirst(datum.name);
+			result[index].category_icon = datum.type;
+			result[index].link = datum.link;
+		}
+	});
+	
+	result[0].size = percentage+"%";
+	
+	result[1].size = (100-percentage)+"%";
+	result[1].verb = (data[1].plural == 1)? 'are' : 'is' ;
 
 	var second_term_of_comparison = data[0].name;
-
-	if(percentage > 50){
-		result.header = result.middle.description+" "+result.middle.verb+" closer in time to us than to "+second_term_of_comparison+".";
-		result.title = result.middle.description+" "+result.middle.verb+" #closerintime to us than to "+second_term_of_comparison+".";
-	} else if(percentage < 50){
-		result.header = result.middle.description+" "+result.middle.verb+" closer in time to "+second_term_of_comparison+" than to us.";
-		result.title = result.middle.description+" "+result.middle.verb+" #closerintime to "+second_term_of_comparison+" than to us.";
-	} else {
-		result.header = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us.";
-		result.title = result.middle.description+" "+result.middle.verb+" is exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
+	var third_term_of_comparison = 'us';
+	if(data[2]){
+		third_term_of_comparison = data[2].name;
 	}
 
-	header_h3.html(result.header);
-	document.title = result.title;
+	if(percentage > 50){
+		header = result[1].description+" "+result[1].verb+" closer in time to "+third_term_of_comparison+" than to "+second_term_of_comparison+".";
+		title = result[1].description+" "+result[1].verb+" #closerintime to "+third_term_of_comparison+" than to "+second_term_of_comparison+".";
+	} else if(percentage < 50){
+		header = result[1].description+" "+result[1].verb+" closer in time to "+second_term_of_comparison+" than to "+third_term_of_comparison+".";
+		title = result[1].description+" "+result[1].verb+" #closerintime to "+second_term_of_comparison+" than to "+third_term_of_comparison+".";
+	} else {
+		header = result[1].description+" "+result[1].verb+" exactly halfway between "+second_term_of_comparison+" and "+third_term_of_comparison+".";
+		title = result[1].description+" "+result[1].verb+" is exactly halfway between "+second_term_of_comparison+" and "+third_term_of_comparison+". #closerintime";
+	}
+
+	header_h3.html(header);
+	document.title = title;
 	var url = window.location.href.split('#');
-	if(result.start.id>0 && result.middle.id>0){
-		permalink.attr('href', '#'+result.start.id+'/'+result.middle.id);
-		url = url[0] + '#'+result.start.id+'/'+result.middle.id;
+	var index;
+	var hashpars = [];
+	for(index = 0; index < event_ids.length; index++){
+		if( result[index].id > 0){
+			hashpars.push(result[index].id);
+		} else {
+			haspars = {};
+			break;
+		}
+	}
+	if(hashpars.length > 0){
+		permalink.attr('href', '#'+hashpars.join('/'));
+		url = url[0] + '#'+hashpars.join('/');
 	} else {
 		permalink.attr('href', '#');
 		url = url[0];
 	}
-	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>');
+	
+	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>');
 
-	start_date.html(result.start.date);
-	start_description.html(result.start.description);
+	start_date.html(result[0].date);
+	start_description.html(result[0].description);
 
-	middle_date.html(result.middle.date);
-	middle_description.html(result.middle.description);
+	middle_date.html(result[1].date);
+	middle_description.html(result[1].description);
 
-	end_date.html(result.now_date);
+	end_date.html(result[2].date);
+	end_description.html(result[2].description);
 
-	timeline_part_one_label.html(result.timeline_1);
-	timeline_part_two_label.html(result.timeline_2);
+	timeline_part_one_label.html(timeline_1);
+	timeline_part_two_label.html(timeline_2);
 
-	timeline_part_one.width(result.start.size);
-	timeline_part_two.width(result.middle.size);
-	middle.css('left', result.start.size);
+	timeline_part_one.width(result[0].size);
+	timeline_part_two.width(result[1].size);
+	middle.css('left', result[0].size);
 
-	start_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result.start.category_icon));
-	middle_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result.middle.category_icon));
+	start_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result[0].category_icon));
+	middle_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result[1].category_icon));
+	end_icon.removeClass().addClass('timeline-marker-icon '+replaceSpaces(result[2].category_icon));
 
-	if(chooser_event_one.typeahead('val') !== result.start.description){
-		var item = {};
-		item.id = result.start.id;
-		item.name = result.start.description;
-		item.year = year_0;
-		item.type = result.start.category_icon;
-		item.link = result.start.link;
-		setNameEtc(chooser_event_one, item, 0);		
-	}
-	if(chooser_event_two.typeahead('val') !== result.middle.description){
-		var item = {};
-		item.id = result.middle.id;
-		item.name = result.middle.description;
-		item.year = year_1;
-		item.type = result.middle.category_icon;
-		item.link = result.middle.link;
-		setNameEtc(chooser_event_two, item, 1);	
-	}
+	chooser_events.each(function(index, chooser_event){
+		if(chooser_events.eq(index).typeahead('val') !== result[index].description){
+			var item = {};
+			item.id = result[index].id;
+			item.name = result[index].description;
+			item.year = year[index];
+			item.type = result[index].category_icon;
+			item.link = result[index].link;
+			setNameEtc(chooser_events.eq(index), item, 1);	
+		}
+	});
+	
+}
+
+function sortArrays(datetime, data){
+	// temporary array holds objects with position and sort-value
+	var mapped = datetime.map(function(el, i) {
+	  return { index: i, value: el };
+	})
+
+	// sorting the mapped array containing the reduced values
+	mapped.sort(function(a, b) {
+	  if (a.value.isBefore(b.value)){
+		  return -1;
+	  } else if(b.value.isBefore(a.value)){
+		  return 1;
+	  } else {
+		  return 0;
+	  }
+	});
+
+	var result = [];
+
+	result['datetime'] = mapped.map(function(el){
+		return datetime[el.index];
+	});
+	
+	result['data'] = mapped.map(function(el){
+		return data[el.index];
+	});
+
+	result['event_ids'] = mapped.map(function(el){
+		return event_ids[el.index];
+	});
+
+	
+	return result;
 }
 
 /**
@@ -1101,5 +1176,8 @@ function showFlAlert(message, alert, timeout) {
  * @returns
  */
 function replaceSpaces(string){
-	return string.split(' ').join('-');
+	if(string)
+		return string.split(' ').join('-');
+	else
+		return string;
 }
