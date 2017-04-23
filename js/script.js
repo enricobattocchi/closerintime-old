@@ -991,7 +991,9 @@ function populateIDB(data){
 		permalink.attr('href', '#');
 		url = url[0];
 	}
-	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>');
+	var sharing_html = null;
+	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>' 
+			+ '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&quote='+encodeURIComponent(result.title)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>');
 
 	start_date.html(result.start.date);
 	start_description.html(result.start.description);

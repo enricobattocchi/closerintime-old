@@ -419,8 +419,13 @@ foter .popover a:visited{
 	color: $text-color;
 }
 
-#twitter-share-button{
+#twitter-share-button,
+#facebook-share-button{
 	font-weight: bold;
+}
+
+#twitter-share-button{
+	margin-right: 30px;
 }
 
 #form-suggest input,
