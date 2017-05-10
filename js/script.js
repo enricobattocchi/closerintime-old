@@ -44,8 +44,45 @@ $(function(){
 	$(window).on('hashchange',function() {
 		loadComparison();
 	});
+	
+	$(document).on('click', '#clipboard-share-button', function(){
+		copyToClipboard();
+	});
 
 });
+
+function copyToClipboard(){
+
+	var textArea = document.createElement("textarea");
+	textArea.style.position = 'fixed';
+	textArea.style.top = 0;
+	textArea.style.left = 0;
+	textArea.style.width = '2em';
+	textArea.style.height = '2em';
+	textArea.style.padding = 0;
+	textArea.style.border = 'none';
+	textArea.style.outline = 'none';
+	textArea.style.boxShadow = 'none';
+	
+	textArea.style.background = 'transparent';
+	textArea.value = $('#permalink h3').text()+' '+$('#clipboard-share-button').attr('href');
+	
+	document.body.appendChild(textArea);
+	
+	textArea.select();
+	
+	try {
+		var successful = document.execCommand('copy');
+		var msg = successful ? 'successful' : 'unsuccessful';
+		console.log('Copying text command was ' + msg);
+		showFlAlert('Copied to clipboard', 'info');
+		} catch (err) {
+			console.log('Oops, unable to copy');
+			showFlAlert('Text was not copied', 'warning');
+		}
+	
+		document.body.removeChild(textArea);	
+}
 
 
 function storageAvailable(type) {
@@ -993,7 +1030,8 @@ function populateIDB(data){
 	}
 	var sharing_html = null;
 	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>' 
-			+ '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&quote='+encodeURIComponent(result.title)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>');
+			+ '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&quote='+encodeURIComponent(result.title)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>'
+			+ '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>');
 
 	start_date.html(result.start.date);
 	start_description.html(result.start.description);
