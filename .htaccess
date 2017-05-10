@@ -7,6 +7,5 @@ Header set Cache-Control "max-age=0, public"
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /closertintime/
-RewriteRule . index.php [L]
-RewriteRule ^/closerintime/([0-9]+/?)+$ index.php [L]
+RewriteRule ^closerintime/([0-9]+/?)+$ index.php [L]
 </IfModule>
