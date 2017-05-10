@@ -4,8 +4,9 @@ Options +FollowSymLinks
 Header set Cache-Control "max-age=0, public"
 </filesMatch>
 
+
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /closertintime/
-RewriteRule ^closerintime/([0-9]+/?)+$ index.php [L]
+RewriteBase /
+RewriteRule ^([0-9]+/?)+$ index.php [L]
 </IfModule>

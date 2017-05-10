@@ -92,7 +92,7 @@ if ( erli( $sql, $res, $db ) && ( mysqli_num_rows( $res ) > 0 ) ) {
 <script src="js/moment-precise-range.js"></script>
 <script src="js/script.js" async></script>
 
-<title>#closerintime</title>
+<title>#closerintime PHP</title>
 
 <script>
 	(function(i, s, o, g, r, a, m) {
