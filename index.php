@@ -166,7 +166,7 @@ if (count($data) == 2){
 <meta property="og:type" content="website">
 <meta property="og:image"
 	content="https://closerinti.me/<?php echo $image; ?>">
-<meta property="og_app_id" content="1012298692240693">
+<meta property="fb:app_id" content="1012298692240693">
 	
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@lopo">
