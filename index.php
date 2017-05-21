@@ -148,9 +148,9 @@ if (count($data) == 2){
 		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." is exactly halfway between ".$second_term_of_comparison." and us. #closerintime" );
 	}
 	
-	$url .= '/'.$result['start']['id'].'/'.$result['middle']['id'];
-	
 	$image = $url."/thumb/".$result['start']['id']."_".$result['middle']['id'].".png";
+	$url .= '/'.$result['start']['id'].'/'.$result['middle']['id'];	
+	
 }
 
 ?>
