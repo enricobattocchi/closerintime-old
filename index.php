@@ -8,9 +8,9 @@ array_shift($path);
 $data = array();
 $result = array();
 $ids = array();
-$image = '/img/closerintime-img-sharing.png';
 $title = '#closerintime';
 $url = 'https://closerinti.me';
+$image = $url.'/img/closerintime-img-sharing.png';
 
 $whr = array();
 foreach ($path as $id){
@@ -39,8 +39,8 @@ if ( erli( $sql, $res, $db ) && ( mysqli_num_rows( $res ) > 0 ) ) {
 
 if (count($data) == 2){
 	
-	asort($ids);
-	$image = "/thumb/$ids[0]_$ids[1].png";
+	//asort($ids);
+	//$image = "/thumb/$ids[0]_$ids[1].png";
 	
 	if(empty(data[0]['month']) || empty(data[1]['month'])){
 		// let's use only the years
@@ -149,6 +149,8 @@ if (count($data) == 2){
 	}
 	
 	$url .= '/'.$result['start']['id'].'/'.$result['middle']['id'];
+	
+	$image = $url."/thumb/".$result['start']['id']."_".$result['middle']['id'].".png";
 }
 
 ?>
@@ -165,14 +167,14 @@ if (count($data) == 2){
 	content="Timespan comparisons between historical events.">
 <meta property="og:type" content="website">
 <meta property="og:image"
-	content="https://closerinti.me/<?php echo $image; ?>">
+	content="<?php echo $image; ?>">
 <meta property="fb:app_id" content="1012298692240693">
 	
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@lopo">
 <meta name="twitter:title" content="<?php echo $title; ?>">
 <meta name="twitter:description" content="Timespan comparisons between historical events.">
-<meta name="twitter:image" content="https://closerinti.me/<?php echo $image; ?>">
+<meta name="twitter:image" content="<?php echo $image; ?>">
 
 <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
