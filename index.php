@@ -139,16 +139,16 @@ if (count($data) == 2){
 	
 	if($percentage > 50){
 		$result['header'] = $result['middle']['description']." ".$result['middle']['verb']." closer in time to us than to ".$second_term_of_comparison.".";
-		$title = $result['middle']['description']." ".$result['middle']['verb']." #closerintime to us than to ".$second_term_of_comparison.".";
+		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." #closerintime to us than to ".$second_term_of_comparison."." );
 	} else if($percentage < 50){
 		$result['header'] = $result['middle']['description']." ".$result['middle']['verb']." closer in time to ".$second_term_of_comparison." than to us.";
-		$title = $result['middle']['description']." ".$result['middle']['verb']." #closerintime to ".$second_term_of_comparison." than to us.";
+		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." #closerintime to ".$second_term_of_comparison." than to us." );
 	} else {
 		$result['header'] = $result['middle']['description']." ".$result['middle']['verb']." exactly halfway between ".$second_term_of_comparison." and us.";
-		$title = $result['middle']['description']." ".$result['middle']['verb']." is exactly halfway between ".$second_term_of_comparison." and us. #closerintime";
+		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." is exactly halfway between ".$second_term_of_comparison." and us. #closerintime" );
 	}
 	
-	$url .= '/'.$result['start']['id'].'/'.$result;
+	$url .= '/'.$result['start']['id'].'/'.$result['middle']['id'];
 }
 
 ?>
