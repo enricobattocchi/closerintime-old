@@ -1,0 +1,8 @@
+Options +FollowSymLinks
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /thumb/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([0-9]+)_([0-9]+)\.png$ index.php?a=$1&b=$2 [L]
+</IfModule>
