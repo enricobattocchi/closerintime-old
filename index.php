@@ -42,7 +42,7 @@ if (count($data) == 2){
 	//asort($ids);
 	//$image = "/thumb/$ids[0]_$ids[1].png";
 	
-	if(empty(data[0]['month']) || empty(data[1]['month'])){
+	if(empty($data[0]['month']) || empty($data[1]['month'])){
 		// let's use only the years
 		$bol_years_only = true;
 	
