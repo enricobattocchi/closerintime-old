@@ -1023,7 +1023,7 @@ function populateIDB(data){
 		result.title = result.middle.description+" "+result.middle.verb+" #closerintime to "+second_term_of_comparison+" than to us.";
 	} else {
 		result.header = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us.";
-		result.title = result.middle.description+" "+result.middle.verb+" is exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
+		result.title = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
 	}
 
 	header_h3.html(result.header);
