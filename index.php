@@ -559,6 +559,9 @@ if (count($data) == 2){
 						<li><a href='http://www.dafont.com/it/comfortaa.font' rel='external noopener' target='_blank'>Comfortaa</a></li>				
 						</ul>
 					<p>You can <a href="https://paypal.me/lopo"	rel="external noopener" target="_blank">donate</a> to support (part of the donations will be forwarded to the above-mentioned projects).</p>
+					<p>Sharing on Facebook or Twitter shows some images connected to the selected events.
+					I've used public domain pictures wherever possible, and I don't claim any rights on the remaining ones, whose copyright is still of their authors/licensees.
+					The images are used in very low resolution, only for educational and noncommercial purposes.</p>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
@@ -569,7 +572,7 @@ if (count($data) == 2){
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta5 - <a href="#"
+				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta6 - <a href="#"
 				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>
