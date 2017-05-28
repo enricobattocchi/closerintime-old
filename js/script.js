@@ -14,13 +14,6 @@ var settings = {
  */
 $(function(){
 
-	initPopover();
-
-	initSuggestionForm();
-	
-	initSettings();
-	initSettingsForm();
-
 	initIndexedDB();
 	
 	initTypeahead();
@@ -41,15 +34,18 @@ $(function(){
 		event_ids[1] = null;
 	});
 
-	$(window).on('hashchange',function() {
-		loadComparison();
-	});
-	
 	$(document).on('click', '#clipboard-share-button', function(event){
 		copyToClipboard();
 		event.preventDefault();
 		return false;
 	});
+	
+	initPopover();
+
+	initSuggestionForm();
+	
+	initSettings();
+	initSettingsForm();
 
 });
 

@@ -67,12 +67,12 @@ h1,h2{
 }
 
 h5, h6, .timeline-marker-label, #timeline-header{
-	opacity: 0;
-	animation-name: appear;
+	opacity: 1;
+	/*animation-name: appear;
 	animation-duration: 2s;
 	animation-delay: 2s;
     -webkit-animation-fill-mode: forwards; 
-    animation-fill-mode: forwards;
+    animation-fill-mode: forwards;*/
 }
 
 
@@ -101,10 +101,7 @@ header#main h1 a:visited{
 #chooser{
 	margin: 0 auto;
 	max-width: 1200px;
-	/*animation-name: appear;
-    animation-duration: 2s;
-    animation-timing-function: ease-in-out;*/
-    transition: opacity 2s ease-in-out;
+    /*transition: opacity 2s ease-in-out;*/
 }
 
 .transparent{
@@ -148,9 +145,9 @@ header#main h1 a:visited{
     position: relative;
     margin-left: 11%;
     margin-right: 11%;
-    animation-name: expand, appear;
+    /*animation-name: expand, appear;
     animation-duration: 2s;
-    animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;*/
 }
 
 #timeline-header{
