@@ -1,3 +1,12 @@
+Options +FollowSymLinks
+
 <filesMatch "service-worker.js$">
 Header set Cache-Control "max-age=0, public"
 </filesMatch>
+
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^([0-9]+/?){2,}$ index.php [L]
+</IfModule>

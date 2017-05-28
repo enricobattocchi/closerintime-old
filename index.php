@@ -1,26 +1,182 @@
+<?php 
+require_once('connection.php');
+
+$path = $_SERVER['REQUEST_URI'];
+$path = explode('/', $path);
+array_shift($path);
+
+$data = array();
+$result = array();
+$ids = array();
+$title = '#closerintime';
+$url = 'https://closerinti.me';
+$image = $url.'/img/closerintime-img-sharing.png';
+
+$whr = array();
+foreach ($path as $id){
+	if (!empty($id) && is_numeric($id)){
+		$whr[] = ' id = '.$id.' ';
+	}
+}
+
+if(count($whr)){
+	$whr = ' AND ( '.implode(' OR ', $whr).' ) ';
+} else {
+	$whr = '';
+}
+
+$sql = "SELECT id, name, year, month, day, plural "
+		. "FROM events "
+		. "WHERE enabled <> 0 ".
+		$whr;
+$res = $db->query( $sql );
+if ( erli( $sql, $res, $db ) && ( mysqli_num_rows( $res ) > 0 ) ) {
+	while( $row = mysqli_fetch_assoc( $res )){
+		$data[] = $row;
+		$ids[] = $row['id'];
+	}
+}
+
+if (count($data) == 2){
+	
+	//asort($ids);
+	//$image = "/thumb/$ids[0]_$ids[1].png";
+	
+	if(empty($data[0]['month']) || empty($data[1]['month'])){
+		// let's use only the years
+		$bol_years_only = true;
+	
+		$datetime = array(2);
+		
+		$datetime[0] = new DateTime();
+		$datetime[1] = new DateTime();
+		$datenow = new DateTime();
+		$datetime[0]->setDate($data[0]['year'], $datenow->format('m'), $datenow->format('d'))->setTime(12,0,0);
+		$datetime[1]->setDate($data[1]['year'], $datenow->format('m'), $datenow->format('d'))->setTime(12,0,0);
+		$datenow->setTime(12,0,0);
+			
+		// reverse order if first event is more recent
+		if($datetime[1] < $datetime[0]){
+			$data = array_reverse($data);
+			$datetime = array_reverse($datetime);
+		}
+	
+		$diff_now_0 = $datenow->diff($datetime[0]);
+		$diff_0_1 = $datetime[0]->diff($datetime[1]);
+		$diff_now_1 = $datenow->diff($datetime[1]);
+		
+		$total_span = abs($diff_now_0->format('%y'));
+		$first_span = abs($diff_0_1->format('%y'));
+		$second_span = abs($diff_now_1->format('%y'));
+	
+		$percentage = 100*$first_span/$total_span;
+	
+		$year_0 = ($datetime[0]->format('y') < 0)? abs($datetime[0]->format('y')).' B.C.' : $datetime[0]->format('y');
+		$year_1 = ($datetime[1]->format('y') < 0)? abs($datetime[1]->format('y')).' B.C.' : $datetime[1]->format('y');		
+	
+		$result['start']['date'] = $year_0;
+		$result['middle']['date'] = $year_1;
+		$result['now_date'] = $datenow->format('y');
+	
+		$result['timeline_1'] = $first_span . ($first_span > 1 ? " years" : " year");
+		$result['timeline_2'] = $second_span . ($second_span > 1 ? " years" : " year");
+	} else {
+		$bol_years_only = false;
+	
+		$datetime = array(2);
+	
+		$datetime[0] = new DateTime();
+		$datetime[1] = new DateTime();
+		$datenow = new DateTime();
+		$datetime[0]->setDate($data[0]['year'], $data[0]['month'], $data[0]['day'])->setTime(12,0,0);
+		$datetime[1]->setDate($data[1]['year'], $data[1]['month'], $data[1]['day'])->setTime(12,0,0);
+		$datenow->setTime(12,0,0);
+		
+		// reverse order if first event is more recent
+		if($datetime[1] < $datetime[0]){
+			$data = array_reverse($data);
+			$datetime = array_reverse($datetime);
+		}
+	
+		$diff_now_0 = $datenow->diff($datetime[0]);
+		$diff_0_1 = $datetime[0]->diff($datetime[1]);
+		$diff_now_1 = $datenow->diff($datetime[1]);
+		
+		$total_span = abs($diff_now_0->format('%d'));
+		$first_span = abs($diff_0_1->format('%d'));
+		$second_span = abs($diff_now_1->format('%d'));
+	
+		$percentage = 100*$first_span/$total_span;
+	
+	
+		$year_0 = ($datetime[0]->format('y') < 0)? abs($datetime[0]->format('y')).' B.C.' : $datetime[0]->format('y');
+		$year_1 = ($datetime[1]->format('y') < 0)? abs($datetime[1]->format('y')).' B.C.' : $datetime[1]->format('y');	
+	
+		$format = 'F j';
+	
+		$result['start']['date'] = $datetime[0]->format($format).', '.$year_0;
+		$result['middle']['date'] = $datetime[1]->format($format).', '.$year_1;
+		$result['now_date'] = $datenow->format($format.', Y');
+	
+		$result['timeline_1'] = $first_span . ($first_span > 1 ? " days" : " day");
+		$result['timeline_2'] = $second_span . ($second_span > 1 ? " days" : " day");
+	}
+	
+	$result['start']['id'] = $data[0]['id'];
+	$result['start']['description'] = ucfirst($data[0]['name']);
+	//result.start.category_icon = data[0].type;
+	//result.start.size = percentage+"%";
+	//result.start.link = data[0].link;
+	
+	$result['middle']['id'] = $data[1]['id'];
+	$result['middle']['description'] = ucfirst($data[1]['name']);
+	//result.middle.category_icon = data[1].type;
+	//result.middle.size = (100-percentage)+"%";
+	$result['middle']['verb'] = ($data[1]['plural'] == 1)? 'are' : 'is' ;
+	//result.middle.link = data[1].link;
+	
+	$second_term_of_comparison = $data[0]['name'];
+	
+	if($percentage > 50){
+		$result['header'] = $result['middle']['description']." ".$result['middle']['verb']." closer in time to us than to ".$second_term_of_comparison.".";
+		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." #closerintime to us than to ".$second_term_of_comparison."." );
+	} else if($percentage < 50){
+		$result['header'] = $result['middle']['description']." ".$result['middle']['verb']." closer in time to ".$second_term_of_comparison." than to us.";
+		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." #closerintime to ".$second_term_of_comparison." than to us." );
+	} else {
+		$result['header'] = $result['middle']['description']." ".$result['middle']['verb']." exactly halfway between ".$second_term_of_comparison." and us.";
+		$title = htmlentities( $result['middle']['description']." ".$result['middle']['verb']." is exactly halfway between ".$second_term_of_comparison." and us. #closerintime" );
+	}
+	
+	$image = $url."/thumb/".$result['start']['id']."_".$result['middle']['id'].".png";
+	$url .= '/'.$result['start']['id'].'/'.$result['middle']['id'];	
+	
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#fa7921">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta property="og:title" content="#closerintime">
+<meta property="og:title" content="<?php echo $title; ?>">
 <meta property="og:site_name" content="#closerintime">
-<meta property="og:url" content="https://closerinti.me">
+<meta property="og:url" content="<?php echo $url; ?>">
 <meta property="og:description"
 	content="Timespan comparisons between historical events.">
 <meta property="og:type" content="website">
 <meta property="og:image"
-	content="https://closerinti.me/img/closerintime-img-sharing.png">
+	content="<?php echo $image; ?>">
 <meta property="og:image:width" content="1200"/>
-<meta property="og:image:height" content="627"/>
+<meta property="og:image:height" content="600"/>
 <meta property="fb:app_id" content="1012298692240693">
 	
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@lopo">
-<meta name="twitter:title" content="#closerintime">
+<meta name="twitter:title" content="<?php echo $title; ?>">
 <meta name="twitter:description" content="Timespan comparisons between historical events.">
-<meta name="twitter:image" content="https://closerinti.me/img/closerintime-img-sharing.png">
+<meta name="twitter:image" content="<?php echo $image; ?>">
 
 <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
@@ -62,7 +218,7 @@
 <script src="/js/moment-precise-range.js"></script>
 <script src="/js/script.js" async></script>
 
-<title>#closerintime</title>
+<title><?php echo $title; ?></title>
 
 <script>
 	(function(i, s, o, g, r, a, m) {
@@ -403,7 +559,7 @@
 						<li><a href='https://momentjs.com/' rel='external noopener' target='_blank'>moment.js</a></li>
 						<li><a href='https://github.com/GoogleChrome/sw-precache' rel='external noopener' target='_blank'>sw-precache</a></li>
 						<li><a href='http://www.dafont.com/it/comfortaa.font' rel='external noopener' target='_blank'>Comfortaa</a></li>				
-						</ul>					
+						</ul>
 					<p>You can <a href="https://paypal.me/lopo"	rel="external noopener" target="_blank">donate</a> to support (part of the donations will be forwarded to the above-mentioned projects).</p>
 					<p>Sharing on Facebook or Twitter shows some images connected to the selected events.
 					I've used public domain pictures wherever possible, and I don't claim any rights on the remaining ones, whose copyright still belongs to their authors/licensees.

@@ -14,13 +14,6 @@ var settings = {
  */
 $(function(){
 
-	initPopover();
-
-	initSuggestionForm();
-	
-	initSettings();
-	initSettingsForm();
-
 	initIndexedDB();
 	
 	initTypeahead();
@@ -41,13 +34,18 @@ $(function(){
 		event_ids[1] = null;
 	});
 
-	$(window).on('hashchange',function() {
-		loadComparison();
+	$(document).on('click', '#clipboard-share-button', function(event){
+		copyToClipboard();
+		event.preventDefault();
+		return false;
 	});
 	
-	$(document).on('click', '#clipboard-share-button', function(){
-		copyToClipboard();
-	});
+	initPopover();
+
+	initSuggestionForm();
+	
+	initSettings();
+	initSettingsForm();
 
 });
 
@@ -81,7 +79,7 @@ function copyToClipboard(){
 			showFlAlert('Text was not copied', 'warning');
 		}
 	
-		document.body.removeChild(textArea);	
+	document.body.removeChild(textArea);	
 }
 
 
@@ -140,7 +138,7 @@ function initJSONdata(){
  */
 function loadComparison(){
 	console.log("execute loadComparison");
-	var hashpars = window.location.hash.substr(1);
+	var hashpars = window.location.pathname.substr(1);
 	if(hashpars){
 		var pars = hashpars.split('/');
 		if($.isNumeric(pars[0])){
@@ -295,18 +293,24 @@ function resetChooserButtons(field){
  */
 function updateHashFromIDS(){
 	console.log("execute updateHashFromIDS");
-	var url = window.location.href.split('#');
-	var href = url[0] + '#';
+	var url = window.location.origin;
+
 	if( event_ids[0] > 0 && event_ids[1] > 0){
-		href = href + event_ids[0] + '/' + event_ids[1];
-		if( window.location.href != href ){
-			window.location.href = href;
-		}
+		var stateObj = { ids : [event_ids[0], event_ids[1]] };
+		var path = event_ids[0] + '/' + event_ids[1];
+		history.pushState(stateObj, path, '/'+path );
+		computeFromIDB();
 	} else {
+		var stateObj = { ids : [event_ids[0], event_ids[1]] };
+		var path = event_ids[0] + '/' + event_ids[1];
+		history.pushState(stateObj, path, '/' );
+		computeFromIDB();
+		/*
 		if( window.location.href != href ){
 			window.location.href = href;
 		}
 		computeFromIDB();
+		*/
 	}
 
 }
@@ -705,7 +709,7 @@ function initIndexedDB(){
 		.then(function(){
 			console.log("Database is empty. Populating from ajax call...");
 			return new Dexie.Promise(function (resolve, reject) {
-				$.ajax('lookup.php', {
+				$.ajax('/lookup.php', {
 					type: 'get',
 					dataType: 'json',
 					error: function (xhr, textStatus) {
@@ -1015,22 +1019,22 @@ function populateIDB(data){
 		result.title = result.middle.description+" "+result.middle.verb+" #closerintime to "+second_term_of_comparison+" than to us.";
 	} else {
 		result.header = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us.";
-		result.title = result.middle.description+" "+result.middle.verb+" is exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
+		result.title = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
 	}
 
 	header_h3.html(result.header);
 	document.title = result.title;
-	var url = window.location.href.split('#');
+	var url = window.location.origin;
 	if(result.start.id>0 && result.middle.id>0){
-		permalink.attr('href', '#'+result.start.id+'/'+result.middle.id);
-		url = url[0] + '#'+result.start.id+'/'+result.middle.id;
+		permalink.attr('href', '/'+result.start.id+'/'+result.middle.id);
+		url = url + '/'+result.start.id+'/'+result.middle.id;
 	} else {
-		permalink.attr('href', '#');
-		url = url[0];
+		permalink.attr('href', '/');
+		url = url;
 	}
 	var sharing_html = null;
 	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>' 
-			+ '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&quote='+encodeURIComponent(result.title)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>'
+			+ '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>'
 			+ '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>');
 
 	start_date.html(result.start.date);
