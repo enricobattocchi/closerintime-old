@@ -8,5 +8,6 @@ Header set Cache-Control "max-age=0, public"
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
+RewriteRule ^template.html$ index.html [L]
 RewriteRule ^([0-9]+/?){2,}$ index.php [L]
 </IfModule>

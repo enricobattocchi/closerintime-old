@@ -3,15 +3,16 @@ var $ = require('gulp-load-plugins')()
 var gulp = require('gulp');
 var sass = require('gulp-sass');
 var cleanCSS = require('gulp-clean-css');
+var preprocess = require('gulp-preprocess');
+var rename = require('gulp-rename');
 
 var packageJson = require('./package.json');
-
 
 //style paths
 var sassFiles = 'css/style.scss',  
     cssDest = 'css/';
 
-gulp.task('default', ['style', 'generate-service-worker']);
+gulp.task('default', ['style', 'generate-html', 'generate-php', 'generate-service-worker']);
 
 gulp.task('style', function(){  
     gulp.src(sassFiles)
@@ -45,4 +46,20 @@ gulp.task('generate-service-worker', function(callback) {
     					handler: 'networkFirst'
         				}]
 		}, callback);
+	});
+
+
+
+gulp.task('generate-html', function() {
+  gulp.src('template.html')
+    .pipe(preprocess()) //To set environment variables in-line
+    .pipe(rename('index.html'))
+    .pipe(gulp.dest('.')); 
+});
+
+gulp.task('generate-php', function() {
+	  gulp.src('template.html')
+	    .pipe(preprocess({context: { PHP: true}})) //To set environment variables in-line
+	    .pipe(rename('index.php'))
+	    .pipe(gulp.dest('.'));
 	});
