@@ -102,9 +102,9 @@ if (count($data) == 2){
 		$diff_0_1 = $datetime[0]->diff($datetime[1]);
 		$diff_now_1 = $datenow->diff($datetime[1]);
 		
-		$total_span = abs($diff_now_0->format('%d'));
-		$first_span = abs($diff_0_1->format('%d'));
-		$second_span = abs($diff_now_1->format('%d'));
+		$total_span = abs($diff_now_0->format('%a'));
+		$first_span = abs($diff_0_1->format('%a'));
+		$second_span = abs($diff_now_1->format('%a'));
 	
 		$percentage = 100*$first_span/$total_span;
 	
