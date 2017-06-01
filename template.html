@@ -266,7 +266,7 @@ if (count($data) == 2){
 	</header>
 	<section id="chooser" class="transparent">
 		<h2 id="chooser-header">
-			Pick two events <i id="openinstructions" class="fa fa-question-circle-o"
+			Pick two or more events <i id="openinstructions" class="fa fa-question-circle-o"
 				data-toggle="modal" data-target="#instructions"></i>
 				<i id="opensettings" class="fa fa-cog"
 				data-toggle="modal" data-target="#settings"></i>
@@ -325,6 +325,38 @@ if (count($data) == 2){
 					</div>
 				</div>
 			</div>
+			<div class="row">
+				<div class="col-md-3">
+				</div>
+				<div class="col-md-6">
+					<label class="sr-only" for="chooser-event-three">Look up a third event or add your own</label>
+					<div class="input-group">
+						<span class="input-group-addon"><i
+							id="chooser-event-pre-three" class="chooser-event-pre"></i></span> <input
+							type="text" class="form-control typeahead"
+							placeholder="Look up an event or add your own" id="chooser-event-three"
+							name="chooser-event-three" value="" /> <span
+							class="input-group-btn">
+							<button class="btn btn-default hide chooser-link"
+								id="chooser-event-link-three" type="button">
+								<i class="fa fa-wikipedia-w"></i>
+							</button>
+							<button class="btn btn-default chooser-edit"
+								id="chooser-event-edit-three" data-frominput="2" 
+								data-toggle="modal" data-target="#suggest"
+								type="button">
+								<i class="fa fa-pencil"></i>
+							</button>
+							<button class="btn btn-default hide chooser-cancel" id="chooser-event-three-cancel"
+								type="button">
+								<i class="fa fa-close"></i>
+							</button>
+						</span>
+					</div>
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>				
 		</div>
 	</section>
 	<section id="timeline-section">

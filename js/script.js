@@ -4,6 +4,7 @@ var jsondata = new Array();
 var db = null;
 
 var settings = {
+	numberevents : 2,
 	showdates: 0,
 	timespanformat: 0,
 };
@@ -17,22 +18,18 @@ $(function(){
 	initIndexedDB();
 	
 	initTypeahead();
-
-	$('#chooser-event-one-cancel').on('click',function(){
-		$('#chooser-event-one').removeAttr('disabled');
-		$('#chooser-event-one').typeahead('val','');
-		$('#chooser-event-pre-one').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		resetChooserButtons($('#chooser-event-one'));
-		event_ids[0] = null;
+	
+	$('.chooser-cancel').on('click',function(){
+		var chooser_group = $(this).closest('.input-group');
+		var chooser_field = chooser_group.find('.tt-input');
+		var chooser_pre = chooser_group.find('.chooser-event-pre');
+		chooser_field.removeAttr('disabled');
+		chooser_field.typeahead('val','');
+		chooser_pre.attr('data-content', '').removeClass().addClass('chooser-event-pre');
+		resetChooserButtons(chooser_field);
+		event_ids[chooser_field.attr('data-index')] = null;
 	});
-
-	$('#chooser-event-two-cancel').on('click',function(){
-		$('#chooser-event-two').removeAttr('disabled');
-		$('#chooser-event-two').typeahead('val','');
-		$('#chooser-event-pre-two').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		resetChooserButtons($('#chooser-event-two'));
-		event_ids[1] = null;
-	});
+	
 
 	$(document).on('click', '#clipboard-share-button', function(event){
 		copyToClipboard();
@@ -98,6 +95,7 @@ function storageAvailable(type) {
 
 function initSettings(){
 	if (storageAvailable('localStorage')) {
+		settings.numberevents = window.localStorage.getItem('numberevents') ? window.localStorage.getItem('numberevents') : 2;
 		settings.showdates = window.localStorage.getItem('showdates') ? window.localStorage.getItem('showdates') : 0;
 		settings.timespanformat = window.localStorage.getItem('timespanformat') ? window.localStorage.getItem('timespanformat') : 0;
 	}
@@ -139,6 +137,7 @@ function initJSONdata(){
 function loadComparison(){
 	console.log("execute loadComparison");
 	var hashpars = window.location.pathname.substr(1);
+	var chooser_events = $('#chooser input.tt-input');
 	if(hashpars){
 		var pars = hashpars.split('/');
 		if($.isNumeric(pars[0])){
@@ -842,21 +841,23 @@ function computeFromIDB(){
 	var data = new Array();
 	db.transaction('r', db.events, db.localevents, function(){
 		event_ids.forEach(function(event_id, index){
-			var id = event_id;
-			if(event_id < 0){
-				id = Math.abs(event_id);
-				db.localevents.get(id).then(function(item){
-					item.id = 0-item.id;
-					data[index] = item;
-				}).catch (function (error) {
-					console.error ("Error while getting event from DB: " + error);
-				});
-			} else {
-				db.events.get(id).then(function(item){
-					data[index] = item;
-				}).catch (function (error) {
-					console.error ("Error while getting event from DB: " + error);
-				});
+			if(event_id){
+				var id = event_id;
+				if(event_id < 0){
+					id = Math.abs(event_id);
+					db.localevents.get(id).then(function(item){
+						item.id = 0-item.id;
+						data[index] = item;
+					}).catch (function (error) {
+						console.error ("Error while getting event from DB: " + error);
+					});
+				} else {
+					db.events.get(id).then(function(item){
+						data[index] = item;
+					}).catch (function (error) {
+						console.error ("Error while getting event from DB: " + error);
+					});
+				}
 			}
 		});
 	}).then(function(result){
@@ -872,7 +873,7 @@ function computeFromIDB(){
  * @param data
  */
 function populateIDB(data){
-	if (data.length != 2) return;
+	if (data.length < 2) return;
 	console.log("execute populateIDB");
 
 	var header = $('#timeline-header');
@@ -889,7 +890,10 @@ function populateIDB(data){
 	var middle_description = $('#timeline-marker-middle .timeline-marker-description');
 	var middle_icon = $('#timeline-marker-icon-middle');
 
-	var end_date = $('#timeline-marker-end .date');
+	var end = $('#timeline-marker-end');
+ 	var end_date = $('#timeline-marker-end .date');
+	var end_description = $('#timeline-marker-end .timeline-marker-description');
+	var end_icon = $('#timeline-marker-icon-end');
 
 	var timeline_part_one = $('#timeline-part-one');
 	var timeline_part_one_label = $('#timeline-part-one .timeline-part-label');
@@ -897,8 +901,7 @@ function populateIDB(data){
 	var timeline_part_two = $('#timeline-part-two');
 	var timeline_part_two_label = $('#timeline-part-two .timeline-part-label');
 
-	var chooser_event_one = $('#chooser-event-one');
-	var chooser_event_two = $('#chooser-event-two');
+	var chooser_events = $('#chooser input.tt-input');
 
 	var result = {};
 	result.start = {};
@@ -914,12 +917,13 @@ function populateIDB(data){
 
 	var year_0;
 	var year_1;
+	var year_2;
 
 	if(!data[0].month || !data[1].month){
 		// let's use only the years
 		bol_years_only = true;
 
-		var datetime = new Array(2);
+		var datetime = new Array(3);
 
 		datetime[0] = moment.utc().year(data[0].year);
 
