@@ -1,6 +1,6 @@
 $break-point-0: 640px;
 $break-point-1: 1040px;
-$break-point-2: 1800px;
+$break-point-2: 1500px;
 
 $v-break-point-0: 600px;
 
@@ -142,12 +142,15 @@ header#main h1 a:visited{
 }
 
 #timeline{
-    position: relative;
-    margin-left: 11%;
-    margin-right: 11%;
-    /*animation-name: expand, appear;
-    animation-duration: 2s;
-    animation-timing-function: ease-in-out;*/
+	position: relative;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	
+	@media screen and (max-width: $break-point-2) {
+		margin-left: 11%;
+		margin-right: 11%;
+	}
 }
 
 #timeline-header{
@@ -161,13 +164,12 @@ header#main h1 a:visited{
 
 .timeline-part{
 	border: 0px;
-	float: left;
 	position:relative;
 	text-align: center;
-	padding-bottom: 5px;
 	z-index: -100;
 	transition: width 2s ease-in-out;
 	border-bottom: solid 6px;
+	height: 0;
 }
 
 .timeline-part-label{
@@ -178,50 +180,48 @@ header#main h1 a:visited{
 	text-align: center;
 }
 
-#timeline-part-one{
+.timeline-part:nth-of-type(2){
 	border-color: $color-1;
 	color: $color-1;
 }
 
-#timeline-part-two{
+.timeline-part:nth-of-type(4){
 	border-color: $color-2;
 	color: $color-2;
 }
 
-.timeline-marker{
-	position: absolute;
-	top: -2vw;
-	width: 20vw;
-	text-align: center;
-	/*max-width: 250px;*/
-	@media screen and (min-width: $break-point-0) {
-		top: -2.5vw;
-	}
+.timeline-part:nth-of-type(6){
+	border-color: $color-5;
+	color: $color-5;
+}
 
-	@media screen and (min-width: $break-point-1) {
-		top: -3vw;
-	}
+.timeline-marker{
+	position: relative;
+	width: 0vw;
+	text-align: center;
+	flex-grow: 0;
+	top: 3px;
 }
 
 .timeline-marker-label{
-		font-weight: bold;
+	font-weight: bold;
+	position: absolute;
+	top: 3.5vw;
+	width: 10vw;
+	left: -5vw;
 }
 
 .timeline-marker-icon{
-	padding: 1.2vw;
-	margin: 1vw auto;
+	padding: 0;
+	margin: 0 auto;
 	border-radius: 3rem;
 	color: transparent;
-	/*font-size: 2.4rem;
-	line-height: 2rem;*/
 	box-shadow: 0 1px 3px $shadow-1, 0 1px 2px $shadow-2;
 	box-sizing: border-box;	
-	/*background-color: $color-4;
-	max-width: 5vw;*/
 	transition: color 2s;
 	width: 5vw;
 	height: 5vw;
-	position: relative;
+	position: absolute;
 	max-width: 90px;
 	max-height: 90px;
 	background-color: $color-3;
@@ -229,6 +229,8 @@ header#main h1 a:visited{
 	background-position: 0% 0%;
 	background-size: cover;
 	background-repeat: none;
+	top: -2.5vw;
+	left: -2.5vw;
 }
 
 
@@ -343,31 +345,6 @@ header#main h1 a:visited{
 
 .pop-culture{
 	background-position: 0% calc(100% / #{$num_icons} * 13);
-}
-
-
-#timeline-marker-start{
-	left: -10vw;
-}
-
-#timeline-marker-middle{
-	margin-left: -10vw;
-	bottom: -4.95vw;
-	top: auto;
-	transition: left 2s ease-in-out;
-
-	@media screen and (min-width: $break-point-0) {
-		bottom: -4.45vw;
-	}
-
-	@media screen and (min-width: $break-point-1) {
-		bottom: -3.95vw;
-	}
-
-}
-
-#timeline-marker-end{
-	right: -10vw;
 }
 
 h5.date{

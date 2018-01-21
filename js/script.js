@@ -1,4 +1,5 @@
 var event_ids = new Array();
+var event_objs = new Array();
 var eventsengine = null;
 var jsondata = new Array();
 var db = null;
@@ -8,8 +9,210 @@ var settings = {
 	showdates: 0,
 	timespanformat: 0,
 };
+/**
+ * Uses the DBs to populate the JSON array used to choose the events from
+ */
+function initJSONdata(){
+	db.events.toArray(function(array){
+		jsondata = array;
+	}).then(function(){
+		db.localevents.toArray(function(array){
+			array.forEach(function(item){
+				item.id = 0-item.id;
+			});
+			jsondata = jsondata.concat(array);
+		}).then(function(){
+			$('#chooser').removeClass('transparent');
+			initEventEngine();
+		}).catch(function (error){
+			console.error('Failed to initialise local data: '+ error);
+			initEventEngine();
+		});
+	}).catch(function (error) {
+	    console.error ("Failed to initialise data: " + error);
+		showFlAlert('Failed to initialise data!','danger');
+	});
+}
+
+/**
+ * initializes the IndexedDB (using Dexie library) with data from the server
+ */
+function initIndexedDB(){
+	db = new Dexie("closerintime");
+
+	db.version(17).stores({
+		events: "id, name, year, month, day, type, plural, enabled, link, uuid",
+		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
+	});
+	
+
+	db.on('ready', function () {
+		return db.events.clear()
+		.catch(function(error){
+			console.error('Error clearing the DB: '+error);
+			showFlAlert('There was an error initialising the database.<br/>Some older browsers may be not fully supported.','danger');
+		})
+		.then(function(){
+			console.log("Database is empty. Populating from ajax call...");
+			return new Dexie.Promise(function (resolve, reject) {
+				$.ajax('/lookup.php', {
+					type: 'get',
+					dataType: 'json',
+					error: function (xhr, textStatus) {
+						// Rejecting promise to make db.open() fail.
+						reject(textStatus);
+					},
+					success: function (data) {
+						// Resolving Promise will launch then() below.
+						jsondata = data;
+						resolve();
+					}
+				});
+			}).then(function () {
+				console.log("Got ajax response. We'll now put the objects.");
+				return db.events
+					.bulkPut(jsondata);
+			}).catch(Dexie.BulkError, function (e) {
+			    console.error ("Some events not added. " + e.failures.length + " errors.");
+			    showFlAlert('There was an error populating the database.<br/>Some older browsers may be not fully supported.','danger');
+			}).then(function(){
+				console.log("Added events");
+				
+				//  extract UUIDs
+				var uuids = jsondata.map(function(item){
+					return item.uuid;
+				});	
+				
+				// delete local events with matching UUIDS
+				return db.localevents
+				.where('uuid')
+				.anyOf(uuids)
+				.delete();
+			}).catch(function(error){
+				console.error('error deleting superseded local events: ' + error);
+				showFlAlert('There was an error syncing the local database.<br/>Some older browsers may be not fully supported.','warning');
+			}).then(function (deleteCount) {
+				if(deleteCount > 0){
+					console.log( "Deleted " + deleteCount + " events");
+				}
+				
+				// ask the server what happened to remaining submissions
+				return db.localevents
+				.orderBy('uuid')
+				.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
+				.keys(function(uuids){
+					var requestjson = {};
+					if(uuids.length){
+						
+						return new Dexie.Promise(function (resolve, reject) {
+							$.ajax('verify.php', {
+								type: 'post',
+								data: JSON.stringify(uuids),
+								dataType: 'json',
+								error: function (xhr, textStatus) {
+									// Rejecting promise to make db.open() fail.
+									reject(textStatus);
+								},
+								success: function (data) {
+									console.log("Verification asked.");
+									resolve(data);
+								}
+							});
+						}).then(function(result) {
+							console.log(result);
+							
+							db.transaction('rw', db.localevents, function () {
+								
+								if(result['to_move'] && result['to_move'].length){
+									db.localevents
+									.where('uuid')
+									.anyOf(result['to_move'])
+									.modify({type: 'personal'})
+									.catch(function(error){
+										console.error('error moving local events to personal list: ' + error);
+									});
+								}
+								
+								if(result['to_delete'] && result['to_delete'].length){
+									db.localevents
+									.where('uuid')
+									.anyOf(result['to_delete'])
+									.delete()
+									.catch(function(error){
+										console.error('error deleting substituted local events: ' + error);
+									});
+								}
+							}).then(function(){
+								showFlAlert('Local database updated','success');
+								initJSONdata();
+							}).catch(function(error){
+								console.error('Failed transaction: '+ error.stack);
+								showFlAlert('There was an error cleaning the local database.<br/>Some browsers may be not fully supported.','danger');
+							});
+
+						}).catch(function(error){
+							showFlAlert('Error while querying the server for updates', 'warning');
+							console.error('Failed AJAX verify: '+ error.stack);
+						});
+					}
+
+				});
+			}).then(function () {
+				console.log ("Transaction committed");
+				initJSONdata();
+				loadComparison();
+			}).catch(function (error){
+				showFlAlert('There was an error verifying the local database. Some duplicate events could be appearing. ','warning');
+				console.error('Failed filtering: '+ error.stack);
+				initJSONdata();
+				loadComparison();
+			});
+		});
+	});
 
 
+	db.open()
+	.catch(function (error) {
+		console.error(error.stack || error);
+	});
+
+}
+
+/**
+ * reads the events from the DB and starts the computation
+ */
+function computeFromIDB(){
+	console.log("execute computeFromIDB");
+	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
+
+	var data = new Array();
+	db.transaction('r', db.events, db.localevents, function(){
+		event_ids.forEach(function(event_id, index){
+			if(event_id){
+				var id = event_id;
+				if(event_id < 0){
+					id = Math.abs(event_id);
+					db.localevents.get(id).then(function(item){
+						item.id = 0-item.id;
+						data[index] = item;
+					}).catch (function (error) {
+						console.error ("Error while getting event from DB: " + error);
+					});
+				} else {
+					db.events.get(id).then(function(item){
+						data[index] = item;
+					}).catch (function (error) {
+						console.error ("Error while getting event from DB: " + error);
+					});
+				}
+			}
+		});
+	}).then(function(result){
+		populateIDB(data);
+	}).catch(function(error){
+		console.error('Failed transaction: '+ error.stack);
+	});
+}
 /**
  * After the page has been loaded: initializations
  */
@@ -46,53 +249,6 @@ $(function(){
 
 });
 
-function copyToClipboard(){
-
-	var textArea = document.createElement("textarea");
-	textArea.style.position = 'fixed';
-	textArea.style.top = 0;
-	textArea.style.left = 0;
-	textArea.style.width = '2em';
-	textArea.style.height = '2em';
-	textArea.style.padding = 0;
-	textArea.style.border = 'none';
-	textArea.style.outline = 'none';
-	textArea.style.boxShadow = 'none';
-	
-	textArea.style.background = 'transparent';
-	textArea.value = $('#permalink h3').text()+' '+$('#clipboard-share-button').attr('href');
-	
-	document.body.appendChild(textArea);
-	
-	textArea.select();
-	
-	try {
-		var successful = document.execCommand('copy');
-		var msg = successful ? 'successful' : 'unsuccessful';
-		console.log('Copying text command was ' + msg);
-		showFlAlert('Copied to clipboard', 'info');
-		} catch (err) {
-			console.log('Oops, unable to copy');
-			showFlAlert('Text was not copied', 'warning');
-		}
-	
-	document.body.removeChild(textArea);	
-}
-
-
-function storageAvailable(type) {
-	try {
-		var storage = window[type],
-			x = '__storage_test__';
-		storage.setItem(x, x);
-		storage.removeItem(x);
-		return true;
-	}
-	catch(e) {
-		return false;
-	}
-}
-
 function initSettings(){
 	if (storageAvailable('localStorage')) {
 		settings.numberevents = window.localStorage.getItem('numberevents') ? window.localStorage.getItem('numberevents') : 2;
@@ -101,77 +257,6 @@ function initSettings(){
 	}
 	else {
 		$('#opensettings').addClass('hide');
-	}
-}
-
-/**
- * Uses the DBs to populate the JSON array used to choose the events from
- */
-function initJSONdata(){
-	db.events.toArray(function(array){
-		jsondata = array;
-	}).then(function(){
-		db.localevents.toArray(function(array){
-			array.forEach(function(item){
-				item.id = 0-item.id;
-			});
-			jsondata = jsondata.concat(array);
-		}).then(function(){
-			$('#chooser').removeClass('transparent');
-			initEventEngine();
-		}).catch(function (error){
-			console.error('Failed to initialise local data: '+ error);
-			initEventEngine();
-		});
-	}).catch(function (error) {
-	    console.error ("Failed to initialise data: " + error);
-		showFlAlert('Failed to initialise data!','danger');
-	});
-
-}
-
-/**
- * Reads the hash part of the URL to fill the chooser input field and start the
- * computation
- */
-function loadComparison(){
-	console.log("execute loadComparison");
-	var hashpars = window.location.pathname.substr(1);
-	var chooser_events = $('#chooser input.tt-input');
-	if(hashpars){
-		var pars = hashpars.split('/');
-		if($.isNumeric(pars[0])){
-			event_ids[0] = pars[0];
-			if(pars[1]){
-				/* both events set, let's compute everything */
-				event_ids[1] = pars[1];
-				computeFromIDB();
-			} else {
-				/* just one event set, fill the chooser field */		
-				db.events.get(event_ids[0])
-				.then(function(data){
-					var chooser_event_one = $('#chooser-event-one');
-					setNameEtc(chooser_event_one, data, 0);
-				}).catch(function (e) {
-					console.error('Error populating the chooser field: '+ e.toString());
-					var chooser_event_one = $('#chooser-event-one');
-					chooser_event_one.removeAttr('disabled').typeahead('val','');
-					resetChooserButtons(chooser_event_one);
-				});
-			}
-		} else {
-			if(pars[0] == 'cancel'){
-				db.localevents.clear().then(function(){
-					showFlAlert('Local events cleared.','info');
-					updateHashFromIDS();
-				}).catch(function(error){
-					console.error('Failed to clear local events: '+error);
-					showFlAlert('Failed to clear local events.','warning');
-					updateHashFromIDS();
-				});
-				
-			}
-		}
 	}
 }
 
@@ -260,99 +345,8 @@ function initTypeahead(){
 			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong>'+postfix+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
-		var index = $('#chooser input[id^="chooser-"]').index(this);
-		event_ids[index] = obj.id;
-		setNameEtc($(this), obj, index);
-		// computeFromIDB();
-		updateHashFromIDS();
-	})/*.on('typeahead:render', function(){
-		if(!$(this).typeahead('val')){
-			var index = $('#chooser input[id^="chooser-"]').index(this);
-			event_ids[index] = '';
-		}			
-	})*/.typeahead('val', '').removeAttr('disabled');	
-}
-
-
-/**
- * Hides the buttons and unsets click events for a given chooser field
- * 
- * @param field
- */
-function resetChooserButtons(field){
-	field.closest('.input-group').find('.chooser-cancel').addClass('hide');
-	field.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
-	field.closest('.input-group').find('.chooser-edit').removeClass('hide').removeAttr('data-id');
-	field.closest('.input-group').find('.chooser-event-pre').attr('data-content', '').removeClass().addClass('chooser-event-pre');
-	field.removeAttr('disabled');
-}
-
-/**
- * reads the event_ids array and updates the url with the IDs in the hash part
- */
-function updateHashFromIDS(){
-	console.log("execute updateHashFromIDS");
-	var url = window.location.origin;
-
-	if( event_ids[0] > 0 && event_ids[1] > 0){
-		var stateObj = { ids : [event_ids[0], event_ids[1]] };
-		var path = event_ids[0] + '/' + event_ids[1];
-		history.pushState(stateObj, path, '/'+path );
-		computeFromIDB();
-	} else {
-		var stateObj = { ids : [event_ids[0], event_ids[1]] };
-		var path = event_ids[0] + '/' + event_ids[1];
-		history.pushState(stateObj, path, '/' );
-		computeFromIDB();
-		/*
-		if( window.location.href != href ){
-			window.location.href = href;
-		}
-		computeFromIDB();
-		*/
-	}
-
-}
-
-
-/**
- * service function for the typeahead engine lets it use only the name of the
- * event, not the year part
- * 
- * @param str
- * @returns array of tokens from the string
- */
-function whitespacelesshyphen(str) {
-	str = (typeof str === "undefined" || str === null) ? "" : str + "";
-	str = str.split('–');
-	str = str[0];
-	return str ? str.split(/\s+/) : [];
-}
-
-/**
- * filters the typeahead suggestions so they don't show the already choosen
- * event
- * 
- * @param suggestions
- * @returns {Array}
- */
-function filterselected(suggestions){
-	var filtered = new Array();
-	if(suggestions.length > 0){
-		suggestions.forEach(function(item){
-			if(item && item.id !== event_ids[0] && item.id !== event_ids[1]){
-				filtered.push(item);
-			}
-		});	
-	}
-	return filtered;
-}
-
-/**
- * initializes the popovers
- */
-function initPopover(){
-	$('[data-toggle="popover"]').popover();	
+		insertEventObj(obj);
+	}).typeahead('val', '').removeAttr('disabled');	
 }
 
 /**
@@ -571,58 +565,93 @@ function initSettingsForm(){
 	});	
 
 }
-
-
 /**
- * Sets name, link, icon, buttons for a given chooser field
- * 
- * @param field
- * @param item
- * @param index
+ * Reads the hash part of the URL to fill the chooser input field and start the
+ * computation
  */
-function setNameEtc(field, item, index){
-	resetChooserButtons(field);
-	var postfix = '';
-	if(settings.showdates == 0){
-		var year = item.year;
-		if(item.year < 0){
-			year = Math.abs(item.year)+ ' B.C.';
+function loadComparison(){
+	console.log("execute loadComparison");
+	var hashpars = window.location.pathname.substr(1);
+	var chooser_events = $('#chooser input.tt-input');
+	if(hashpars){
+		var pars = hashpars.split('/');
+		if($.isNumeric(pars[0])){
+			event_ids[0] = pars[0];
+			if(pars[1]){
+				/* both events set, let's compute everything */
+				event_ids[1] = pars[1];
+				computeFromIDB();
+			} else {
+				/* just one event set, fill the chooser field */		
+				db.events.get(event_ids[0])
+				.then(function(data){
+					var chooser_event_one = $('#chooser-event-one');
+					setNameEtc(chooser_event_one, data, 0);
+				}).catch(function (e) {
+					console.error('Error populating the chooser field: '+ e.toString());
+					var chooser_event_one = $('#chooser-event-one');
+					chooser_event_one.removeAttr('disabled').typeahead('val','');
+					resetChooserButtons(chooser_event_one);
+				});
+			}
+		} else {
+			if(pars[0] == 'cancel'){
+				db.localevents.clear().then(function(){
+					showFlAlert('Local events cleared.','info');
+					updateHashFromIDS();
+				}).catch(function(error){
+					console.error('Failed to clear local events: '+error);
+					showFlAlert('Failed to clear local events.','warning');
+					updateHashFromIDS();
+				});
+				
+			}
 		}
-		postfix = ' – '+year;
 	}
-	field.typeahead('val',ucfirst(item.name) + postfix);
-	event_ids[index] = item.id;
-	field.closest('.input-group').find('.chooser-event-pre').addClass(replaceSpaces(item.type)).attr('data-content', item.type);
-	field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
-	if(item.link){
-		field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
-			window.open(event.data.link);				
-		});
-	}
-	if(item.id < 0  && item.type != 'submitted'){
-		field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id);
-	} else {
-		field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id',item.id);
-	}
-	field.blur();
-	field.attr('disabled','disabled');
 }
 
-/**
- * resets all the fields of the suggestion form
- */
-function resetSuggestionForm(){
-	$('input[name="id"]').val('');
-	$('input[name="uuid"]').val('');
-	$('input[name="name"]').val('');
-	$('input[name="year"]').val('');
-	$('select[name="month"]').val('').attr('disabled', 'disabled');
-	$('select[name="day"]').val('').attr('disabled', 'disabled');
-	$('#type-personal').click();
-	$('#singular').click();
-	$('#type-group').removeClass('hide');
-	$('#suggestions-delete').addClass('hide');
+
+
+
+function insertEventObj(obj){
+	obj
+	
 }
+
+
+
+
+/**
+ * reads the event_ids array and updates the url with the IDs in the hash part
+ */
+function updateHashFromIDS(){
+	console.log("execute updateHashFromIDS");
+	var url = window.location.origin;
+
+	if( event_ids[0] > 0 && event_ids[1] > 0){
+		var stateObj = { ids : [event_ids[0], event_ids[1]] };
+		var path = event_ids[0] + '/' + event_ids[1];
+		history.pushState(stateObj, path, '/'+path );
+		computeFromIDB();
+	} else {
+		var stateObj = { ids : [event_ids[0], event_ids[1]] };
+		var path = event_ids[0] + '/' + event_ids[1];
+		history.pushState(stateObj, path, '/' );
+		computeFromIDB();
+		/*
+		if( window.location.href != href ){
+			window.location.href = href;
+		}
+		computeFromIDB();
+		*/
+	}
+
+}
+
+
+
+
+
 
 /**
  * submits the suggestions to the server to be included in the global list of
@@ -684,188 +713,7 @@ function pushSuggestions(data){
 }
 
 
-/**
- * initializes the IndexedDB (using Dexie library) with data from the server
- */
-/**
- * 
- */
-function initIndexedDB(){
-	db = new Dexie("closerintime");
 
-	db.version(17).stores({
-		events: "id, name, year, month, day, type, plural, enabled, link, uuid",
-		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
-	});
-	
-
-	db.on('ready', function () {
-		return db.events.clear()
-		.catch(function(error){
-			console.error('Error clearing the DB: '+error);
-			showFlAlert('There was an error initialising the database.<br/>Some older browsers may be not fully supported.','danger');
-		})
-		.then(function(){
-			console.log("Database is empty. Populating from ajax call...");
-			return new Dexie.Promise(function (resolve, reject) {
-				$.ajax('/lookup.php', {
-					type: 'get',
-					dataType: 'json',
-					error: function (xhr, textStatus) {
-						// Rejecting promise to make db.open() fail.
-						reject(textStatus);
-					},
-					success: function (data) {
-						// Resolving Promise will launch then() below.
-						jsondata = data;
-						resolve();
-					}
-				});
-			}).then(function () {
-				console.log("Got ajax response. We'll now put the objects.");
-				return db.events
-					.bulkPut(jsondata);
-			}).catch(Dexie.BulkError, function (e) {
-			    console.error ("Some events not added. " + e.failures.length + " errors.");
-			    showFlAlert('There was an error populating the database.<br/>Some older browsers may be not fully supported.','danger');
-			}).then(function(){
-				console.log("Added events");
-				
-				//  extract UUIDs
-				var uuids = jsondata.map(function(item){
-					return item.uuid;
-				});	
-				
-				// delete local events with matching UUIDS
-				return db.localevents
-				.where('uuid')
-				.anyOf(uuids)
-				.delete();
-			}).catch(function(error){
-				console.error('error deleting superseded local events: ' + error);
-				showFlAlert('There was an error syncing the local database.<br/>Some older browsers may be not fully supported.','warning');
-			}).then(function (deleteCount) {
-				if(deleteCount > 0){
-					console.log( "Deleted " + deleteCount + " events");
-				}
-				
-				// ask the server what happened to remaining submissions
-				return db.localevents
-				.orderBy('uuid')
-				.filter(function(item){	return (item.type == 'submitted') && (item.sent == 1);	})
-				.keys(function(uuids){
-					var requestjson = {};
-					if(uuids.length){
-						
-						return new Dexie.Promise(function (resolve, reject) {
-							$.ajax('verify.php', {
-								type: 'post',
-								data: JSON.stringify(uuids),
-								dataType: 'json',
-								error: function (xhr, textStatus) {
-									// Rejecting promise to make db.open() fail.
-									reject(textStatus);
-								},
-								success: function (data) {
-									console.log("Verification asked.");
-									resolve(data);
-								}
-							});
-						}).then(function(result) {
-							console.log(result);
-							
-							db.transaction('rw', db.localevents, function () {
-								
-								if(result['to_move'] && result['to_move'].length){
-									db.localevents
-									.where('uuid')
-									.anyOf(result['to_move'])
-									.modify({type: 'personal'})
-									.catch(function(error){
-										console.error('error moving local events to personal list: ' + error);
-									});
-								}
-								
-								if(result['to_delete'] && result['to_delete'].length){
-									db.localevents
-									.where('uuid')
-									.anyOf(result['to_delete'])
-									.delete()
-									.catch(function(error){
-										console.error('error deleting substituted local events: ' + error);
-									});
-								}
-							}).then(function(){
-								showFlAlert('Local database updated','success');
-								initJSONdata();
-							}).catch(function(error){
-								console.error('Failed transaction: '+ error.stack);
-								showFlAlert('There was an error cleaning the local database.<br/>Some browsers may be not fully supported.','danger');
-							});
-
-						}).catch(function(error){
-							showFlAlert('Error while querying the server for updates', 'warning');
-							console.error('Failed AJAX verify: '+ error.stack);
-						});
-					}
-
-				});
-			}).then(function () {
-				console.log ("Transaction committed");
-				initJSONdata();
-				loadComparison();
-			}).catch(function (error){
-				showFlAlert('There was an error verifying the local database. Some duplicate events could be appearing. ','warning');
-				console.error('Failed filtering: '+ error.stack);
-				initJSONdata();
-				loadComparison();
-			});
-		});
-	});
-
-
-	db.open()
-	.catch(function (error) {
-		console.error(error.stack || error);
-	});
-
-}
-
-/**
- * reads the events from the DB and starts the computation
- */
-function computeFromIDB(){
-	console.log("execute computeFromIDB");
-	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
-
-	var data = new Array();
-	db.transaction('r', db.events, db.localevents, function(){
-		event_ids.forEach(function(event_id, index){
-			if(event_id){
-				var id = event_id;
-				if(event_id < 0){
-					id = Math.abs(event_id);
-					db.localevents.get(id).then(function(item){
-						item.id = 0-item.id;
-						data[index] = item;
-					}).catch (function (error) {
-						console.error ("Error while getting event from DB: " + error);
-					});
-				} else {
-					db.events.get(id).then(function(item){
-						data[index] = item;
-					}).catch (function (error) {
-						console.error ("Error while getting event from DB: " + error);
-					});
-				}
-			}
-		});
-	}).then(function(result){
-		populateIDB(data);
-	}).catch(function(error){
-		console.error('Failed transaction: '+ error.stack);
-	});
-}
 
 /**
  * Compares the data and populates the diagram
@@ -908,7 +756,6 @@ function populateIDB(data){
 	result.middle = {};
 	result.end = {};
 	var bol_years_only = true;
-	var datenow = moment.utc().hour(12).minute(0).seconds(0);
 
 	var total_span;
 	var first_span;
@@ -918,8 +765,9 @@ function populateIDB(data){
 	var year_0;
 	var year_1;
 	var year_2;
+	var year = array();
 
-	if(!data[0].month || !data[1].month){
+	if(!data[0].month || !data[1].month || (data[2] && !data[2].month)){
 		// let's use only the years
 		bol_years_only = true;
 
@@ -928,8 +776,12 @@ function populateIDB(data){
 		datetime[0] = moment.utc().year(data[0].year);
 
 		datetime[1] = moment.utc().year(data[1].year);
-
-		datenow = moment();
+		
+		if(data[2]){
+			datetime[2] = moment.utc().year(data[2].year);
+		} else {
+			datetime[2] = moment.utc();
+		}
 
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
@@ -1037,9 +889,15 @@ function populateIDB(data){
 		url = url;
 	}
 	var sharing_html = null;
-	sharing.html('<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>' 
-			+ '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>'
-			+ '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>');
+	sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
+	if(result.start.id>0 && result.middle.id>0){
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
+	} else  {
+		sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(result.title)+'"><i class="fa fa-facebook"></i> Share</a>';
+	}
+	sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
+		
+	sharing.html(sharing_html);
 
 	start_date.html(result.start.date);
 	start_description.html(result.start.description);
@@ -1077,6 +935,162 @@ function populateIDB(data){
 		item.link = result.middle.link;
 		setNameEtc(chooser_event_two, item, 1);	
 	}
+}
+
+function copyToClipboard(){
+
+	var textArea = document.createElement("textarea");
+	textArea.style.position = 'fixed';
+	textArea.style.top = 0;
+	textArea.style.left = 0;
+	textArea.style.width = '2em';
+	textArea.style.height = '2em';
+	textArea.style.padding = 0;
+	textArea.style.border = 'none';
+	textArea.style.outline = 'none';
+	textArea.style.boxShadow = 'none';
+	
+	textArea.style.background = 'transparent';
+	textArea.value = $('#permalink h3').text()+' '+$('#clipboard-share-button').attr('href');
+	
+	document.body.appendChild(textArea);
+	
+	textArea.select();
+	
+	try {
+		var successful = document.execCommand('copy');
+		var msg = successful ? 'successful' : 'unsuccessful';
+		console.log('Copying text command was ' + msg);
+		if( successful ) {
+			showFlAlert('Copied to clipboard', 'info');
+		} else {
+			throw "Something was wrong with copying";
+		}
+	} catch (err) {
+		console.log('Oops, unable to copy');
+		showFlAlert('Text was not copied', 'warning');
+	}
+	
+	document.body.removeChild(textArea);	
+}
+
+function storageAvailable(type) {
+	try {
+		var storage = window[type],
+			x = '__storage_test__';
+		storage.setItem(x, x);
+		storage.removeItem(x);
+		return true;
+	}
+	catch(e) {
+		return false;
+	}
+}
+
+/**
+ * Hides the buttons and unsets click events for a given chooser field
+ * 
+ * @param field
+ */
+function resetChooserButtons(field){
+	field.closest('.input-group').find('.chooser-cancel').addClass('hide');
+	field.closest('.input-group').find('.chooser-link').addClass('hide').off('click');
+	field.closest('.input-group').find('.chooser-edit').removeClass('hide').removeAttr('data-id');
+	field.closest('.input-group').find('.chooser-event-pre').attr('data-content', '').removeClass().addClass('chooser-event-pre');
+	field.removeAttr('disabled');
+}
+
+/**
+ * service function for the typeahead engine lets it use only the name of the
+ * event, not the year part
+ * 
+ * @param str
+ * @returns array of tokens from the string
+ */
+function whitespacelesshyphen(str) {
+	str = (typeof str === "undefined" || str === null) ? "" : str + "";
+	str = str.split('–');
+	str = str[0];
+	return str ? str.split(/\s+/) : [];
+}
+
+/**
+ * filters the typeahead suggestions so they don't show the already choosen
+ * event
+ * 
+ * @param suggestions
+ * @returns {Array}
+ */
+function filterselected(suggestions){
+	var filtered = new Array();
+	if(suggestions.length > 0){
+		suggestions.forEach(function(item){
+			if(item && event_ids.indexOf(item.id) === -1){
+				filtered.push(item);
+			}
+		});	
+	}
+	return filtered;
+}
+
+/**
+ * initializes the popovers
+ */
+function initPopover(){
+	$('[data-toggle="popover"]').popover();	
+}
+
+/**
+ * Sets name, link, icon, buttons for a given chooser field
+ * 
+ * @param field
+ * @param item
+ * @param index
+ */
+function setNameEtc(field, item, index){
+	resetChooserButtons(field);
+	if(item.name && item.id && index >= 0){
+		var postfix = '';
+		if(settings.showdates == 0){
+			var year = item.year;
+			if(item.year < 0){
+				year = Math.abs(item.year)+ ' B.C.';
+			}
+			postfix = ' – '+year;
+		}
+		field.typeahead('val',ucfirst(item.name) + postfix);
+		event_ids[index] = item.id;
+		field.closest('.input-group').find('.chooser-event-pre').addClass(replaceSpaces(item.type)).attr('data-content', item.type);
+		field.closest('.input-group').find('.chooser-cancel').removeClass('hide');
+		if(item.link){
+			field.closest('.input-group').find('.chooser-link').removeClass('hide').click(item,function(event){
+				window.open(event.data.link);				
+			});
+		}
+		if(item.id < 0  && item.type != 'submitted'){
+			field.closest('.input-group').find('.chooser-edit').removeClass('hide').attr('data-id',item.id);
+		} else {
+			field.closest('.input-group').find('.chooser-edit').addClass('hide').removeAttr('data-id',item.id);
+		}
+		field.blur();
+		field.attr('disabled','disabled');
+	}
+}
+
+/**
+ * resets all the fields of the suggestion form
+ */
+function resetSuggestionForm(){
+	$('input[name="id"]').val('');
+	$('input[name="uuid"]').val('');
+	$('input[name="name"]').val('');
+	$('input[name="year"]').val('');
+	$('select[name="month"]').val('').attr('disabled', 'disabled');
+	$('select[name="day"]').val('').attr('disabled', 'disabled');
+	$('#type-personal').click();
+	$('#singular').click();
+	$('#type-group').removeClass('hide');
+	$('#suggestions-delete').addClass('hide');
 }
 
 /**

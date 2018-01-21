@@ -89,93 +89,60 @@
 	</header>
 	<section id="chooser" class="transparent">
 		<h2 id="chooser-header">
-			Pick two events <i id="openinstructions" class="fa fa-question-circle-o"
+			Pick two or more events <i id="openinstructions" class="fa fa-question-circle-o"
 				data-toggle="modal" data-target="#instructions"></i>
 				<i id="opensettings" class="fa fa-cog"
 				data-toggle="modal" data-target="#settings"></i>
 		</h2>
 		<div class="container-fluid">
 			<div class="row">
+				<div class="col-md-3">
+				</div>
 				<div class="col-md-6">
-					<label class="sr-only" for="chooser-event-one">Look up an event or add your own</label>
+					<label class="sr-only" for="adder">Look up an event or add your own</label>
 					<div class="input-group">
 						<span class="input-group-addon"><i
-							id="chooser-event-pre-one" class="chooser-event-pre"></i></span> <input
+							id="adder-pre" class="chooser-event-pre"></i></span> <input
 							type="text" class="form-control typeahead"
-							placeholder="Look up an event or add your own" id="chooser-event-one"
-							name="chooser-event-one" value="" /> <span
+							placeholder="Look up an event or add your own" id="adder"
+							name="adder" value="" /> <span
 							class="input-group-btn">
 							<button class="btn btn-default hide chooser-link"
-								id="chooser-event-link-one" type="button">
+								id="adder-link" type="button">
 								<i class="fa fa-wikipedia-w"></i>
 							</button>
 							<button class="btn btn-default chooser-edit"
-								id="chooser-event-edit-one" data-frominput="0" 
+								id="adder-edit" data-frominput="2" 
 								data-toggle="modal" data-target="#suggest"
 								type="button">
 								<i class="fa fa-pencil"></i>
 							</button>
-							<button class="btn btn-default hide chooser-cancel" id="chooser-event-one-cancel"
+							<button class="btn btn-default hide chooser-cancel" id="adder-cancel"
 								type="button">
 								<i class="fa fa-close"></i>
 							</button>
 						</span>
 					</div>
 				</div>
-				<div class="col-md-6">
-					<label class="sr-only" for="chooser-event-one">Look up another event or add your own</label>
-					<div class="input-group">
-						<span class="input-group-addon"><i
-							id="chooser-event-pre-two" class="chooser-event-pre"></i></span> <input
-							type="text" class="form-control typeahead"
-							placeholder="Look up another event or add your own" id="chooser-event-two"
-							value="" /> <span class="input-group-btn">
-							<button class="btn btn-default hide chooser-link"
-								id="chooser-event-link-two" type="button">
-								<i class="fa fa-wikipedia-w"></i>
-							</button>
-							<button class="btn btn-default chooser-edit"
-								id="chooser-event-edit-two" data-frominput="1"
-								data-toggle="modal" data-target="#suggest"
-								type="button">
-								<i class="fa fa-pencil"></i>
-							</button>
-							<button class="btn btn-default hide chooser-cancel" id="chooser-event-two-cancel"
-								type="button">
-								<i class="fa fa-close"></i>
-							</button>
-						</span>
-					</div>
+				<div class="col-md-3">
 				</div>
-			</div>
+			</div>				
 		</div>
 	</section>
 	<section id="timeline-section">
 		<div id="timeline">
-
-			<div id="timeline-marker-start" class="timeline-marker">
+			<!-- div id="timeline-marker-start" class="timeline-marker">
 				<div id="timeline-marker-icon-start" class="timeline-marker-icon"></div>
 				<div class="timeline-marker-label">
 					<h5 class="date"></h5>
 					<div class="timeline-marker-description"></div>
 				</div>
 			</div>
-			<div id="timeline-part-one" class="timeline-part" style="width: 50%;">
+			<div class="timeline-part" style="width: 100%;">
 				<h6 class="timeline-part-label"></h6>
-			</div>
-			<div id="timeline-marker-middle" class="timeline-marker"
-				style="left: 50%;">
-				<div class="timeline-marker-label">
-					<h5 class="date"></h5>
-					<div class="timeline-marker-description"></div>
-				</div>
-				<div id="timeline-marker-icon-middle" class="timeline-marker-icon"></div>
-			</div>
-			<div id="timeline-part-two" class="timeline-part" style="width: 50%;">
-				<h6 class="timeline-part-label"></h6>
-			</div>
-			<div id="timeline-marker-end" class="timeline-marker">
-				<div id="timeline-marker-icon-end" class="timeline-marker-icon"></div>
+			</div -->
+			<div id="timeline-marker-now" class="timeline-marker">
+				<div id="timeline-marker-icon-now" class="timeline-marker-icon"></div>
 				<div class="timeline-marker-label">
 					<h5 class="date"></h5>
 					<div class="timeline-marker-description">Now</div>
@@ -418,11 +385,24 @@
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta6 - <a href="#"
+				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta7 - <a href="#"
 				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>
 	<script src="/js/service-worker-registration.js"></script>
 	<div id="floating_alert"></div>
+	<template style="display: none">
+		<div class="timeline-marker timeline-marker-middle"
+				style="left: 50%;">
+			<div class="timeline-marker-label">
+				<h5 class="date"></h5>
+				<div class="timeline-marker-description"></div>
+			</div>
+			<div class="timeline-marker-icon"></div>
+		</div>
+		<div class="timeline-part" style="width: 50%;">
+			<h6 class="timeline-part-label"></h6>
+		</div>
+	</template>
 </body>
 </html>
