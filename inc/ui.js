@@ -44,16 +44,6 @@ function loadComparison(){
 }
 
 
-
-
-function insertEventObj(obj){
-	obj
-	
-}
-
-
-
-
 /**
  * reads the event_ids array and updates the url with the IDs in the hash part
  */
@@ -261,7 +251,6 @@ function populateIDB(data){
 
 		percentage = 100*first_span/total_span;
 
-
 		year_0 = (datetime[0].year() < 0)? Math.abs(datetime[0].year())+' B.C.' : datetime[0].year();
 		year_1 = (datetime[1].year() < 0)? Math.abs(datetime[1].year())+' B.C.' : datetime[1].year();
 
@@ -368,4 +357,123 @@ function populateIDB(data){
 		item.link = result.middle.link;
 		setNameEtc(chooser_event_two, item, 1);	
 	}
+}
+
+
+
+
+function insertEventObj(obj){
+	var new_marker = $('#template .timeline-marker').clone();
+	var marker_date = new_marker.find('.date');
+	var marker_description = new_marker.find('.timeline-marker-description');
+	var marker_icon = new_marker.find('.timeline-marker-icon');
+	
+	var new_timeline_part = $('#template .timeline-part').clone();
+	
+	marker_date.html(obj.date);
+	marker_description.html(ucfirst(obj.name));
+	marker_icon.addClass(replaceSpaces(obj.type));
+	
+	var year = obj.year;
+	new_marker.attr('data-year', year);
+	
+	var month = obj.month;
+	if(month){
+		new_marker.attr('data-month', month);
+	}
+
+	var day = obj.day;
+	if(day){
+		new_marker.attr('data-day', day);
+	}
+	
+	if(!day){
+		if(!month){
+			var date = moment.utc().year(year);
+		} else {
+			var date = moment.utc().year(year).month(month-1);
+		} 
+	} else {
+		var date = moment.utc().year(year).month(month-1).date(day).hour(12).minute(0).seconds(0);
+	}
+	new_marker.attr('data-date', date.toISOString());
+	
+	var next_marker = findNextMarker(new_marker);	
+	
+	new_timeline_part.css('flex-grow', 0);
+	
+	new_timeline_part.insertBefore(next_marker);
+	new_marker.insertBefore(new_timeline_part);
+	
+	var prev_timeline_part = new_marker.prev('.timeline-part');
+	
+	var new_timespan = calculateTimespanFromMarkers(new_timeline_part);
+		
+	setTimeout(() => {
+		new_timeline_part.css('flex-grow', new_timespan);
+		if(prev_timeline_part.length){
+			var prev_timespan = calculateTimespanFromMarkers(prev_timeline_part);
+			prev_timeline_part.css('flex-grow', prev_timespan);
+		}
+		
+	}, 200);
+}
+
+function removeEventMarker(marker){
+	
+	var timeline_part = marker.next('.timeline-part');
+	var marker_next = timeline_part.next('.timeline-marker');
+	
+	var prev_timeline_part = marker.prev('.timeline-part');
+	
+	timeline_part.css('flex-grow', 0);
+	if(prev_timeline_part.length){
+		var timespan = calculateTimespanFromMarkers(prev_timeline_part, marker_next);
+		prev_timeline_part.css('flex-grow', timespan);
+	}
+	
+	setTimeout(() => {
+		timeline_part.remove();
+		marker.remove();
+	
+	}, 1500);
+}
+
+function findNextMarker(marker){
+	var timeline = $('#timeline');
+	var year = marker.attr('data-year');
+	
+	var next_marker = null;
+	
+	timeline.find('.timeline-marker').each(function(index){
+		next_marker = $(this);
+		next_year = next_marker.attr('data-year');
+		
+		if(parseInt(next_year) >= parseInt(year)){
+			return false;
+		} else {
+			return true;
+		}
+	});
+	
+	return next_marker;
+}
+
+function calculateTimespanFromMarkers(timeline_part, marker_next){
+	var marker_prev = timeline_part.prev('.timeline-marker');
+	if(!marker_next || !marker_next.length){
+		marker_next = timeline_part.next('.timeline-marker');
+	}
+	var datetime = [];
+	
+	if(marker_prev.length && marker_next.length){
+		datetime[0] = moment(marker_prev.attr('data-date'));
+		datetime[1] = moment(marker_next.attr('data-date'));
+		
+		timespan = Math.abs(datetime[0].diff(datetime[1], 'days'));
+		
+		return timespan;
+	}
+	
+	return 0;
 }

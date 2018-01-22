@@ -15,7 +15,7 @@ $shadow-1: rgba(0,0,0,0.12);
 $shadow-2: rgba(0,0,0,0.24);
 $text-color: #333;
 
-$num_icons: 13;
+$num_icons: 14;
 
 
 @import 'closerintime-fa';
@@ -132,7 +132,6 @@ header#main h1 a:visited{
     background-color: $gray-btn-bg;
 }
 
-
 #timeline-section{
 	width: 100%;
 	position: relative;
@@ -167,7 +166,7 @@ header#main h1 a:visited{
 	position:relative;
 	text-align: center;
 	z-index: -100;
-	transition: width 2s ease-in-out;
+	transition: flex-grow 1.5s ease-in-out;
 	border-bottom: solid 6px;
 	height: 0;
 }
@@ -203,12 +202,24 @@ header#main h1 a:visited{
 	top: 3px;
 }
 
+.timeline-marker:hover,
+.timeline-marker:active{
+	z-index: 100;
+}
+
+.timeline-marker:hover .timeline-marker-label,
+.timeline-marker:active .timeline-marker-label{
+	background-color: #ffffff;
+	box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+}
+
 .timeline-marker-label{
 	font-weight: bold;
 	position: absolute;
-	top: 3.5vw;
+	top: 3vw;
 	width: 10vw;
 	left: -5vw;
+	padding: 5px;
 }
 
 .timeline-marker-icon{
@@ -233,6 +244,15 @@ header#main h1 a:visited{
 	left: -2.5vw;
 }
 
+.timeline-marker-icon:hover{
+	background-position: 0% calc(100% / #{$num_icons} * 14);
+	cursor: pointer;
+}
+
+#timeline-marker-icon-now:hover{
+	background-position: 0 0;
+	cursor: auto;
+}
 
 .chooser-event-pre:before{
 	font-family: closerintime;

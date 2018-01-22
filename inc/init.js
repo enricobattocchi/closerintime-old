@@ -25,6 +25,12 @@ $(function(){
 		return false;
 	});
 	
+	$(document).on('click', '.timeline-marker-icon[id!=timeline-marker-icon-now] ', function(event){
+		removeEventMarker($(this).closest('.timeline-marker'));
+	});
+	
+	initMarkers();
+	
 	initPopover();
 
 	initSuggestionForm();
@@ -43,6 +49,22 @@ function initSettings(){
 	else {
 		$('#opensettings').addClass('hide');
 	}
+}
+
+function initMarkers(){
+	var datenow = moment.utc().hour(12).minute(0).seconds(0);
+	var now_marker = $('#timeline-marker-now');
+	
+	var year = datenow.year();
+	now_marker.attr('data-year', year);
+	
+	var month = datenow.month() + 1;
+	now_marker.attr('data-month', month);
+	
+	var day = datenow.day();
+	now_marker.attr('data-day', day);
+	
+	now_marker.attr('data-date', datenow.toISOString());
 }
 
 
@@ -131,6 +153,7 @@ function initTypeahead(){
 		}
 	}).on('typeahead:select', function(e, obj){
 		insertEventObj(obj);
+		$('#chooser .typeahead').typeahead('val', '*').typeahead('val', '').blur();
 	}).typeahead('val', '').removeAttr('disabled');	
 }
 

@@ -131,16 +131,6 @@
 	</section>
 	<section id="timeline-section">
 		<div id="timeline">
-			<!-- div id="timeline-marker-start" class="timeline-marker">
-				<div id="timeline-marker-icon-start" class="timeline-marker-icon"></div>
-				<div class="timeline-marker-label">
-					<h5 class="date"></h5>
-					<div class="timeline-marker-description"></div>
-				</div>
-			</div>
-			<div class="timeline-part" style="width: 100%;">
-				<h6 class="timeline-part-label"></h6>
-			</div -->
 			<div id="timeline-marker-now" class="timeline-marker">
 				<div id="timeline-marker-icon-now" class="timeline-marker-icon"></div>
 				<div class="timeline-marker-label">
@@ -385,24 +375,23 @@
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta7 - <a href="#"
+				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta9 - <a href="#"
 				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>
 	<script src="/js/service-worker-registration.js"></script>
 	<div id="floating_alert"></div>
-	<template style="display: none">
-		<div class="timeline-marker timeline-marker-middle"
-				style="left: 50%;">
+	<div id="template" style="display: none">
+		<div class="timeline-marker">
 			<div class="timeline-marker-label">
 				<h5 class="date"></h5>
 				<div class="timeline-marker-description"></div>
 			</div>
 			<div class="timeline-marker-icon"></div>
 		</div>
-		<div class="timeline-part" style="width: 50%;">
+		<div class="timeline-part">
 			<h6 class="timeline-part-label"></h6>
 		</div>
-	</template>
+	</div>
 </body>
 </html>
