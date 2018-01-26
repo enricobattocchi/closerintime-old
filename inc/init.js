@@ -141,8 +141,9 @@ function initTypeahead(){
 			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong>'+postfix+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
+		$(this).blur();
 		insertEventObj(obj);
-		$(this).typeahead('val', '%').typeahead('val', '').blur();
+		$(this).typeahead('val', '%').typeahead('val', '');
 	}).typeahead('val', '').removeAttr('disabled');	
 }
 

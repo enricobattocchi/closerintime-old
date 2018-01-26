@@ -357,8 +357,9 @@ function initTypeahead(){
 			                    	return '<div><i class="fa '+replaceSpaces(data.type)+'"></i> <strong>'+ucfirst(data.name)+'</strong>'+postfix+'</div>';}
 		}
 	}).on('typeahead:select', function(e, obj){
+		$(this).blur();
 		insertEventObj(obj);
-		$(this).typeahead('val', '%').typeahead('val', '').blur();
+		$(this).typeahead('val', '%').typeahead('val', '');
 	}).typeahead('val', '').removeAttr('disabled');	
 }
 
@@ -1034,7 +1035,10 @@ function calculateTimespanFromMarkers(timeline_part, marker_next){
 		timespan = Math.abs(datetime[0].diff(datetime[1], 'days'));
 		
 		if(settings.timespanformat == 1 || events_with_just_year > 0){
-			timespan_for_label = Math.abs(datetime[0].diff(datetime[1], 'years'));
+			var datetime_years = [];
+			datetime_years[0] = moment().utc().year(marker_prev.attr('data-year')).hour(12).minute(0).seconds(0);
+			datetime_years[1] = moment().utc().year(marker_next.attr('data-year')).hour(12).minute(0).seconds(0);
+			timespan_for_label = Math.abs(datetime_years[0].diff(datetime_years[1], 'years'));
 			timeline_label.html(timespan_for_label + (timespan > 1 ? " years" : "year"));
 		} else if(settings.timespanformat == 0){
 			timeline_label.html(timespan + (timespan > 1 ? " days" : " day"));
