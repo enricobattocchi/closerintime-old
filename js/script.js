@@ -970,10 +970,7 @@ function insertEventObj(obj){
 		
 	setTimeout(() => {
 		new_timeline_part.css('flex-grow', new_timespan);
-		if(prev_timeline_part.length){
-			var prev_timespan = calculateTimespanFromMarkers(prev_timeline_part);
-			prev_timeline_part.css('flex-grow', prev_timespan);
-		}
+		checkTimespanLengths();
 		
 	}, 200);
 }
