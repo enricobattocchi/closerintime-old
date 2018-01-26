@@ -3,11 +3,12 @@ var event_objs = new Array();
 var eventsengine = null;
 var jsondata = new Array();
 var db = null;
+var events_with_just_year = 0;
 
 var settings = {
 	numberevents : 2,
 	showdates: 0,
-	timespanformat: 0,
+	timespanformat: 0, //0: days; 1: years; 2: years, months, days;
 };
 /**
  * Uses the DBs to populate the JSON array used to choose the events from
@@ -267,19 +268,8 @@ function initSettings(){
 }
 
 function initMarkers(){
-	var datenow = moment.utc().hour(12).minute(0).seconds(0);
 	var now_marker = $('#timeline-marker-now');
-	
-	var year = datenow.year();
-	now_marker.attr('data-year', year);
-	
-	var month = datenow.month() + 1;
-	now_marker.attr('data-month', month);
-	
-	var day = datenow.day();
-	now_marker.attr('data-day', day);
-	
-	now_marker.attr('data-date', datenow.toISOString());
+	addDateToMarker(now_marker);
 }
 
 
@@ -368,7 +358,7 @@ function initTypeahead(){
 		}
 	}).on('typeahead:select', function(e, obj){
 		insertEventObj(obj);
-		$('#chooser .typeahead').typeahead('val', '*').typeahead('val', '').blur();
+		$(this).typeahead('val', '%').typeahead('val', '').blur();
 	}).typeahead('val', '').removeAttr('disabled');	
 }
 
@@ -582,7 +572,7 @@ function initSettingsForm(){
 		$('#chooser .typeahead').typeahead('destroy');
 		initTypeahead();
 		computeFromIDB();
-		
+		checkTimespanLengths();
 		$('#settings').modal('hide');
 
 	});	
@@ -954,39 +944,19 @@ function populateIDB(data){
 
 function insertEventObj(obj){
 	var new_marker = $('#template .timeline-marker').clone();
-	var marker_date = new_marker.find('.date');
 	var marker_description = new_marker.find('.timeline-marker-description');
 	var marker_icon = new_marker.find('.timeline-marker-icon');
 	
 	var new_timeline_part = $('#template .timeline-part').clone();
 	
-	marker_date.html(obj.date);
-	marker_description.html(ucfirst(obj.name));
+	if(obj.link.length){
+		marker_description.html('<a href="'+obj.link+'" rel="external" target="_blank">'+ucfirst(obj.name)+'</a>');
+	} else {
+		marker_description.html(ucfirst(obj.name));
+	}
 	marker_icon.addClass(replaceSpaces(obj.type));
 	
-	var year = obj.year;
-	new_marker.attr('data-year', year);
-	
-	var month = obj.month;
-	if(month){
-		new_marker.attr('data-month', month);
-	}
-
-	var day = obj.day;
-	if(day){
-		new_marker.attr('data-day', day);
-	}
-	
-	if(!day){
-		if(!month){
-			var date = moment.utc().year(year);
-		} else {
-			var date = moment.utc().year(year).month(month-1);
-		} 
-	} else {
-		var date = moment.utc().year(year).month(month-1).date(day).hour(12).minute(0).seconds(0);
-	}
-	new_marker.attr('data-date', date.toISOString());
+	addDateToMarker(new_marker, obj);
 	
 	var next_marker = findNextMarker(new_marker);	
 	
@@ -996,7 +966,6 @@ function insertEventObj(obj){
 	new_marker.insertBefore(new_timeline_part);
 	
 	var prev_timeline_part = new_marker.prev('.timeline-part');
-	
 	var new_timespan = calculateTimespanFromMarkers(new_timeline_part);
 		
 	setTimeout(() => {
@@ -1022,10 +991,14 @@ function removeEventMarker(marker){
 		prev_timeline_part.css('flex-grow', timespan);
 	}
 	
+	if (!marker.attr('data-month')){
+		events_with_just_year--;
+	}
+	
 	setTimeout(() => {
 		timeline_part.remove();
 		marker.remove();
-	
+		checkTimespanLengths();
 	}, 1500);
 }
 
@@ -1055,17 +1028,35 @@ function calculateTimespanFromMarkers(timeline_part, marker_next){
 		marker_next = timeline_part.next('.timeline-marker');
 	}
 	var datetime = [];
+	var timeline_label = timeline_part.find('.timeline-part-label');
 	
 	if(marker_prev.length && marker_next.length){
-		datetime[0] = moment(marker_prev.attr('data-date'));
-		datetime[1] = moment(marker_next.attr('data-date'));
+		datetime[0] = moment(marker_prev.attr('data-date')).utc().hour(12).minute(0).seconds(0);
+		datetime[1] = moment(marker_next.attr('data-date')).utc().hour(12).minute(0).seconds(0);
 		
 		timespan = Math.abs(datetime[0].diff(datetime[1], 'days'));
+		
+		if(settings.timespanformat == 1 || events_with_just_year > 0){
+			timespan_for_label = Math.abs(datetime[0].diff(datetime[1], 'years'));
+			timeline_label.html(timespan_for_label + (timespan > 1 ? " years" : "year"));
+		} else if(settings.timespanformat == 0){
+			timeline_label.html(timespan + (timespan > 1 ? " days" : " day"));
+		} else if(settings.timespanformat == 2){
+			timeline_label.html(moment.preciseDiff(datetime[0], datetime[1]));
+		}
 		
 		return timespan;
 	}
 	
 	return 0;
+}
+
+function checkTimespanLengths(){
+	var timeline_parts = $('#timeline .timeline-part');
+	
+	timeline_parts.each(function(){
+		$(this).css('flex-grow', calculateTimespanFromMarkers($(this)));
+	})
 }
 
 function copyToClipboard(){
@@ -1295,4 +1286,47 @@ function showFlAlert(message, alert, timeout) {
  */
 function replaceSpaces(string){
 	return string.split(' ').join('-');
+}
+
+function addDateToMarker(marker, obj){
+
+	if(obj && obj.year){
+		var year = obj.year;
+		var month = obj.month;
+		var day = obj.day;
+	} else {
+		var datenow = moment.utc().hour(12).minute(0).seconds(0);
+		var year = datenow.year();
+		var month = datenow.month() + 1;
+		var day = datenow.date();
+	}
+	
+	marker.attr('data-year', year);
+	if(month){
+		marker.attr('data-month', month);
+	}
+	if(day){
+		marker.attr('data-day', day);
+	}
+	year_label = (year < 0)? Math.abs(year)+' B.C.' : year;
+	if(!day){
+		if(!month){
+			var date = moment.utc().year(year).hour(12).minute(0).seconds(0);
+			marker.find('.date').html(year_label);
+			events_with_just_year++;
+		} else {
+			var date = moment.utc().year(year).month(month-1).hour(12).minute(0).seconds(0);
+			var format = 'MMMM';
+
+			marker_date_label = date.format(format)+' '+year_label;
+			marker.find('.date').html(marker_date_label);
+		} 
+	} else {
+		var date = moment.utc().year(year).month(month-1).date(day).hour(12).minute(0).seconds(0);
+		var format = 'MMMM D';
+
+		marker_date_label = date.format(format)+', '+year_label;
+		marker.find('.date').html(marker_date_label);
+	}
+	marker.attr('data-date', date.toISOString());
 }

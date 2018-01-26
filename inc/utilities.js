@@ -226,3 +226,46 @@ function showFlAlert(message, alert, timeout) {
 function replaceSpaces(string){
 	return string.split(' ').join('-');
 }
+
+function addDateToMarker(marker, obj){
+
+	if(obj && obj.year){
+		var year = obj.year;
+		var month = obj.month;
+		var day = obj.day;
+	} else {
+		var datenow = moment.utc().hour(12).minute(0).seconds(0);
+		var year = datenow.year();
+		var month = datenow.month() + 1;
+		var day = datenow.date();
+	}
+	
+	marker.attr('data-year', year);
+	if(month){
+		marker.attr('data-month', month);
+	}
+	if(day){
+		marker.attr('data-day', day);
+	}
+	year_label = (year < 0)? Math.abs(year)+' B.C.' : year;
+	if(!day){
+		if(!month){
+			var date = moment.utc().year(year).hour(12).minute(0).seconds(0);
+			marker.find('.date').html(year_label);
+			events_with_just_year++;
+		} else {
+			var date = moment.utc().year(year).month(month-1).hour(12).minute(0).seconds(0);
+			var format = 'MMMM';
+
+			marker_date_label = date.format(format)+' '+year_label;
+			marker.find('.date').html(marker_date_label);
+		} 
+	} else {
+		var date = moment.utc().year(year).month(month-1).date(day).hour(12).minute(0).seconds(0);
+		var format = 'MMMM D';
+
+		marker_date_label = date.format(format)+', '+year_label;
+		marker.find('.date').html(marker_date_label);
+	}
+	marker.attr('data-date', date.toISOString());
+}

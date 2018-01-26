@@ -364,39 +364,19 @@ function populateIDB(data){
 
 function insertEventObj(obj){
 	var new_marker = $('#template .timeline-marker').clone();
-	var marker_date = new_marker.find('.date');
 	var marker_description = new_marker.find('.timeline-marker-description');
 	var marker_icon = new_marker.find('.timeline-marker-icon');
 	
 	var new_timeline_part = $('#template .timeline-part').clone();
 	
-	marker_date.html(obj.date);
-	marker_description.html(ucfirst(obj.name));
+	if(obj.link.length){
+		marker_description.html('<a href="'+obj.link+'" rel="external" target="_blank">'+ucfirst(obj.name)+'</a>');
+	} else {
+		marker_description.html(ucfirst(obj.name));
+	}
 	marker_icon.addClass(replaceSpaces(obj.type));
 	
-	var year = obj.year;
-	new_marker.attr('data-year', year);
-	
-	var month = obj.month;
-	if(month){
-		new_marker.attr('data-month', month);
-	}
-
-	var day = obj.day;
-	if(day){
-		new_marker.attr('data-day', day);
-	}
-	
-	if(!day){
-		if(!month){
-			var date = moment.utc().year(year);
-		} else {
-			var date = moment.utc().year(year).month(month-1);
-		} 
-	} else {
-		var date = moment.utc().year(year).month(month-1).date(day).hour(12).minute(0).seconds(0);
-	}
-	new_marker.attr('data-date', date.toISOString());
+	addDateToMarker(new_marker, obj);
 	
 	var next_marker = findNextMarker(new_marker);	
 	
@@ -406,7 +386,6 @@ function insertEventObj(obj){
 	new_marker.insertBefore(new_timeline_part);
 	
 	var prev_timeline_part = new_marker.prev('.timeline-part');
-	
 	var new_timespan = calculateTimespanFromMarkers(new_timeline_part);
 		
 	setTimeout(() => {
@@ -432,10 +411,14 @@ function removeEventMarker(marker){
 		prev_timeline_part.css('flex-grow', timespan);
 	}
 	
+	if (!marker.attr('data-month')){
+		events_with_just_year--;
+	}
+	
 	setTimeout(() => {
 		timeline_part.remove();
 		marker.remove();
-	
+		checkTimespanLengths();
 	}, 1500);
 }
 
@@ -465,15 +448,33 @@ function calculateTimespanFromMarkers(timeline_part, marker_next){
 		marker_next = timeline_part.next('.timeline-marker');
 	}
 	var datetime = [];
+	var timeline_label = timeline_part.find('.timeline-part-label');
 	
 	if(marker_prev.length && marker_next.length){
-		datetime[0] = moment(marker_prev.attr('data-date'));
-		datetime[1] = moment(marker_next.attr('data-date'));
+		datetime[0] = moment(marker_prev.attr('data-date')).utc().hour(12).minute(0).seconds(0);
+		datetime[1] = moment(marker_next.attr('data-date')).utc().hour(12).minute(0).seconds(0);
 		
 		timespan = Math.abs(datetime[0].diff(datetime[1], 'days'));
+		
+		if(settings.timespanformat == 1 || events_with_just_year > 0){
+			timespan_for_label = Math.abs(datetime[0].diff(datetime[1], 'years'));
+			timeline_label.html(timespan_for_label + (timespan > 1 ? " years" : "year"));
+		} else if(settings.timespanformat == 0){
+			timeline_label.html(timespan + (timespan > 1 ? " days" : " day"));
+		} else if(settings.timespanformat == 2){
+			timeline_label.html(moment.preciseDiff(datetime[0], datetime[1]));
+		}
 		
 		return timespan;
 	}
 	
 	return 0;
+}
+
+function checkTimespanLengths(){
+	var timeline_parts = $('#timeline .timeline-part');
+	
+	timeline_parts.each(function(){
+		$(this).css('flex-grow', calculateTimespanFromMarkers($(this)));
+	})
 }

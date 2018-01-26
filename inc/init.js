@@ -52,19 +52,8 @@ function initSettings(){
 }
 
 function initMarkers(){
-	var datenow = moment.utc().hour(12).minute(0).seconds(0);
 	var now_marker = $('#timeline-marker-now');
-	
-	var year = datenow.year();
-	now_marker.attr('data-year', year);
-	
-	var month = datenow.month() + 1;
-	now_marker.attr('data-month', month);
-	
-	var day = datenow.day();
-	now_marker.attr('data-day', day);
-	
-	now_marker.attr('data-date', datenow.toISOString());
+	addDateToMarker(now_marker);
 }
 
 
@@ -153,7 +142,7 @@ function initTypeahead(){
 		}
 	}).on('typeahead:select', function(e, obj){
 		insertEventObj(obj);
-		$('#chooser .typeahead').typeahead('val', '*').typeahead('val', '').blur();
+		$(this).typeahead('val', '%').typeahead('val', '').blur();
 	}).typeahead('val', '').removeAttr('disabled');	
 }
 
@@ -367,7 +356,7 @@ function initSettingsForm(){
 		$('#chooser .typeahead').typeahead('destroy');
 		initTypeahead();
 		computeFromIDB();
-		
+		checkTimespanLengths();
 		$('#settings').modal('hide');
 
 	});	
