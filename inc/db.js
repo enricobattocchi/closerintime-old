@@ -172,8 +172,7 @@ function initIndexedDB(){
  */
 function computeFromIDB(){
 	console.log("execute computeFromIDB");
-	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
-
+	
 	var data = new Array();
 	db.transaction('r', db.events, db.localevents, function(){
 		event_ids.forEach(function(event_id, index){

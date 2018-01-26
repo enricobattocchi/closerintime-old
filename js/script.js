@@ -184,8 +184,7 @@ function initIndexedDB(){
  */
 function computeFromIDB(){
 	console.log("execute computeFromIDB");
-	if(!$.isNumeric(event_ids[0]) || !$.isNumeric(event_ids[1])) return;
-
+	
 	var data = new Array();
 	db.transaction('r', db.events, db.localevents, function(){
 		event_ids.forEach(function(event_id, index){
@@ -580,8 +579,7 @@ function initSettingsForm(){
 
 }
 /**
- * Reads the hash part of the URL to fill the chooser input field and start the
- * computation
+ * Reads the hash part of the URL to start the computation
  */
 function loadComparison(){
 	console.log("execute loadComparison");
@@ -589,38 +587,13 @@ function loadComparison(){
 	var chooser_events = $('#chooser input.tt-input');
 	if(hashpars){
 		var pars = hashpars.split('/');
-		if($.isNumeric(pars[0])){
-			event_ids[0] = pars[0];
-			if(pars[1]){
-				/* both events set, let's compute everything */
-				event_ids[1] = pars[1];
-				computeFromIDB();
-			} else {
-				/* just one event set, fill the chooser field */		
-				db.events.get(event_ids[0])
-				.then(function(data){
-					var chooser_event_one = $('#chooser-event-one');
-					setNameEtc(chooser_event_one, data, 0);
-				}).catch(function (e) {
-					console.error('Error populating the chooser field: '+ e.toString());
-					var chooser_event_one = $('#chooser-event-one');
-					chooser_event_one.removeAttr('disabled').typeahead('val','');
-					resetChooserButtons(chooser_event_one);
-				});
+		event_ids = [];
+		pars.forEach(function(par){
+			if($.isNumeric(par)){
+				pushUnique(event_ids,par);
 			}
-		} else {
-			if(pars[0] == 'cancel'){
-				db.localevents.clear().then(function(){
-					showFlAlert('Local events cleared.','info');
-					updateHashFromIDS();
-				}).catch(function(error){
-					console.error('Failed to clear local events: '+error);
-					showFlAlert('Failed to clear local events.','warning');
-					updateHashFromIDS();
-				});
-				
-			}
-		}
+		});
+		computeFromIDB();
 	}
 }
 
@@ -630,32 +603,16 @@ function loadComparison(){
  */
 function updateHashFromIDS(){
 	console.log("execute updateHashFromIDS");
-	var url = window.location.origin;
-
-	if( event_ids[0] > 0 && event_ids[1] > 0){
-		var stateObj = { ids : [event_ids[0], event_ids[1]] };
-		var path = event_ids[0] + '/' + event_ids[1];
-		history.pushState(stateObj, path, '/'+path );
-		computeFromIDB();
-	} else {
-		var stateObj = { ids : [event_ids[0], event_ids[1]] };
-		var path = event_ids[0] + '/' + event_ids[1];
-		history.pushState(stateObj, path, '/' );
-		computeFromIDB();
-		/*
-		if( window.location.href != href ){
-			window.location.href = href;
-		}
-		computeFromIDB();
-		*/
-	}
-
+		
+	var stateObj = { ids : event_ids };
+	var path = "";
+	event_ids.forEach(function(event_id){
+		path = path + '/' + event_id;
+	});
+	path = path.substr(1);
+	var url = window.location.origin+'/'+path;
+	history.pushState(stateObj, path, url );
 }
-
-
-
-
-
 
 /**
  * submits the suggestions to the server to be included in the global list of
@@ -724,7 +681,7 @@ function pushSuggestions(data){
  * 
  * @param data
  */
-function populateIDB(data){
+function populateIDBOLD(data){
 	if (data.length < 2) return;
 	console.log("execute populateIDB");
 
@@ -941,7 +898,14 @@ function populateIDB(data){
 }
 
 
-
+function populateIDB(data){
+	console.log("execute populateIDB");
+	
+	data.forEach(function(obj){
+		insertEventObj(obj);
+	});
+	
+}
 
 function insertEventObj(obj){
 	var new_marker = $('#template .timeline-marker').clone();
@@ -966,6 +930,9 @@ function insertEventObj(obj){
 	new_timeline_part.insertBefore(next_marker);
 	new_marker.insertBefore(new_timeline_part);
 	
+	pushUnique(event_ids, obj.id);
+	updateHashFromIDS();
+	
 	var prev_timeline_part = new_marker.prev('.timeline-part');
 	var new_timespan = calculateTimespanFromMarkers(new_timeline_part);
 		
@@ -980,7 +947,7 @@ function removeEventMarker(marker){
 	
 	var timeline_part = marker.next('.timeline-part');
 	var marker_next = timeline_part.next('.timeline-marker');
-	
+	var marker_id = marker.attr('data-id');
 	var prev_timeline_part = marker.prev('.timeline-part');
 	
 	timeline_part.css('flex-grow', 0);
@@ -995,6 +962,10 @@ function removeEventMarker(marker){
 	
 	setTimeout(() => {
 		timeline_part.remove();
+		
+		event_ids = remove(event_ids, marker_id);
+		updateHashFromIDS();
+		
 		marker.remove();
 		checkTimespanLengths();
 	}, 1500);
@@ -1290,8 +1261,9 @@ function replaceSpaces(string){
 }
 
 function addDateToMarker(marker, obj){
-
+	
 	if(obj && obj.year){
+		marker.attr('data-id', obj.id);
 		var year = obj.year;
 		var month = obj.month;
 		var day = obj.day;
@@ -1330,4 +1302,15 @@ function addDateToMarker(marker, obj){
 		marker.find('.date').html(marker_date_label);
 	}
 	marker.attr('data-date', date.toISOString());
+}
+
+
+function remove(array, element) {
+    return array.filter(e => e !== element);
+}
+
+function pushUnique(array, element) {
+	if(array.indexOf(element) == -1){
+		array.push(element);
+	}
 }

@@ -1,6 +1,5 @@
 /**
- * Reads the hash part of the URL to fill the chooser input field and start the
- * computation
+ * Reads the hash part of the URL to start the computation
  */
 function loadComparison(){
 	console.log("execute loadComparison");
@@ -8,38 +7,13 @@ function loadComparison(){
 	var chooser_events = $('#chooser input.tt-input');
 	if(hashpars){
 		var pars = hashpars.split('/');
-		if($.isNumeric(pars[0])){
-			event_ids[0] = pars[0];
-			if(pars[1]){
-				/* both events set, let's compute everything */
-				event_ids[1] = pars[1];
-				computeFromIDB();
-			} else {
-				/* just one event set, fill the chooser field */		
-				db.events.get(event_ids[0])
-				.then(function(data){
-					var chooser_event_one = $('#chooser-event-one');
-					setNameEtc(chooser_event_one, data, 0);
-				}).catch(function (e) {
-					console.error('Error populating the chooser field: '+ e.toString());
-					var chooser_event_one = $('#chooser-event-one');
-					chooser_event_one.removeAttr('disabled').typeahead('val','');
-					resetChooserButtons(chooser_event_one);
-				});
+		event_ids = [];
+		pars.forEach(function(par){
+			if($.isNumeric(par)){
+				pushUnique(event_ids,par);
 			}
-		} else {
-			if(pars[0] == 'cancel'){
-				db.localevents.clear().then(function(){
-					showFlAlert('Local events cleared.','info');
-					updateHashFromIDS();
-				}).catch(function(error){
-					console.error('Failed to clear local events: '+error);
-					showFlAlert('Failed to clear local events.','warning');
-					updateHashFromIDS();
-				});
-				
-			}
-		}
+		});
+		computeFromIDB();
 	}
 }
 
@@ -49,32 +23,16 @@ function loadComparison(){
  */
 function updateHashFromIDS(){
 	console.log("execute updateHashFromIDS");
-	var url = window.location.origin;
-
-	if( event_ids[0] > 0 && event_ids[1] > 0){
-		var stateObj = { ids : [event_ids[0], event_ids[1]] };
-		var path = event_ids[0] + '/' + event_ids[1];
-		history.pushState(stateObj, path, '/'+path );
-		computeFromIDB();
-	} else {
-		var stateObj = { ids : [event_ids[0], event_ids[1]] };
-		var path = event_ids[0] + '/' + event_ids[1];
-		history.pushState(stateObj, path, '/' );
-		computeFromIDB();
-		/*
-		if( window.location.href != href ){
-			window.location.href = href;
-		}
-		computeFromIDB();
-		*/
-	}
-
+		
+	var stateObj = { ids : event_ids };
+	var path = "";
+	event_ids.forEach(function(event_id){
+		path = path + '/' + event_id;
+	});
+	path = path.substr(1);
+	var url = window.location.origin+'/'+path;
+	history.pushState(stateObj, path, url );
 }
-
-
-
-
-
 
 /**
  * submits the suggestions to the server to be included in the global list of
@@ -143,7 +101,7 @@ function pushSuggestions(data){
  * 
  * @param data
  */
-function populateIDB(data){
+function populateIDBOLD(data){
 	if (data.length < 2) return;
 	console.log("execute populateIDB");
 
@@ -360,7 +318,14 @@ function populateIDB(data){
 }
 
 
-
+function populateIDB(data){
+	console.log("execute populateIDB");
+	
+	data.forEach(function(obj){
+		insertEventObj(obj);
+	});
+	
+}
 
 function insertEventObj(obj){
 	var new_marker = $('#template .timeline-marker').clone();
@@ -385,6 +350,9 @@ function insertEventObj(obj){
 	new_timeline_part.insertBefore(next_marker);
 	new_marker.insertBefore(new_timeline_part);
 	
+	pushUnique(event_ids, obj.id);
+	updateHashFromIDS();
+	
 	var prev_timeline_part = new_marker.prev('.timeline-part');
 	var new_timespan = calculateTimespanFromMarkers(new_timeline_part);
 		
@@ -399,7 +367,7 @@ function removeEventMarker(marker){
 	
 	var timeline_part = marker.next('.timeline-part');
 	var marker_next = timeline_part.next('.timeline-marker');
-	
+	var marker_id = marker.attr('data-id');
 	var prev_timeline_part = marker.prev('.timeline-part');
 	
 	timeline_part.css('flex-grow', 0);
@@ -414,6 +382,10 @@ function removeEventMarker(marker){
 	
 	setTimeout(() => {
 		timeline_part.remove();
+		
+		event_ids = remove(event_ids, marker_id);
+		updateHashFromIDS();
+		
 		marker.remove();
 		checkTimespanLengths();
 	}, 1500);
@@ -475,6 +447,58 @@ function checkTimespanLengths(){
 	var timeline_parts = $('#timeline .timeline-part');
 	
 	timeline_parts.each(function(){
-		$(this).css('flex-grow', calculateTimespanFromMarkers($(this)));
+		var timespan = calculateTimespanFromMarkers($(this));
+		$(this).css('flex-grow', timespan);
+		$(this).attr('data-timespan', timespan);
 	})
+}
+
+function buildTimelineSentence(){
+	var header = $('#timeline-header');
+	var header_h3 = $('#timeline-header h3');
+	var permalink = $('#permalink');
+	var sharing = $('#sharing');
+	var timespans = $('#timeline .timeline-part');
+	
+	if(event_ids.length == 2){
+		var timespan_lengths = [];
+		timespans.each(function(index, element){
+			timespan_lengths[index] = $(this).attr('data-timespan');
+		});
+		
+		var percentage = (timespan_lengths[0]/timespan_lengths[1])*100;
+	}
+		
+	if(percentage > 50){
+		result.header = result.middle.description+" "+result.middle.verb+" closer in time to us than to "+second_term_of_comparison+".";
+		result.title = result.middle.description+" "+result.middle.verb+" #closerintime to us than to "+second_term_of_comparison+".";
+	} else if(percentage < 50){
+		result.header = result.middle.description+" "+result.middle.verb+" closer in time to "+second_term_of_comparison+" than to us.";
+		result.title = result.middle.description+" "+result.middle.verb+" #closerintime to "+second_term_of_comparison+" than to us.";
+	} else {
+		result.header = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us.";
+		result.title = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
+	}
+
+	header_h3.html(result.header);
+	document.title = result.title;
+	var url = window.location.origin;
+	if(result.start.id>0 && result.middle.id>0){
+		permalink.attr('href', '/'+result.start.id+'/'+result.middle.id);
+		url = url + '/'+result.start.id+'/'+result.middle.id;
+	} else {
+		permalink.attr('href', '/');
+		url = url;
+	}
+	var sharing_html = null;
+	sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
+	if(result.start.id>0 && result.middle.id>0){
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
+	} else  {
+		sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(result.title)+'"><i class="fa fa-facebook"></i> Share</a>';
+	}
+	sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
+		
+	sharing.html(sharing_html);
+	
 }

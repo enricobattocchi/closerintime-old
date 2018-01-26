@@ -228,8 +228,9 @@ function replaceSpaces(string){
 }
 
 function addDateToMarker(marker, obj){
-
+	
 	if(obj && obj.year){
+		marker.attr('data-id', obj.id);
 		var year = obj.year;
 		var month = obj.month;
 		var day = obj.day;
@@ -268,4 +269,15 @@ function addDateToMarker(marker, obj){
 		marker.find('.date').html(marker_date_label);
 	}
 	marker.attr('data-date', date.toISOString());
+}
+
+
+function remove(array, element) {
+    return array.filter(e => e !== element);
+}
+
+function pushUnique(array, element) {
+	if(array.indexOf(element) == -1){
+		array.push(element);
+	}
 }
