@@ -6,18 +6,6 @@ $(function(){
 	initIndexedDB();
 	
 	initTypeahead();
-	
-	$('.chooser-cancel').on('click',function(){
-		var chooser_group = $(this).closest('.input-group');
-		var chooser_field = chooser_group.find('.tt-input');
-		var chooser_pre = chooser_group.find('.chooser-event-pre');
-		chooser_field.removeAttr('disabled');
-		chooser_field.typeahead('val','');
-		chooser_pre.attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		resetChooserButtons(chooser_field);
-		event_ids[chooser_field.attr('data-index')] = null;
-	});
-	
 
 	$(document).on('click', '#clipboard-share-button', function(event){
 		copyToClipboard();
@@ -356,7 +344,6 @@ function initSettingsForm(){
 		initSettings();
 		$('#chooser .typeahead').typeahead('destroy');
 		initTypeahead();
-		computeFromIDB();
 		checkTimespanLengths();
 		$('#settings').modal('hide');
 

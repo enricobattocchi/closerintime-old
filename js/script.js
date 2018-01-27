@@ -195,12 +195,14 @@ function computeFromIDB(){
 					db.localevents.get(id).then(function(item){
 						item.id = 0-item.id;
 						data[index] = item;
+						event_objs[index] = item;
 					}).catch (function (error) {
 						console.error ("Error while getting event from DB: " + error);
 					});
 				} else {
 					db.events.get(id).then(function(item){
 						data[index] = item;
+						event_objs[index] = item;
 					}).catch (function (error) {
 						console.error ("Error while getting event from DB: " + error);
 					});
@@ -221,18 +223,6 @@ $(function(){
 	initIndexedDB();
 	
 	initTypeahead();
-	
-	$('.chooser-cancel').on('click',function(){
-		var chooser_group = $(this).closest('.input-group');
-		var chooser_field = chooser_group.find('.tt-input');
-		var chooser_pre = chooser_group.find('.chooser-event-pre');
-		chooser_field.removeAttr('disabled');
-		chooser_field.typeahead('val','');
-		chooser_pre.attr('data-content', '').removeClass().addClass('chooser-event-pre');
-		resetChooserButtons(chooser_field);
-		event_ids[chooser_field.attr('data-index')] = null;
-	});
-	
 
 	$(document).on('click', '#clipboard-share-button', function(event){
 		copyToClipboard();
@@ -571,7 +561,6 @@ function initSettingsForm(){
 		initSettings();
 		$('#chooser .typeahead').typeahead('destroy');
 		initTypeahead();
-		computeFromIDB();
 		checkTimespanLengths();
 		$('#settings').modal('hide');
 
@@ -914,7 +903,7 @@ function insertEventObj(obj){
 	
 	var new_timeline_part = $('#template .timeline-part').clone();
 	
-	if(obj.link.length){
+	if(obj.link){
 		marker_description.html('<a href="'+obj.link+'" rel="external" target="_blank">'+ucfirst(obj.name)+'</a>');
 	} else {
 		marker_description.html(ucfirst(obj.name));
@@ -1027,8 +1016,104 @@ function checkTimespanLengths(){
 	var timeline_parts = $('#timeline .timeline-part');
 	
 	timeline_parts.each(function(){
-		$(this).css('flex-grow', calculateTimespanFromMarkers($(this)));
+		var timespan = calculateTimespanFromMarkers($(this));
+		$(this).css('flex-grow', timespan);
+		$(this).attr('data-timespan', timespan);
 	})
+	
+	buildTimelineSentence();
+}
+
+function buildTimelineSentence(){
+	var header = $('#timeline-header');
+	var header_h3 = $('#timeline-header h3');
+	var permalink = $('#permalink');
+	var sharing = $('#sharing');
+	var timespans = $('#timeline .timeline-part');
+	var result = {};
+	result.start = {};
+	result.middle = {};
+	
+	var timespan_lengths = [];
+	timespans.each(function(index, element){
+		timespan_lengths[index] = $(this).attr('data-timespan');
+	});
+
+	var markers = $('#timeline .timeline-marker');
+	
+	var marker_start = markers.eq(0);
+	result.start.id = marker_start.attr('data-id');
+	result.start.description = ucfirst(marker_start.attr('data-name'));
+	
+	var second_term_of_comparison = marker_start.attr('data-name');
+	
+	if(event_ids.length == 1){
+		var time_passed = timespans.eq(0).find('.timeline-part-label').text();
+		
+		result.header = time_passed + ' ago: ' + second_term_of_comparison + ".";
+		result.title = time_passed + ' ago: ' + second_term_of_comparison + ". #closerintime";
+		
+		header_h3.html(result.header);
+		document.title = result.title;
+		var url = window.location.origin;
+		if(result.start.id>0){
+			permalink.attr('href', '/'+result.start.id);
+			url = url + '/'+result.start.id;
+		} else {
+			permalink.attr('href', '/');
+			url = url;
+		}
+		var sharing_html = null;
+		sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
+		if(result.start.id>0){
+				sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
+		} else  {
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(result.title)+'"><i class="fa fa-facebook"></i> Share</a>';
+		}
+		sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
+			
+		sharing.html(sharing_html);
+		
+	} else if(event_ids.length == 2){
+		var marker_middle = markers.eq(1);
+		result.middle.id = marker_middle.attr('data-id');
+		result.middle.description = ucfirst(marker_middle.attr('data-name'));
+		result.middle.verb = (marker_middle.attr('data-plural') == 1)? 'are' : 'is' ;
+		
+		var percentage = (timespan_lengths[0]/timespan_lengths[1])*100;
+		
+		if(percentage > 50){
+			result.header = result.middle.description+" "+result.middle.verb+" closer in time to us than to "+second_term_of_comparison+".";
+			result.title = result.middle.description+" "+result.middle.verb+" #closerintime to us than to "+second_term_of_comparison+".";
+		} else if(percentage < 50){
+			result.header = result.middle.description+" "+result.middle.verb+" closer in time to "+second_term_of_comparison+" than to us.";
+			result.title = result.middle.description+" "+result.middle.verb+" #closerintime to "+second_term_of_comparison+" than to us.";
+		} else {
+			result.header = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us.";
+			result.title = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
+		}
+	
+		header_h3.html(result.header);
+		document.title = result.title;
+		var url = window.location.origin;
+		if(result.start.id>0 && result.middle.id>0){
+			permalink.attr('href', '/'+result.start.id+'/'+result.middle.id);
+			url = url + '/'+result.start.id+'/'+result.middle.id;
+		} else {
+			permalink.attr('href', '/');
+			url = url;
+		}
+		var sharing_html = null;
+		sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
+		if(result.start.id>0 && result.middle.id>0){
+				sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
+		} else  {
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(result.title)+'"><i class="fa fa-facebook"></i> Share</a>';
+		}
+		sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
+			
+		sharing.html(sharing_html);
+	}
 }
 
 function copyToClipboard(){
@@ -1264,6 +1349,8 @@ function addDateToMarker(marker, obj){
 	
 	if(obj && obj.year){
 		marker.attr('data-id', obj.id);
+		marker.attr('data-plural', obj.plural);
+		marker.attr('data-name', obj.name);
 		var year = obj.year;
 		var month = obj.month;
 		var day = obj.day;
@@ -1306,7 +1393,7 @@ function addDateToMarker(marker, obj){
 
 
 function remove(array, element) {
-    return array.filter(e => e !== element);
+    return array.filter(e => e != element);
 }
 
 function pushUnique(array, element) {

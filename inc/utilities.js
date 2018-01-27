@@ -231,6 +231,8 @@ function addDateToMarker(marker, obj){
 	
 	if(obj && obj.year){
 		marker.attr('data-id', obj.id);
+		marker.attr('data-plural', obj.plural);
+		marker.attr('data-name', obj.name);
 		var year = obj.year;
 		var month = obj.month;
 		var day = obj.day;
@@ -273,7 +275,7 @@ function addDateToMarker(marker, obj){
 
 
 function remove(array, element) {
-    return array.filter(e => e !== element);
+    return array.filter(e => e != element);
 }
 
 function pushUnique(array, element) {

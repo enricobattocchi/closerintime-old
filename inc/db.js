@@ -183,12 +183,14 @@ function computeFromIDB(){
 					db.localevents.get(id).then(function(item){
 						item.id = 0-item.id;
 						data[index] = item;
+						event_objs[index] = item;
 					}).catch (function (error) {
 						console.error ("Error while getting event from DB: " + error);
 					});
 				} else {
 					db.events.get(id).then(function(item){
 						data[index] = item;
+						event_objs[index] = item;
 					}).catch (function (error) {
 						console.error ("Error while getting event from DB: " + error);
 					});
