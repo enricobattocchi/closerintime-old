@@ -283,3 +283,31 @@ function pushUnique(array, element) {
 		array.push(element);
 	}
 }
+
+function setTimelineHeader(header, title, permalink, url, quote){
+	var header_h3 = $('#timeline-header h3');
+	var permalink_a = $('#permalink');
+	var sharing = $('#sharing');
+	
+	if(!header && !title && !permalink){
+		header_h3.html('');
+		document.title = '#closerintime';
+		sharing.html('');
+		permalink_a.attr('href','');
+	} else {
+		header_h3.html(header);
+		document.title = title;
+		permalink_a.attr('href', permalink);
+		
+		var sharing_html = null;
+		sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
+		if(!quote){
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
+		} else  {
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(quote)+'"><i class="fa fa-facebook"></i> Share</a>';
+		}
+		sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
+			
+		sharing.html(sharing_html);		
+	}
+}

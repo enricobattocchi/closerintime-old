@@ -1025,9 +1025,9 @@ function checkTimespanLengths(){
 }
 
 function buildTimelineSentence(){
-	var header = $('#timeline-header');
+	setTimelineHeader();
+	
 	var header_h3 = $('#timeline-header h3');
-	var permalink = $('#permalink');
 	var sharing = $('#sharing');
 	var timespans = $('#timeline .timeline-part');
 	var result = {};
@@ -1053,26 +1053,19 @@ function buildTimelineSentence(){
 		result.header = time_passed + ' ago: ' + second_term_of_comparison + ".";
 		result.title = time_passed + ' ago: ' + second_term_of_comparison + ". #closerintime";
 		
-		header_h3.html(result.header);
-		document.title = result.title;
 		var url = window.location.origin;
-		if(result.start.id>0){
-			permalink.attr('href', '/'+result.start.id);
+		var permalink = "";
+		if(result.start.id > 0){
+			permalink = '/'+result.start.id;
 			url = url + '/'+result.start.id;
+			var quote = null;
 		} else {
-			permalink.attr('href', '/');
+			permalink = '/';
 			url = url;
+			var quote = result.title;
 		}
-		var sharing_html = null;
-		sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
-		if(result.start.id>0){
-				sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
-		} else  {
-			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(result.title)+'"><i class="fa fa-facebook"></i> Share</a>';
-		}
-		sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
-			
-		sharing.html(sharing_html);
+		
+		setTimelineHeader(result.header, result.title, permalink, url, quote);
 		
 	} else if(event_ids.length == 2){
 		var marker_middle = markers.eq(1);
@@ -1093,26 +1086,19 @@ function buildTimelineSentence(){
 			result.title = result.middle.description+" "+result.middle.verb+" exactly halfway between "+second_term_of_comparison+" and us. #closerintime";
 		}
 	
-		header_h3.html(result.header);
-		document.title = result.title;
+		
 		var url = window.location.origin;
 		if(result.start.id>0 && result.middle.id>0){
-			permalink.attr('href', '/'+result.start.id+'/'+result.middle.id);
+			permalink = '/'+result.start.id+'/'+result.middle.id;
 			url = url + '/'+result.start.id+'/'+result.middle.id;
+			var quote = null;
 		} else {
-			permalink.attr('href', '/');
+			permalink = '/';
 			url = url;
+			var quote = result.title;
 		}
-		var sharing_html = null;
-		sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(result.title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
-		if(result.start.id>0 && result.middle.id>0){
-				sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
-		} else  {
-			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(result.title)+'"><i class="fa fa-facebook"></i> Share</a>';
-		}
-		sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
-			
-		sharing.html(sharing_html);
+		
+		setTimelineHeader(result.header, result.title, permalink, url, quote);
 	}
 }
 
@@ -1399,5 +1385,33 @@ function remove(array, element) {
 function pushUnique(array, element) {
 	if(array.indexOf(element) == -1){
 		array.push(element);
+	}
+}
+
+function setTimelineHeader(header, title, permalink, url, quote){
+	var header_h3 = $('#timeline-header h3');
+	var permalink_a = $('#permalink');
+	var sharing = $('#sharing');
+	
+	if(!header && !title && !permalink){
+		header_h3.html('');
+		document.title = '#closerintime';
+		sharing.html('');
+		permalink_a.attr('href','');
+	} else {
+		header_h3.html(header);
+		document.title = title;
+		permalink_a.attr('href', permalink);
+		
+		var sharing_html = null;
+		sharing_html = '<a id="twitter-share-button" target="_blank" href="https://twitter.com/intent/tweet?text='+encodeURIComponent(title)+'&url='+encodeURIComponent(url)+'" result-size="large"><i class="fa fa-twitter"></i> Tweet</a>';
+		if(!quote){
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime"><i class="fa fa-facebook"></i> Share</a>';
+		} else  {
+			sharing_html = sharing_html + '<a id="facebook-share-button" target="_blank" href="https://www.facebook.com/dialog/share?app_id=1012298692240693&href='+encodeURIComponent(url)+'&hashtag=%23closerintime&quote='+encodeURIComponent(quote)+'"><i class="fa fa-facebook"></i> Share</a>';
+		}
+		sharing_html = sharing_html + '<a id="clipboard-share-button" href="'+url+'"><i class="fa fa-clipboard"></i> Copy</a>';
+			
+		sharing.html(sharing_html);		
 	}
 }
