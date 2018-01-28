@@ -531,7 +531,7 @@ if (count($data) == 2){
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta9 - <a href="#"
+				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta10 - <a href="#"
 				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>
