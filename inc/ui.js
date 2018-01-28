@@ -412,6 +412,7 @@ function findNextMarker(marker){
 }
 
 function calculateTimespanFromMarkers(timeline_part, marker_next){
+	var timeline = $('#timeline');
 	var marker_prev = timeline_part.prev('.timeline-marker');
 	if(!marker_next || !marker_next.length){
 		marker_next = timeline_part.next('.timeline-marker');
@@ -420,20 +421,35 @@ function calculateTimespanFromMarkers(timeline_part, marker_next){
 	var timeline_label = timeline_part.find('.timeline-part-label');
 	
 	if(marker_prev.length && marker_next.length){
-		datetime[0] = moment(marker_prev.attr('data-date')).utc().hour(12).minute(0).seconds(0);
-		datetime[1] = moment(marker_next.attr('data-date')).utc().hour(12).minute(0).seconds(0);
+		datetime[0] = moment(marker_prev.attr('data-date')).utc().hour(12).minute(0).seconds(0).millisecond(0);
+		datetime[1] = moment(marker_next.attr('data-date')).utc().hour(12).minute(0).seconds(0).millisecond(0);
 		
 		timespan = Math.abs(datetime[0].diff(datetime[1], 'days'));
 		
-		if(settings.timespanformat == 1 || events_with_just_year > 0){
+		if(events_with_just_year > 0){
+			timeline.addClass('just-years');
 			var datetime_years = [];
-			datetime_years[0] = moment().utc().year(marker_prev.attr('data-year')).hour(12).minute(0).seconds(0);
-			datetime_years[1] = moment().utc().year(marker_next.attr('data-year')).hour(12).minute(0).seconds(0);
+			datetime_years[0] = moment().utc().hour(12).minute(0).seconds(0).millisecond(0);
+			datetime_years[1] = datetime_years[0].clone();
+			datetime_years[0].year(marker_prev.attr('data-year'));
+			datetime_years[1].year(marker_next.attr('data-year'));
+			timespan_for_label = Math.abs(datetime_years[0].diff(datetime_years[1], 'years'));
+			timeline_label.html(timespan_for_label + (timespan > 1 ? " years" : "year"));
+			timespan = Math.abs(datetime_years[0].diff(datetime_years[1], 'years'));
+		} else if(settings.timespanformat == 1 || events_with_just_year > 0){
+			timeline.removeClass('just-years');
+			var datetime_years = [];
+			datetime_years[0] = moment().utc().hour(12).minute(0).seconds(0).millisecond(0);
+			datetime_years[1] = datetime_years[0].clone();
+			datetime_years[0].year(marker_prev.attr('data-year'));
+			datetime_years[1].year(marker_next.attr('data-year'));
 			timespan_for_label = Math.abs(datetime_years[0].diff(datetime_years[1], 'years'));
 			timeline_label.html(timespan_for_label + (timespan > 1 ? " years" : "year"));
 		} else if(settings.timespanformat == 0){
+			timeline.removeClass('just-years');
 			timeline_label.html(timespan + (timespan > 1 ? " days" : " day"));
 		} else if(settings.timespanformat == 2){
+			timeline.removeClass('just-years');
 			timeline_label.html(moment.preciseDiff(datetime[0], datetime[1]));
 		}
 		
@@ -506,10 +522,10 @@ function buildTimelineSentence(){
 		
 		var percentage = (timespan_lengths[0]/timespan_lengths[1])*100;
 		
-		if(percentage > 50){
+		if(percentage > 100){
 			result.header = result.middle.description+" "+result.middle.verb+" closer in time to us than to "+second_term_of_comparison+".";
 			result.title = result.middle.description+" "+result.middle.verb+" #closerintime to us than to "+second_term_of_comparison+".";
-		} else if(percentage < 50){
+		} else if(percentage < 100){
 			result.header = result.middle.description+" "+result.middle.verb+" closer in time to "+second_term_of_comparison+" than to us.";
 			result.title = result.middle.description+" "+result.middle.verb+" #closerintime to "+second_term_of_comparison+" than to us.";
 		} else {
