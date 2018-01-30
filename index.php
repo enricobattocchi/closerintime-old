@@ -9,7 +9,7 @@ $data = array();
 $result = array();
 $ids = array();
 $title = '#closerintime';
-$url = 'https://closerinti.me';
+$url = 'https://'. $_SERVER['HTTP_HOST'];
 $image = $url.'/img/closerintime-img-sharing.png';
 
 $whr = array();
@@ -151,6 +151,10 @@ if (count($data) == 2){
 	$image = $url."/thumb/".$result['start']['id']."_".$result['middle']['id'].".png";
 	$url .= '/'.$result['start']['id'].'/'.$result['middle']['id'];	
 	
+} if (count($data) == 1){
+	$image = $url."/thumb/".$ids[0]."_.png";
+} else {
+	$image = $url."/thumb/".$ids[0]."_".$ids[1]."_".$ids[2].".png";
 }
 
 ?>
@@ -245,7 +249,7 @@ if (count($data) == 2){
 	</header>
 	<section id="chooser" class="transparent">
 		<h2 id="chooser-header">
-			Pick two or more events <i id="openinstructions" class="fa fa-question-circle-o"
+			Pick two or more events <i id="openinstructions" class="fa fa-question-circle"
 				data-toggle="modal" data-target="#instructions"></i>
 				<i id="opensettings" class="fa fa-cog"
 				data-toggle="modal" data-target="#settings"></i>
