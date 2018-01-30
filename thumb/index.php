@@ -15,9 +15,9 @@ if($a && $b && $c && ($src1 = new Imagick("$a.png")) && ($src2 = new Imagick("$b
 	$src2->resizeImage(270, 270, Imagick::FILTER_LANCZOS, 1);
 	$src3->resizeImage(270, 270, Imagick::FILTER_LANCZOS, 1);
 	
-	$im->compositeImage($src1, Imagick::COMPOSITE_DEFAULT, 65, 202);
-	$im->compositeImage($src2, Imagick::COMPOSITE_DEFAULT, 465, 202);
-	$im->compositeImage($src3, Imagick::COMPOSITE_DEFAULT, 865, 202);
+	$im->compositeImage($src1, Imagick::COMPOSITE_DEFAULT, 65, 200);
+	$im->compositeImage($src2, Imagick::COMPOSITE_DEFAULT, 465, 200);
+	$im->compositeImage($src3, Imagick::COMPOSITE_DEFAULT, 865, 200);
 	
 	/* Output the image */
 	$im->setImageFormat("png");
@@ -44,7 +44,23 @@ if($a && $b && $c && ($src1 = new Imagick("$a.png")) && ($src2 = new Imagick("$b
 	header("Content-Type: image/png");
 	echo $im;
 
-} else {
+} else if($a && ($src1 = new Imagick("$a.png")) ){
+	$im = new Imagick('sharing-img-template-1.png');
+	/* Append the images into one */
+	//$im->resetIterator();
+	//$combined = $im->appendImages(false);
+	
+	$src1->resizeImage(370, 370, Imagick::FILTER_LANCZOS, 1);
+	
+	$im->compositeImage($src1, Imagick::COMPOSITE_DEFAULT, 415, 150);
+	
+	/* Output the image */
+	$im->setImageFormat("png");
+	$im->writeImage ($a.'_.png');
+	header("Content-Type: image/png");
+	echo $im;
+	
+} else{
 	die('Error');
 }
 ?>
