@@ -196,7 +196,7 @@ if (count($data) == 2){
 <link rel="stylesheet" href="/css/typeahead.css" />
 <link rel="stylesheet" href="/css/style.css" />
 
-<script src="/js/jquery-3.1.1.min.js"></script>
+<script src="/js/jquery.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/typeahead.bundle.min.js"></script>
 <script src="/js/dexie.min.js"></script>
@@ -231,10 +231,10 @@ if (count($data) == 2){
 	</header>
 	<section id="chooser" class="transparent">
 		<h2 id="chooser-header">
-			Pick one or more events <i id="openinstructions" class="fa fa-question-circle"
+			Pick one or more events <span id="chooser-header-icons"><i id="openinstructions" class="fa fa-question-circle"
 				data-toggle="modal" data-target="#instructions"></i>
 				<i id="opensettings" class="fa fa-cog"
-				data-toggle="modal" data-target="#settings"></i>
+				data-toggle="modal" data-target="#settings"></i></span>
 		</h2>
 		<div class="container-fluid">
 			<div class="row">

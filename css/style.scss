@@ -114,6 +114,10 @@ header#main h1 a:visited{
 	width: 100%;
 }
 
+#chooser-header-icons{
+	white-space: nowrap;
+}
+
 #chooser-header i.fa{
 	color: $gray-base;
 	font-size: 20px;
