@@ -102,6 +102,7 @@ header#main h1 a:visited{
 	margin: 0 auto;
 	max-width: 1200px;
     /*transition: opacity 2s ease-in-out;*/
+    margin-bottom: 150px;
 }
 
 .transparent{
@@ -135,7 +136,6 @@ header#main h1 a:visited{
 #timeline-section{
 	width: 100%;
 	position: relative;
-	top: 150px;
 	max-width: 1200px;
 	margin: 0 auto;
 }
@@ -145,20 +145,26 @@ header#main h1 a:visited{
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: center;
+	margin-bottom: 150px;
 	
 	@media screen and (max-width: $break-point-2) {
 		margin-left: 11%;
 		margin-right: 11%;
+	}
+	
+	@media screen and (max-width: $break-point-0) {
+		flex-flow: column nowrap;
+		height: 80vh;
+		align-items: center;
 	}
 }
 
 #timeline-header{
 	text-align: center;
 	position: relative;
-	margin-top: 300px;
 	margin-left: 11%;
 	margin-right: 11%;
-	padding-bottom: 80px;
+	padding-bottom: 150px;
 }
 
 .timeline-part{
@@ -169,6 +175,15 @@ header#main h1 a:visited{
 	transition: flex-grow 1.5s ease-in-out, border-color 1s ease-in-out, color 1s ease-in-out;
 	border-bottom: solid 6px;
 	height: 0;
+	
+	@media screen and (max-width: $break-point-0) {
+		border-bottom: solid 0px;
+		border-left: solid 6px;
+		display: flex;
+		justify-content: center;
+		flex-flow: column;
+		width: 0px;
+	}
 }
 
 .timeline-part-label{
@@ -177,6 +192,13 @@ header#main h1 a:visited{
 	bottom: 0px;
 	padding: 0px 30px;
 	text-align: center;
+	
+	@media screen and (max-width: $break-point-0) {
+		bottom: unset;
+		text-align: right;
+		right: 0px;
+		width: 50vw;
+	}
 }
 
 .timeline-part:nth-of-type(2){
@@ -200,6 +222,14 @@ header#main h1 a:visited{
 	text-align: center;
 	flex-grow: 0;
 	top: 3px;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	justify-content: center;
+	
+	@media screen and (max-width: $break-point-0) {
+		flex-flow: row;
+	}
 }
 
 .timeline-marker:hover,
@@ -212,11 +242,22 @@ header#main h1 a:visited{
 	position: absolute;
 	top: 1.7vw;
 	width: 10vw;
-	left: 50%;
-	margin-left: -5vw;
+	left: auto;
 	padding: 10px 10px 7px;
 	background-color: #ffffff;
 	box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+	
+	@media screen and (max-width: $break-point-1) {
+		width: 20vw;
+		top: 3.5vw;
+	}
+	
+	@media screen and (max-width: $break-point-0) {
+    	width: 30vw;
+    	left: 7vw;
+    	top: auto;
+	}
+	
 }
 
 .timeline-marker-label a{
@@ -232,7 +273,7 @@ header#main h1 a:visited{
 .timeline-marker-icon{
 	padding: 0;
 	margin: 0 auto;
-	border-radius: 3rem;
+	border-radius: 1.25vw;
 	color: transparent;
 	box-shadow: 0 1px 3px $shadow-1, 0 1px 2px $shadow-2;
 	box-sizing: border-box;	
@@ -247,9 +288,21 @@ header#main h1 a:visited{
 	background-position: 0% 0%;
 	background-size: cover;
 	background-repeat: none;
-	top: -1.4vw;
-	left: 50%;
-	margin-left: -1.3vw;
+	top: auto;
+	left: auto;
+	
+	@media screen and (max-width: $break-point-1) {
+		width: 5vw;
+		height: 5vw;
+		border-radius: 2.5vw;
+	}
+	
+	@media screen and (max-width: $break-point-0) {
+		width: 10vw;
+		height: 10vw;
+		border-radius: 5vw;
+	}
+	
 }
 
 .timeline-marker-icon:hover{
