@@ -230,6 +230,12 @@ $(function(){
 		return false;
 	});
 	
+	$(document).on('click', '#edit-share-button', function(event){
+		editTimelineHeader();
+		event.preventDefault();
+		return false;
+	});
+	
 	$(document).on('click', '.timeline-marker-icon[id!=timeline-marker-icon-now] ', function(event){
 		removeEventMarker($(this).closest('.timeline-marker'));
 	});

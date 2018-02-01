@@ -275,7 +275,7 @@ header#main h1 a:visited{
 	font-style: bold;
 }
 
-#timeline-marker-icon-end{
+#timeline-marker-icon-now{
 	background-position: 0% calc(100% / #{$num_icons} * 1); //calendar-check-o
 }
 
@@ -352,7 +352,7 @@ header#main h1 a:visited{
 }
 
 .personal:before{
-	content: "\f2be"; /* user-circle-o */
+	content: "\f2bd"; /* user-circle-o */
 }
 
 .personal{
@@ -537,6 +537,10 @@ legend{
     border: none;
     border-radius: 0;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+.tt-dataset .fa {
+    color: $color-3;
 }
 
 

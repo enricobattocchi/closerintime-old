@@ -182,31 +182,13 @@ if (count($data) == 2){
 <meta name="twitter:title" content="<?php echo $title; ?>">
 <meta name="twitter:image" content="<?php echo $image; ?>">
 
-<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114"
-	href="/apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120"
-	href="/apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144"
-	href="/apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152"
-	href="/apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180"
-	href="/apple-icon-180x180.png">
-<link rel="icon" type="image/png" sizes="192x192"
-	href="/android-icon-192x192.png">
-<link rel="icon" type="image/png" sizes="32x32"
-	href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96"
-	href="/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16"
-	href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2bQgnAoELw">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2bQgnAoELw">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2bQgnAoELw">
 <link rel="manifest" href="/manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg?v=2bQgnAoELw" color="#fa7921">
+<link rel="shortcut icon" href="/favicon.ico?v=2bQgnAoELw">
+<meta name="msapplication-TileColor" content="#da532c">
 <meta name="theme-color" content="#ffffff">
 
 <!-- Latest compiled and minified CSS -->
@@ -249,7 +231,7 @@ if (count($data) == 2){
 	</header>
 	<section id="chooser" class="transparent">
 		<h2 id="chooser-header">
-			Pick two or more events <i id="openinstructions" class="fa fa-question-circle"
+			Pick one or more events <i id="openinstructions" class="fa fa-question-circle"
 				data-toggle="modal" data-target="#instructions"></i>
 				<i id="opensettings" class="fa fa-cog"
 				data-toggle="modal" data-target="#settings"></i>
@@ -535,7 +517,7 @@ if (count($data) == 2){
 	<footer>
 		<section class="right">
 			A progressive web app from <a href="https://lopo.it"
-				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta10 - <a href="#"
+				rel="author noopener" target="_blank">Lopo.it</a> - v0.9-beta11 - <a href="#"
 				data-toggle="modal" data-target="#credits">Credits</a>
 		</section>
 	</footer>
