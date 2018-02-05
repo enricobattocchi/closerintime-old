@@ -34,6 +34,11 @@ function initIndexedDB(){
 		localevents: "++id, &name, year, month, day, type, plural, sent, link, &uuid"
 	});
 	
+	db.version(18).stores({
+		events: "id, name, year, month, day, type, plural, approximate, enabled, link, uuid",
+		localevents: "++id, &name, year, month, day, type, plural, approximate, sent, link, &uuid"
+	});
+	
 
 	db.on('ready', function () {
 		return db.events.clear()
