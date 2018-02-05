@@ -905,7 +905,7 @@ function populateIDB(data){
 	result.middle = {};
 	result.end = {};
 	var bol_years_only = true;
-	var datenow = moment.utc().hour(12).minute(0).seconds(0);
+	var datenow = moment.utc().hour(12).minute(0).seconds(0).millisecond(0);
 
 	var total_span;
 	var first_span;
@@ -921,11 +921,11 @@ function populateIDB(data){
 
 		var datetime = new Array(2);
 
-		datetime[0] = moment.utc().year(data[0].year);
+		datetime[0] = moment.utc().year(data[0].year).millisecond(0);
 
-		datetime[1] = moment.utc().year(data[1].year);
+		datetime[1] = moment.utc().year(data[1].year).millisecond(0);
 
-		datenow = moment();
+		datenow = moment().millisecond(0);
 
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
@@ -954,9 +954,9 @@ function populateIDB(data){
 
 		var datetime = new Array(2);
 
-		datetime[0] = moment.utc().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day).hour(12).minute(0).seconds(0);
+		datetime[0] = moment.utc().year(data[0].year).month(parseInt(data[0].month)-1).date(data[0].day).hour(12).minute(0).seconds(0).millisecond(0);
 
-		datetime[1] = moment.utc().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day).hour(12).minute(0).seconds(0);
+		datetime[1] = moment.utc().year(data[1].year).month(parseInt(data[1].month)-1).date(data[1].day).hour(12).minute(0).seconds(0).millisecond(0);
 
 		// reverse order if first event is more recent
 		if(datetime[1].isBefore(datetime[0])){
