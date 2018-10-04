@@ -1,10 +1,10 @@
-[closerintime] [closerintime-site]
+[closerintime]
 ==================================
 Timespan comparisons between historical events
 
 <!-- section links -->
 
-[closerintime-site]: https://closerinti.me
+[closerintime]: https://closerinti.me
 
 Getting Started
 ---------------
