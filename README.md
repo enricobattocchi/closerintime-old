@@ -4,7 +4,7 @@ Timespan comparisons between historical events
 
 <!-- section links -->
 
-[closerintime]: https://closerinti.me
+[closerintime]: https://old.closerinti.me
 
 Getting Started
 ---------------

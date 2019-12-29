@@ -9,7 +9,7 @@ $data = array();
 $result = array();
 $ids = array();
 $title = '#closerintime';
-$url = 'https://closerinti.me';
+$url = 'https://old.closerinti.me';
 $image = $url.'/img/closerintime-img-sharing.png';
 
 $whr = array();
@@ -240,7 +240,7 @@ if (count($data) == 2){
 <body>
 	<header id="main">
 		<h1>
-			<a href="https://closerinti.me" rel="bookmark">#closerintime</a>
+			<a href="https://old.closerinti.me" rel="bookmark">#closerintime</a>
 		</h1>
 	</header>
 	<section id="chooser" class="transparent">
